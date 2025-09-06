@@ -98,13 +98,13 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     protected Void doInBackground() throws Exception {
 
        //  pobieranie OSM
-        pobierzOSM(nazwaPliku);
+//        pobierzOSM(nazwaPliku);
 
         //czytanie OSM
         czytajOSM(nazwaPliku + ".osm");
 
         //pobieranie HERE
-        pobierzTF(nazwaPliku);
+//        pobierzTF(nazwaPliku);
         //czytanie HERE
         czytajTF(nazwaPliku + ".xml");
      //   zapisz dodatkowe info
@@ -152,12 +152,12 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
     @Override
     protected void done() {
-//        punktyLista.clear();
-//        punktyLista.putAll(allNodes);
-//        drogi.clear();
-//        drogi.addAll(ways);
-//        TrafficFlow.clear();
-//        TrafficFlow.addAll(ruchUliczny);
+        punktyLista.clear();
+        punktyLista.putAll(allNodes);
+        drogi.clear();
+        drogi.addAll(ways);
+        TrafficFlow.clear();
+        TrafficFlow.addAll(ruchUliczny);
         System.out.println("DONE");
 
     }
@@ -339,10 +339,10 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 ways.add(way);
             }
             System.out.println("➡ Wczytano dróg: " + ways.size());
-
-            pasekPostepuCzytajOSM.setIndeterminate(false);
-            pasekPostepuCzytajOSM.setValue(100);
-            pasekPostepuCzytajOSM.setString("Odczytano: " + ilosc);
+//
+//            pasekPostepuCzytajOSM.setIndeterminate(false);
+//            pasekPostepuCzytajOSM.setValue(100);
+//            pasekPostepuCzytajOSM.setString("Odczytano: " + ilosc);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -426,7 +426,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 out.write(buffer, 0, bytesRead);
                 pobraneBajty += bytesRead;
                 publish(new stanRealTime(pobraneBajty, (int) (100.0 * pobraneBajty / wielkoscPliku), 3));
-                //publish((int) (100.0 * pobraneBajty / wielkoscPliku));
                 System.out.println("[DEBUG] Pobrano " + (int) (100.0 * pobraneBajty / wielkoscPliku) + " %");
             }
 
