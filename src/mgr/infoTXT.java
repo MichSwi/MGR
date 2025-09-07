@@ -58,14 +58,17 @@ public class infoTXT {
 
     public void zapiszPlik() {
         try (PrintWriter pw = new PrintWriter(new FileWriter("POBRANE_PLIKI\\" + nazwaPliku))) {
-
-            LocalDateTime teraz = LocalDateTime.now();
-
-            String godzina = teraz.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-            String data = teraz.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-            pw.println("" + data);
-            pw.println("" + godzina);
-
+            pw.println(nazwaPliku);
+            String godzina = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            String data = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            pw.println(data);
+            pw.println(godzina);
+            pw.println(_1_W_LAT);
+            pw.println(_2_S_LON);
+            pw.println(_3_E_SZER_R);
+            pw.println(_4_N_WYS);
+            pw.println(typPobrania);
+            pw.println(obliczPole());
             
             
         } catch (IOException e) {
@@ -78,7 +81,11 @@ public class infoTXT {
             return abs((_4_N_WYS-_2_S_LON)*(_3_E_SZER_R-_1_W_LAT));
         }
         else if (typPobrania==2){ //obszar
+            return abs(_3_E_SZER_R*_4_N_WYS);
             
+        }
+        else if (typPobrania==3){
+            return abs(Math.PI*_3_E_SZER_R*_3_E_SZER_R);
         }
         return -1;
     }

@@ -1,6 +1,5 @@
 package mgr;
 
-// DOKONCZYC KSZTALTY POBIERANIA I WSPOLZEDNE POBIERANIA
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,6 +59,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     private JProgressBar pasekPostepuCzytajTF;
     private String nazwaPliku;
     int tryb;
+    List<Boolean> coRobic;
 
     //czytanie osm
     private Map<Long, Punkt> allNodes = new HashMap<>();
@@ -75,7 +75,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             JProgressBar pasekPostepuOSM, JProgressBar pasekPostepuTF,
             JProgressBar pasekPostepuCzytajOSM, JProgressBar pasekPostepuCzytajTF,
             double S, double W, double N, double E,
-            String nazwaPliku, int tryb) {
+            String nazwaPliku, int tryb, List<Boolean> coRobic) {
 
         this.TrafficFlow = TrafficFlow;
         this.drogi = drogi;
@@ -92,23 +92,37 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         pobraneBajtyTF = 0;
         this.nazwaPliku = nazwaPliku;
         this.tryb = tryb;
+        this.coRobic = coRobic;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
 
-       //  pobieranie OSM
-//        pobierzOSM(nazwaPliku);
+        //pobieranie OSM
+        if (coRobic.get(0)) {
+            pobierzOSM(nazwaPliku);
+        }
 
         //czytanie OSM
-        czytajOSM(nazwaPliku + ".osm");
+        if (coRobic.get(1)) {
+            czytajOSM(nazwaPliku + ".osm");
+        }
 
         //pobieranie HERE
-//        pobierzTF(nazwaPliku);
+        if (coRobic.get(2)) {
+            pobierzTF(nazwaPliku);
+        }
+
         //czytanie HERE
-        czytajTF(nazwaPliku + ".xml");
-     //   zapisz dodatkowe info
-        zapiszInfoTXT();
+        if (coRobic.get(3)) {
+            czytajTF(nazwaPliku + ".xml");
+        }
+
+        //zapisz dodatkowe info
+        if (coRobic.get(4)) {
+            zapiszInfoTXT();
+        }
+        
         return null;
     }
 
@@ -339,10 +353,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 ways.add(way);
             }
             System.out.println("➡ Wczytano dróg: " + ways.size());
-//
-//            pasekPostepuCzytajOSM.setIndeterminate(false);
-//            pasekPostepuCzytajOSM.setValue(100);
-//            pasekPostepuCzytajOSM.setString("Odczytano: " + ilosc);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -478,8 +489,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         }
         //return out;
         ruchUliczny = out;
-        pasekPostepuTF.setValue(100);
-        pasekPostepuTF.setString("Odczytano: " + ilosc);
     }
 
     private List<Punkt> parseShape(JSONObject loc) {
@@ -540,7 +549,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
     private void zapiszInfoTXT() {
         try (PrintWriter pw = new PrintWriter(new FileWriter("POBRANE_PLIKI\\" + nazwaPliku))) {
-            
+
             LocalDateTime teraz = LocalDateTime.now();
 
             String godzina = teraz.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
