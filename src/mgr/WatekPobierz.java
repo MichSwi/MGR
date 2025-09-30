@@ -3,18 +3,14 @@ package mgr;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
@@ -59,7 +55,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     private JProgressBar pasekPostepuCzytajTF;
     private String nazwaPliku;
     int tryb;
-    List<Boolean> coRobic;
+    List<Boolean> coZaznaczone;
 
     //czytanie osm
     private Map<Long, Punkt> allNodes = new HashMap<>();
@@ -92,37 +88,38 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         pobraneBajtyTF = 0;
         this.nazwaPliku = nazwaPliku;
         this.tryb = tryb;
-        this.coRobic = coRobic;
+        this.coZaznaczone = coRobic;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
 
         //pobieranie OSM
-        if (coRobic.get(0)) {
+        if (coZaznaczone.get(0)) {
             pobierzOSM(nazwaPliku);
         }
 
         //czytanie OSM
-        if (coRobic.get(1)) {
+        if (coZaznaczone.get(1)) {
             czytajOSM(nazwaPliku + ".osm");
         }
 
         //pobieranie HERE
-        if (coRobic.get(2)) {
+        if (coZaznaczone.get(2)) {
             pobierzTF(nazwaPliku);
         }
 
         //czytanie HERE
-        if (coRobic.get(3)) {
+        if (coZaznaczone.get(3)) {
             czytajTF(nazwaPliku + ".xml");
         }
 
         //zapisz dodatkowe info
-        if (coRobic.get(4)) {
-            zapiszInfoTXT();
+        if (coZaznaczone.get(4)) {
+            infoTXT info = new infoTXT(nazwaPliku, _4_N_WYS, _3_E_SZER_R, _2_S_LON, _1_W_LAT, tryb);
+            info.zapiszPlik();
         }
-        
+
         return null;
     }
 
@@ -168,12 +165,14 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     protected void done() {
         punktyLista.clear();
         punktyLista.putAll(allNodes);
+        
         drogi.clear();
         drogi.addAll(ways);
+        
         TrafficFlow.clear();
         TrafficFlow.addAll(ruchUliczny);
+        
         System.out.println("DONE");
-
     }
 
     ////// FUNKCJE
@@ -227,7 +226,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
         File out = new File("POBRANE_PLIKI", nazwaPliku + ".osm");
 
-        System.out.println("➡ Zapisuję do: " + out.getAbsolutePath());
+        System.out.println("Zapisuję do: " + out.getAbsolutePath());
 
         for (String endpoint : endpoints) {
             String urlStr = endpoint + "?data=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
@@ -256,20 +255,20 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 }
 
                 if (code >= 200 && code < 300) {
-                    System.out.println("✅ Gotowe: " + out.length() + " bajtów");
+                    System.out.println("Gotowe: " + out.length() + " bajtów");
                     pasekPostepuOSM.setIndeterminate(false);
                     pasekPostepuOSM.setValue(100);
                     pasekPostepuOSM.setString("Pobieranie zakończone");
                     return; // sukces – kończymy
                 } else {
-                    System.err.println("⚠ Overpass HTTP " + code + " – spróbuję kolejny mirror.");
+                    System.err.println("Overpass HTTP " + code + " – spróbuję kolejny mirror.");
                 }
             } catch (Exception e) {
-                System.err.println("⚠ Błąd połączenia z " + endpoint + ": " + e.getMessage());
+                System.err.println("Błąd połączenia z " + endpoint + ": " + e.getMessage());
             }
         }
 
-        System.err.println("❌ Nie udało się pobrać – spróbuj mniejszego bboxa lub później.");
+        System.err.println("Nie udało się pobrać – spróbuj mniejszego bboxa lub później.");
         pasekPostepuOSM.setIndeterminate(false);
         pasekPostepuOSM.setValue(30);
         pasekPostepuOSM.setString("Błąd pobierania");
@@ -280,7 +279,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
         try {
             int ilosc = 0;
-            System.out.println("➡ Otwieram plik: " + fileName);
+            System.out.println("Otwieram plik: " + fileName);
             File file = new File("POBRANE_PLIKI/" + fileName);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -411,6 +410,9 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             conn.setRequestMethod("GET");
             System.out.println("[INFO] Połączenie otwarte...");
 
+            // zapisujemy ilosc pobran
+            
+            
             // Sprawdzamy kod odpowiedzi
             int code = conn.getResponseCode();
             System.out.println("[INFO] HTTP response = " + code);
@@ -424,7 +426,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             InputStream in = new BufferedInputStream(conn.getInputStream());
             FileOutputStream out = new FileOutputStream(new File("POBRANE_PLIKI", nazwaPliku + ".xml"));
 
-            System.out.println("[INFO] Zapisuję dane do pliku ." + nazwaPliku);
+            System.out.println("[INFO] Zapisuję dane do pliku: " + nazwaPliku);
 
             byte[] buffer = new byte[4096];
             int bytesRead;
@@ -547,18 +549,18 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         return pts;
     }
 
-    private void zapiszInfoTXT() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter("POBRANE_PLIKI\\" + nazwaPliku))) {
-
-            LocalDateTime teraz = LocalDateTime.now();
-
-            String godzina = teraz.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-            String data = teraz.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-            pw.println("" + data);
-            pw.println("" + godzina);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void zapiszInfoTXT() {
+//        try (PrintWriter pw = new PrintWriter(new FileWriter("POBRANE_PLIKI\\" + nazwaPliku))) {
+//
+//            LocalDateTime teraz = LocalDateTime.now();
+//
+//            String godzina = teraz.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+//            String data = teraz.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+//            pw.println("" + data);
+//            pw.println("" + godzina);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

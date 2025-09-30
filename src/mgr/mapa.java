@@ -1,81 +1,20 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
 package mgr;
 
+/**
+ *
+ * @author Micha
+ */
 public class mapa extends javax.swing.JPanel {
 
-    private int skalaProc = 100;           // 100%
-    private double widok_x = 0;
-    private double widok_y = 0;
-
-    private int prevMouseX, prevMouseY;
-
+    /**
+     * Creates new form mapa
+     */
     public mapa() {
         initComponents();
-
-        java.awt.event.MouseAdapter ma = new java.awt.event.MouseAdapter() {
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent e) {
-                prevMouseX = e.getX();
-                prevMouseY = e.getY();
-            }
-
-            @Override
-            public void mouseDragged(java.awt.event.MouseEvent e) {
-                int dx = e.getX() - prevMouseX;
-                int dy = e.getY() - prevMouseY;
-                widok_x += dx;
-                widok_y += dy;
-                prevMouseX = e.getX();
-                prevMouseY = e.getY();
-                repaint();
-            }
-
-            @Override
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent e) {
-                int notches = e.getWheelRotation(); // >0 w dół (oddal), <0 w górę (przybliż)
-                int oldProc = skalaProc;
-
-                // krok = 10% bieżącej skali
-                int step = (int) Math.round(skalaProc * 0.1);
-                if (step < 1) {
-                    step = 1; // zabezpieczenie, żeby zawsze coś się zmieniało
-                }
-                skalaProc += -notches * step;   // kółko w górę -> +skala, w dół -> -skala
-                skalaProc = Math.max(10, Math.min(500, skalaProc)); // zakres 10%–500%
-
-                if (skalaProc != oldProc) {
-                    double sOld = oldProc / 100.0;
-                    double sNew = skalaProc / 100.0;
-                    double factor = sNew / sOld;
-
-                    // utrzymaj punkt pod kursorem
-                    double cx = e.getX();
-                    double cy = e.getY();
-                    widok_x = cx - factor * (cx - widok_x);
-                    widok_y = cy - factor * (cy - widok_y);
-
-                    repaint();
-                }
-            }
-        };
-        addMouseListener(ma);
-        addMouseMotionListener(ma);
-        addMouseWheelListener(ma);
-    }
-
-    @Override
-    protected void paintComponent(java.awt.Graphics g) {
-        super.paintComponent(g);
-
-        java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
-
-        // zastosuj przesunięcie i skalę
-        g2d.translate(widok_x, widok_y);
-        g2d.scale(skalaProc / 100.0, skalaProc / 100.0);
-
-        int r = 100;
-        g2d.setColor(java.awt.Color.RED);
-        // okrąg na środku panelu (współrzędne liczone od rozmiaru panelu)
-        g2d.drawOval(getWidth() / 2 - r, getHeight() / 2 - r, 2 * r, 2 * r);
     }
 
     /**
@@ -87,19 +26,86 @@ public class mapa extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+        jLayeredPane1 = new javax.swing.JLayeredPane();
+        interfejs1 = new mgr.interfejs();
+        jPanel1 = new javax.swing.JPanel();
+        skala_tekst = new javax.swing.JLabel();
+
+        setPreferredSize(new java.awt.Dimension(800, 800));
+        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLayeredPane1.setBackground(new java.awt.Color(0, 204, 102));
+
+        javax.swing.GroupLayout interfejs1Layout = new javax.swing.GroupLayout(interfejs1);
+        interfejs1.setLayout(interfejs1Layout);
+        interfejs1Layout.setHorizontalGroup(
+            interfejs1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 794, Short.MAX_VALUE)
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+        interfejs1Layout.setVerticalGroup(
+            interfejs1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 794, Short.MAX_VALUE)
         );
+
+        jPanel1.setBackground(new java.awt.Color(0, 255, 0));
+        jPanel1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jPanel1.setFocusCycleRoot(true);
+        jPanel1.setOpaque(false);
+
+        skala_tekst.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        skala_tekst.setForeground(new java.awt.Color(0, 0, 0));
+        skala_tekst.setText("tekst");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(550, Short.MAX_VALUE)
+                .addComponent(skala_tekst, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(144, 144, 144))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(712, Short.MAX_VALUE)
+                .addComponent(skala_tekst, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30))
+        );
+
+        jLayeredPane1.setLayer(interfejs1, javax.swing.JLayeredPane.PALETTE_LAYER);
+        jLayeredPane1.setLayer(jPanel1, javax.swing.JLayeredPane.POPUP_LAYER);
+
+        javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
+        jLayeredPane1.setLayout(jLayeredPane1Layout);
+        jLayeredPane1Layout.setHorizontalGroup(
+            jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jLayeredPane1Layout.createSequentialGroup()
+                .addComponent(interfejs1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jLayeredPane1Layout.setVerticalGroup(
+            jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jLayeredPane1Layout.createSequentialGroup()
+                .addComponent(interfejs1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jLayeredPane1Layout.createSequentialGroup()
+                    .addGap(3, 3, 3)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGap(3, 3, 3)))
+        );
+
+        add(jLayeredPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(3, 1, 800, 800));
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private mgr.interfejs interfejs1;
+    private javax.swing.JLayeredPane jLayeredPane1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel skala_tekst;
     // End of variables declaration//GEN-END:variables
 }

@@ -14,8 +14,8 @@ import java.util.Map;
 public class Punkt {
     
     private long ID;
-    private double X;
-    private double Y;
+    private int X;
+    private int Y;
     private double LAT;
     private double LON;
     private TypPunkt typ;
@@ -33,5 +33,12 @@ public class Punkt {
         this.LAT = lat;
         this.LON = lon;
     }
+        
+        public void ustawXY(double _1_W_LAT, double _2_S_LON, double _3_E_SZER_R, double _4_N_WYS){
+            int szer_mapy = 1000;
+            int wys_mapy = 1000;
+            
+            this.X = 0;
+        }
     
 }

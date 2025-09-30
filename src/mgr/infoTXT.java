@@ -4,6 +4,8 @@
  */
 package mgr;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -39,21 +41,33 @@ public class infoTXT {
         pole = 0;
     }
 
-    public infoTXT(String nazwaPliku, String data, String godzina, double _4_N_WYS, double _3_E_SZER_R, double _1_W_LAT, double _2_S_LON, int typPobrania) {
+    public infoTXT(String nazwaPliku, double _4_N_WYS, double _3_E_SZER_R, double _1_W_LAT, double _2_S_LON, int typPobrania) {
         this.nazwaPliku = nazwaPliku;
-        this.data = data;
-        this.godzina = godzina;
         this._4_N_WYS = _4_N_WYS;
         this._3_E_SZER_R = _3_E_SZER_R;
         this._1_W_LAT = _1_W_LAT;
         this._2_S_LON = _2_S_LON;
         this.typPobrania = typPobrania;
-        
+
         pole = obliczPole();
     }
 
     public boolean wczytajPlik(String nazwaPliku) {
-        return false;
+        try (BufferedReader br = new BufferedReader(new FileReader("POBRANE_PLIKI\\" + nazwaPliku))) {
+            data = br.readLine();    // pierwsza linia
+            godzina = br.readLine();
+            _1_W_LAT = Double.parseDouble(br.readLine());
+            _2_S_LON = Double.parseDouble(br.readLine());
+            _3_E_SZER_R = Double.parseDouble(br.readLine());
+            _4_N_WYS = Double.parseDouble(br.readLine());
+            typPobrania = Integer.parseInt(br.readLine());
+            pole = Double.parseDouble(br.readLine());
+            
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public void zapiszPlik() {
@@ -69,25 +83,59 @@ public class infoTXT {
             pw.println(_4_N_WYS);
             pw.println(typPobrania);
             pw.println(obliczPole());
-            
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private double obliczPole(){
-        if (typPobrania==1){ //granice
-            return abs((_4_N_WYS-_2_S_LON)*(_3_E_SZER_R-_1_W_LAT));
-        }
-        else if (typPobrania==2){ //obszar
-            return abs(_3_E_SZER_R*_4_N_WYS);
-            
-        }
-        else if (typPobrania==3){
-            return abs(Math.PI*_3_E_SZER_R*_3_E_SZER_R);
+    private double obliczPole() {
+        if (typPobrania == 1) { //granice
+            return abs((_4_N_WYS - _2_S_LON) * (_3_E_SZER_R - _1_W_LAT));
+        } else if (typPobrania == 2) { //obszar
+            return abs(_3_E_SZER_R * _4_N_WYS);
+        } else if (typPobrania == 3) {
+            return abs(Math.PI * _3_E_SZER_R * _3_E_SZER_R);
         }
         return -1;
     }
+
+    public String getNazwaPliku() {
+        return nazwaPliku;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public String getGodzina() {
+        return godzina;
+    }
+
+    public double get4_N_WYS() {
+        return _4_N_WYS;
+    }
+
+    public double get3_E_SZER_R() {
+        return _3_E_SZER_R;
+    }
+
+    public double get1_W_LAT() {
+        return _1_W_LAT;
+    }
+
+    public double get2_S_LON() {
+        return _2_S_LON;
+    }
+
+    public int getTypPobrania() {
+        return typPobrania;
+    }
+
+    public double getPole() {
+        return pole;
+    }
+    
+    
     
 }
