@@ -27,11 +27,6 @@ public class PanelPobierania extends javax.swing.JPanel {
     private List<TrafficSegment> TrafficFlow = new ArrayList<>();
     private List<Droga> drogi = new ArrayList<>();
     private Map<Long, Punkt> punktyLista = new HashMap<>();
-    private String nazwaPliku;
-    private double _4_N_WYS,
-            _3_E_SZER_R,
-            _1_W_LAT,
-            _2_S_LON;
 
     public PanelPobierania() {
         initComponents();
@@ -48,10 +43,10 @@ public class PanelPobierania extends javax.swing.JPanel {
 
         przelaczTryb();
         wywolajListenery();
-        _4_N_WYS = 0;
-        _1_W_LAT = 0;
-        _2_S_LON = 0;
-        _3_E_SZER_R = 0;
+        DANE._4_N_WYS = 0;
+        DANE._1_W_LAT = 0;
+        DANE._2_S_LON = 0;
+        DANE._3_E_SZER_R = 0;
 
         // NEWS: 54.160, 19.380, 54.175, 19.430
         jTextField1.setText("13.3905");
@@ -454,23 +449,21 @@ public class PanelPobierania extends javax.swing.JPanel {
                 || !jTextField3.getText().isEmpty()
                 || !jTextField4.getText().isEmpty()) {
 
-            this._1_W_LAT = Double.parseDouble(jTextField1.getText());
-            this._2_S_LON = Double.parseDouble(jTextField2.getText());
-            this._3_E_SZER_R = Double.parseDouble(jTextField3.getText());
-            this._4_N_WYS = Double.parseDouble(jTextField4.getText());
+            DANE._1_W_LAT = Double.parseDouble(jTextField1.getText());
+            DANE._2_S_LON = Double.parseDouble(jTextField2.getText());
+            DANE._3_E_SZER_R = Double.parseDouble(jTextField3.getText());
+            DANE._4_N_WYS = Double.parseDouble(jTextField4.getText());
 
-            List<Boolean> coZaznaczone = new ArrayList<>();
-
-            coZaznaczone.add(jCheckBox1.isSelected());
-            coZaznaczone.add(jCheckBox2.isSelected());
-            coZaznaczone.add(jCheckBox3.isSelected());
-            coZaznaczone.add(jCheckBox4.isSelected());
-            coZaznaczone.add(jCheckBox5.isSelected());
+            DANE.coZaznaczone.add(jCheckBox1.isSelected());
+            DANE.coZaznaczone.add(jCheckBox2.isSelected());
+            DANE.coZaznaczone.add(jCheckBox3.isSelected());
+            DANE.coZaznaczone.add(jCheckBox4.isSelected());
+            DANE.coZaznaczone.add(jCheckBox5.isSelected());
 
             WatekPobierz watekPobierania = new WatekPobierz(TrafficFlow, drogi, punktyLista,
                     jProgressBarOSMDOWNLOAD, jProgressBarTFDOWNLOAD,
                     jProgressBarOSMREAD, jProgressBarTFREAD,
-                    _2_S_LON, _1_W_LAT, _4_N_WYS, _3_E_SZER_R, nazwaPliku, tryb, coZaznaczone);
+                    tryb);
             watekPobierania.execute();
         }
     }//GEN-LAST:event_jButtonPobierzActionPerformed
@@ -485,26 +478,6 @@ public class PanelPobierania extends javax.swing.JPanel {
         // TODO add your handling code here:
         System.out.println("STOP DEBUG)");
     }//GEN-LAST:event_jButton4ActionPerformed
-
-    public double get4_N_WYS() {
-        return _4_N_WYS;
-    }
-
-    public double get3_E_SZER_R() {
-        return _3_E_SZER_R;
-    }
-
-    public double get1_W_LAT() {
-        return _1_W_LAT;
-    }
-
-    public double get2_S_LON() {
-        return _2_S_LON;
-    }
-
-    private void ustawNazwaPliku(String nazwaPliku) {
-        this.nazwaPliku = nazwaPliku;
-    }
 
     private void wywolajListenery() {
         jTextField1.addFocusListener(new FocusAdapter() {
@@ -538,7 +511,7 @@ public class PanelPobierania extends javax.swing.JPanel {
         jTextFieldNazwaPliku.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                ustawNazwaPliku(jTextFieldNazwaPliku.getText().trim());
+                DANE.nazwaPliku = jTextFieldNazwaPliku.getText().trim();
             }
         });
     }

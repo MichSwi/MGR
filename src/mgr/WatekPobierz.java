@@ -43,19 +43,13 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
     private static final String API_KEY = "opXIV-5dVqM7Ia_DQmr9L2giM4hKSk07FwlE7zi2_h0";
 
-    private long pobraneBajtyOSM;
-    private long pobraneBajtyTF;
-    private final double _2_S_LON, _1_W_LAT, _4_N_WYS, _3_E_SZER_R;
     private List<TrafficSegment> TrafficFlow;
-    private List<Droga> drogi;
     private Map<Long, Punkt> punktyLista;
     private JProgressBar pasekPostepuTF;
     private JProgressBar pasekPostepuOSM;
     private JProgressBar pasekPostepuCzytajOSM;
     private JProgressBar pasekPostepuCzytajTF;
-    private String nazwaPliku;
     int tryb;
-    List<Boolean> coZaznaczone;
 
     //czytanie osm
     private Map<Long, Punkt> allNodes = new HashMap<>();
@@ -70,53 +64,43 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             Map<Long, Punkt> punktyLista,
             JProgressBar pasekPostepuOSM, JProgressBar pasekPostepuTF,
             JProgressBar pasekPostepuCzytajOSM, JProgressBar pasekPostepuCzytajTF,
-            double S, double W, double N, double E,
-            String nazwaPliku, int tryb, List<Boolean> coRobic) {
+            int tryb) {
 
         this.TrafficFlow = TrafficFlow;
-        this.drogi = drogi;
         this.punktyLista = punktyLista;
         this.pasekPostepuOSM = pasekPostepuOSM;
         this.pasekPostepuTF = pasekPostepuTF;
         this.pasekPostepuCzytajOSM = pasekPostepuCzytajOSM;
         this.pasekPostepuCzytajTF = pasekPostepuCzytajTF;
-        this._2_S_LON = S;
-        this._1_W_LAT = W;
-        this._4_N_WYS = N;
-        this._3_E_SZER_R = E;
-        pobraneBajtyOSM = 0;
-        pobraneBajtyTF = 0;
-        this.nazwaPliku = nazwaPliku;
         this.tryb = tryb;
-        this.coZaznaczone = coRobic;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
 
         //pobieranie OSM
-        if (coZaznaczone.get(0)) {
-            pobierzOSM(nazwaPliku);
+        if (DANE.coZaznaczone.get(0)) {
+            pobierzOSM();
         }
 
         //czytanie OSM
-        if (coZaznaczone.get(1)) {
-            czytajOSM(nazwaPliku + ".osm");
+        if (DANE.coZaznaczone.get(1)) {
+            czytajOSM();
         }
 
         //pobieranie HERE
-        if (coZaznaczone.get(2)) {
-            pobierzTF(nazwaPliku);
+        if (DANE.coZaznaczone.get(2)) {
+            pobierzTF();
         }
 
         //czytanie HERE
-        if (coZaznaczone.get(3)) {
-            czytajTF(nazwaPliku + ".xml");
+        if (DANE.coZaznaczone.get(3)) {
+            czytajTF();
         }
 
         //zapisz dodatkowe info
-        if (coZaznaczone.get(4)) {
-            infoTXT info = new infoTXT(nazwaPliku, _4_N_WYS, _3_E_SZER_R, _2_S_LON, _1_W_LAT, tryb);
+        if (DANE.coZaznaczone.get(4)) {
+            infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._2_S_LON, DANE._1_W_LAT, tryb);
             info.zapiszPlik();
         }
 
@@ -166,8 +150,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         punktyLista.clear();
         punktyLista.putAll(allNodes);
         
-        drogi.clear();
-        drogi.addAll(ways);
+        DANE.drogi.clear();
+        DANE.drogi.addAll(ways);
         
         TrafficFlow.clear();
         TrafficFlow.addAll(ruchUliczny);
@@ -176,7 +160,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     }
 
     ////// FUNKCJE
-    private void pobierzOSM(String nazwaPliku) {
+    private void pobierzOSM() {
         pasekPostepuOSM.setIndeterminate(true);
 
         String query = "";
@@ -190,8 +174,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     + ");"
                     + "(._;>;);"
                     + "out body;",
-                    _2_S_LON, _1_W_LAT, _4_N_WYS, _3_E_SZER_R,
-                    _2_S_LON, _1_W_LAT, _4_N_WYS, _3_E_SZER_R
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R
             );
 
 //query = String.format(Locale.US,
@@ -224,7 +208,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             "https://overpass.openstreetmap.fr/api/interpreter"
         };
 
-        File out = new File("POBRANE_PLIKI", nazwaPliku + ".osm");
+        File out = new File("POBRANE_PLIKI", DANE.nazwaPliku + ".osm");
 
         System.out.println("Zapisuję do: " + out.getAbsolutePath());
 
@@ -274,13 +258,13 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         pasekPostepuOSM.setString("Błąd pobierania");
     }
 
-    private void czytajOSM(String fileName) {
+    private void czytajOSM() {
         //setLabel "konwertowanie zmiennych"
 
         try {
             int ilosc = 0;
-            System.out.println("Otwieram plik: " + fileName);
-            File file = new File("POBRANE_PLIKI/" + fileName);
+            System.out.println("Otwieram plik: " + DANE.nazwaPliku+".osm");
+            File file = new File("POBRANE_PLIKI/" + DANE.nazwaPliku+".osm");
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(file);
@@ -291,36 +275,27 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             NodeList wList = doc.getElementsByTagName("way");
             int ilosc_wszystkich = nList.getLength() + wList.getLength();
             for (int i = 0; i < nList.getLength(); i++) {
-                Element e = (Element) nList.item(i);
+    Element e = (Element) nList.item(i);
 
-                boolean isCrossing = false;
-                NodeList tags = e.getElementsByTagName("tag");
-                for (int t = 0; t < tags.getLength(); t++) {
-                    Element tag = (Element) tags.item(t);
-                    String k = tag.getAttribute("k");
-                    String v = tag.getAttribute("v");
-                    if (("highway".equals(k) && "crossing".equals(v)) || "crossing".equals(k)) {
-                        isCrossing = true;
-                        break;
-                    }
-                }
-                ilosc++;
-                publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
-                if (!isCrossing) {
-                    continue;
-                }
+    long id = Long.parseLong(e.getAttribute("id"));
+    double lat = Double.parseDouble(e.getAttribute("lat"));
+    double lon = Double.parseDouble(e.getAttribute("lon"));
 
-                long id = Long.parseLong(e.getAttribute("id"));
-                double lat = Double.parseDouble(e.getAttribute("lat"));
-                double lon = Double.parseDouble(e.getAttribute("lon"));
-                Punkt p = new Punkt(lat, lon, TypPunkt.DROGA_PKT, id);
-                for (int t = 0; t < tags.getLength(); t++) {
-                    Element tag = (Element) tags.item(t);
-                    p.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
-                }
+    Punkt p = new Punkt(lat, lon, TypPunkt.DROGA_PKT, id);
 
-                allNodes.put(id, p);
-            }
+    // jeśli potrzebujesz XY do rysowania – przywróć tę linię:
+    // p.ustawXY(_1_W_LAT, _2_S_LON, _3_E_SZER_R, _4_N_WYS);
+
+    NodeList tags = e.getElementsByTagName("tag");
+    for (int t = 0; t < tags.getLength(); t++) {
+        Element tag = (Element) tags.item(t);
+        p.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
+    }
+
+    allNodes.put(id, p);
+    ilosc++;
+    publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
+}
 
             System.out.println("➡ Wszystkich node: " + allNodes.size());
 
@@ -358,7 +333,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         }
     }
 
-    private void pobierzTF(String nazwaPliku) {
+    private void pobierzTF() {
         System.out.println("[INFO] Start pobierania danych z HERE Traffic API v7...");
         pasekPostepuTF.setIndeterminate(true);
         double minLat = 0;
@@ -367,10 +342,10 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         double minLon = 0;
 
         if (tryb == 2) {
-            double lat = _1_W_LAT; //polnoc poludnie
-            double lon = _2_S_LON; //wschod zachod
-            double offset_LON = _3_E_SZER_R;
-            double offset_LAT = _4_N_WYS;
+            double lat = DANE._1_W_LAT; //polnoc poludnie
+            double lon = DANE._2_S_LON; //wschod zachod
+            double offset_LON = DANE._3_E_SZER_R;
+            double offset_LAT = DANE._4_N_WYS;
 
             // Wyliczenie granic prostokąta
             minLat = lat - offset_LAT;
@@ -379,10 +354,10 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             maxLon = lon + offset_LON;
 
         } else if (tryb == 1) {
-            minLat = _2_S_LON;
-            maxLat = _4_N_WYS;
-            minLon = _1_W_LAT;
-            maxLon = _3_E_SZER_R;
+            minLat = DANE._2_S_LON;
+            maxLat = DANE._4_N_WYS;
+            minLon = DANE._1_W_LAT;
+            maxLon = DANE._3_E_SZER_R;
         }//1 - granice  2 - obszar  3 - kolo
 
         String endpoint = "https://data.traffic.hereapi.com/v7/flow"
@@ -424,13 +399,12 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
             // Pobieramy dane do pliku
             InputStream in = new BufferedInputStream(conn.getInputStream());
-            FileOutputStream out = new FileOutputStream(new File("POBRANE_PLIKI", nazwaPliku + ".xml"));
+            FileOutputStream out = new FileOutputStream(new File("POBRANE_PLIKI", DANE.nazwaPliku + ".xml"));
 
-            System.out.println("[INFO] Zapisuję dane do pliku: " + nazwaPliku);
+            System.out.println("[INFO] Zapisuję dane do pliku: " + DANE.nazwaPliku);
 
             byte[] buffer = new byte[4096];
             int bytesRead;
-            int total = 0;
 
             int wielkoscPliku = conn.getContentLength();
             int pobraneBajty = 0;
@@ -459,10 +433,10 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         }
     }
 
-    private void czytajTF(String nazwaPliku) throws IOException, JSONException {
+    private void czytajTF() throws IOException, JSONException {
         int ilosc = 0;
         //String content = Files.readString(Path.of(filePath));
-        String content = Files.readString(Paths.get("POBRANE_PLIKI/" + nazwaPliku));
+        String content = Files.readString(Paths.get("POBRANE_PLIKI/" + DANE.nazwaPliku));
         JSONObject root = new JSONObject(content);
         JSONArray results = root.getJSONArray("results");
         int ilosc_wszystkich = results.length();

@@ -6,12 +6,8 @@ package mgr;
  */
 import com.formdev.flatlaf.FlatDarkLaf;
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -42,16 +38,8 @@ public class Main extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        pobierzButton = new javax.swing.JButton();
-        inputFieldS = new javax.swing.JFormattedTextField();
-        inputFieldE = new javax.swing.JFormattedTextField();
-        inputFieldW = new javax.swing.JFormattedTextField();
-        inputFieldN = new javax.swing.JFormattedTextField();
-        POBIERZHEREBUTTON = new javax.swing.JButton();
         panelPobierania1 = new mgr.PanelPobierania();
-        jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -59,66 +47,12 @@ public class Main extends javax.swing.JFrame {
 
         jLabel1.setText("Moja apka");
 
-        pobierzButton.setText("DownloadOSM");
-        pobierzButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                pobierzButtonActionPerformed(evt);
-            }
-        });
-
-        inputFieldS.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
-        inputFieldS.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                inputFieldSActionPerformed(evt);
-            }
-        });
-
-        inputFieldE.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
-        inputFieldE.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                inputFieldEActionPerformed(evt);
-            }
-        });
-
-        inputFieldW.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
-        inputFieldW.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                inputFieldWActionPerformed(evt);
-            }
-        });
-
-        inputFieldN.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
-        inputFieldN.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                inputFieldNActionPerformed(evt);
-            }
-        });
-
-        POBIERZHEREBUTTON.setText("POBIERZ HERE");
-        POBIERZHEREBUTTON.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                POBIERZHEREBUTTONActionPerformed(evt);
-            }
-        });
-
-        jButton3.setText("readTF");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
-            }
-        });
+        panelPobierania1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 5));
 
         jButton4.setText("STOP DEBUG");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
-            }
-        });
-
-        jButton5.setText("jButton5");
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton5ActionPerformed(evt);
             }
         });
 
@@ -136,39 +70,15 @@ public class Main extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(48, 48, 48)
-                                .addComponent(jLabel1))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(63, 63, 63)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(pobierzButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(inputFieldW)
-                                    .addComponent(inputFieldE)
-                                    .addComponent(inputFieldN)
-                                    .addComponent(inputFieldS, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton5)
-                        .addGap(53, 53, 53)))
+                .addGap(48, 48, 48)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 100, Short.MAX_VALUE)
                 .addComponent(panelPobierania1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(148, 148, 148)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(POBIERZHEREBUTTON, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(159, 159, 159))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(217, 217, 217))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jButton4)
-                                .addGap(419, 419, 419))))
+                        .addComponent(jButton4)
+                        .addGap(419, 419, 419))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(34, 34, 34)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))))
@@ -178,35 +88,11 @@ public class Main extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(32, 32, 32)
                 .addComponent(jLabel1)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(32, 32, 32)
-                        .addComponent(jButton4)
-                        .addGap(203, 203, 203)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(231, 231, 231)
-                        .addComponent(jButton5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(inputFieldN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(inputFieldE, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(inputFieldW, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(inputFieldS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(12, 12, 12)
-                                .addComponent(pobierzButton))
-                            .addComponent(POBIERZHEREBUTTON, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(109, 109, 109))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(44, 44, 44))))
+                .addGap(32, 32, 32)
+                .addComponent(jButton4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(44, 44, 44))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(panelPobierania1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -216,80 +102,14 @@ public class Main extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void pobierzButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pobierzButtonActionPerformed
-        DownloadOSM.download(54.160, 19.380, 54.175, 19.430);
-        //DownloadOSM download = new DownloadOSM(S, W, N, E;
-    }//GEN-LAST:event_pobierzButtonActionPerformed
-
-    private void inputFieldNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputFieldNActionPerformed
-        // TODO add your handling code here:
-        N = Double.parseDouble(inputFieldN.getText());
-    }//GEN-LAST:event_inputFieldNActionPerformed
-
-    private void inputFieldEActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputFieldEActionPerformed
-        // TODO add your handling code here:
-        E = Double.parseDouble(inputFieldE.getText());
-    }//GEN-LAST:event_inputFieldEActionPerformed
-
-    private void inputFieldWActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputFieldWActionPerformed
-        // TODO add your handling code here:
-        W = Double.parseDouble(inputFieldW.getText());
-    }//GEN-LAST:event_inputFieldWActionPerformed
-
-    private void inputFieldSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputFieldSActionPerformed
-        // TODO add your handling code here:
-        S = Double.parseDouble(inputFieldS.getText());
-    }//GEN-LAST:event_inputFieldSActionPerformed
-
-    private void POBIERZHEREBUTTONActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_POBIERZHEREBUTTONActionPerformed
-        // TODO add your handling code here:
-
-        HereTrafficXML.pobierz();
-
-    }//GEN-LAST:event_POBIERZHEREBUTTONActionPerformed
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-
-        try {
-            segments = ReadTF.read("nowy28.08.xml");
-
-            // teraz wszystkie dane masz w zmiennych w liście "segments"
-            // np. pierwszy element:
-            if (!segments.isEmpty()) {
-                TrafficSegment first = segments.get(0);
-                System.out.println("Pierwszy: " + first.street + " speed=" + first.speed);
-            }
-
-        } catch (Exception e) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Błąd: " + e.getMessage());
-        }
-        System.out.println("fdfdf");
-
-    }//GEN-LAST:event_jButton3ActionPerformed
-
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
         System.out.println("STOP DEBUG)");
     }//GEN-LAST:event_jButton4ActionPerformed
 
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
-
-        try (BufferedReader br = new BufferedReader(new FileReader("POBRANE_PLIKI\\txt"))) {
-            String linia;
-            while ((linia = br.readLine()) != null) { // czyta linia po linii
-                daneTXT.add(linia);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }//GEN-LAST:event_jButton5ActionPerformed
-
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        oknoMapy oknoMapy= new oknoMapy();
+        oknoMapy oknoMapy = new oknoMapy();
         oknoMapy.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -329,17 +149,9 @@ public class Main extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton POBIERZHEREBUTTON;
-    private javax.swing.JFormattedTextField inputFieldE;
-    private javax.swing.JFormattedTextField inputFieldN;
-    private javax.swing.JFormattedTextField inputFieldS;
-    private javax.swing.JFormattedTextField inputFieldW;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private mgr.PanelPobierania panelPobierania1;
-    private javax.swing.JButton pobierzButton;
     // End of variables declaration//GEN-END:variables
 }

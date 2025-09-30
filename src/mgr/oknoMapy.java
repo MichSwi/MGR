@@ -17,6 +17,7 @@ public class oknoMapy extends javax.swing.JFrame {
      */
     public oknoMapy() {
         initComponents();
+        System.out.println("otwarto okno mapy");
     }
 
     /**
@@ -28,10 +29,12 @@ public class oknoMapy extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        interfejs2 = new mgr.interfejs();
+        mapa1 = new mgr.mapa();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        getContentPane().add(interfejs2, java.awt.BorderLayout.CENTER);
+
+        mapa1.setPreferredSize(new java.awt.Dimension(1000, 675));
+        getContentPane().add(mapa1, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -62,6 +65,6 @@ public class oknoMapy extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private mgr.interfejs interfejs2;
+    private mgr.mapa mapa1;
     // End of variables declaration//GEN-END:variables
 }
