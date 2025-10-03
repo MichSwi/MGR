@@ -149,13 +149,13 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     protected void done() {
         punktyLista.clear();
         punktyLista.putAll(allNodes);
-        
+
         DANE.drogi.clear();
         DANE.drogi.addAll(ways);
-        
+
         TrafficFlow.clear();
         TrafficFlow.addAll(ruchUliczny);
-        
+
         System.out.println("DONE");
     }
 
@@ -169,12 +169,12 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             query = String.format(Locale.US,
                     "[out:xml][timeout:60];"
                     + "("
-                    + "way[\"highway\"][\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform)$\"](%.6f,%.6f,%.6f,%.6f);"
-                    //+ "node[\"highway\"=\"crossing\"](%.6f,%.6f,%.6f,%.6f);"
+                    + "way[\"highway\"]"
+                    + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|service|driveway)$\"]"
+                    + "(%.6f,%.6f,%.6f,%.6f);"
                     + ");"
                     + "(._;>;);"
                     + "out body;",
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R
             );
 
@@ -263,8 +263,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
         try {
             int ilosc = 0;
-            System.out.println("Otwieram plik: " + DANE.nazwaPliku+".osm");
-            File file = new File("POBRANE_PLIKI/" + DANE.nazwaPliku+".osm");
+            System.out.println("Otwieram plik: " + DANE.nazwaPliku + ".osm");
+            File file = new File("POBRANE_PLIKI/" + DANE.nazwaPliku + ".osm");
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(file);
@@ -275,27 +275,26 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             NodeList wList = doc.getElementsByTagName("way");
             int ilosc_wszystkich = nList.getLength() + wList.getLength();
             for (int i = 0; i < nList.getLength(); i++) {
-    Element e = (Element) nList.item(i);
+                Element e = (Element) nList.item(i);
 
-    long id = Long.parseLong(e.getAttribute("id"));
-    double lat = Double.parseDouble(e.getAttribute("lat"));
-    double lon = Double.parseDouble(e.getAttribute("lon"));
+                long id = Long.parseLong(e.getAttribute("id"));
+                double lat = Double.parseDouble(e.getAttribute("lat"));
+                double lon = Double.parseDouble(e.getAttribute("lon"));
 
-    Punkt p = new Punkt(lat, lon, TypPunkt.DROGA_PKT, id);
+                Punkt p = new Punkt(lat, lon, TypPunkt.DROGA_PKT, id);
 
-    // jeśli potrzebujesz XY do rysowania – przywróć tę linię:
-    // p.ustawXY(_1_W_LAT, _2_S_LON, _3_E_SZER_R, _4_N_WYS);
+                // jeśli potrzebujesz XY do rysowania – przywróć tę linię:
+                // p.ustawXY(_1_W_LAT, _2_S_LON, _3_E_SZER_R, _4_N_WYS);
+                NodeList tags = e.getElementsByTagName("tag");
+                for (int t = 0; t < tags.getLength(); t++) {
+                    Element tag = (Element) tags.item(t);
+                    p.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
+                }
 
-    NodeList tags = e.getElementsByTagName("tag");
-    for (int t = 0; t < tags.getLength(); t++) {
-        Element tag = (Element) tags.item(t);
-        p.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
-    }
-
-    allNodes.put(id, p);
-    ilosc++;
-    publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
-}
+                allNodes.put(id, p);
+                ilosc++;
+                publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
+            }
 
             System.out.println("➡ Wszystkich node: " + allNodes.size());
 
@@ -312,6 +311,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     long ref = Long.parseLong(nd.getAttribute("ref"));
                     Punkt node = allNodes.get(ref);
                     if (node != null) {
+                        node.ustawXY();
                         way.punkty.add(node);
                     }
                 }
@@ -386,8 +386,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             System.out.println("[INFO] Połączenie otwarte...");
 
             // zapisujemy ilosc pobran
-            
-            
             // Sprawdzamy kod odpowiedzi
             int code = conn.getResponseCode();
             System.out.println("[INFO] HTTP response = " + code);

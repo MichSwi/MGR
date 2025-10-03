@@ -3,32 +3,38 @@ package mgr;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.List;
 
 public class mapa extends javax.swing.JPanel {
-
-    private int skalaProc = 100;           // 100%
-    private double widok_x = 0;
-    private double widok_y = 0;
+    
+    private int skalaProc = 100;
+    private double widok_x = 30;
+    private double widok_y = 30;
     private int prevMouseX, prevMouseY;
-
+    private List<Droga> drogi;
+    
     public mapa() {
         initComponents();
-
-        this.setBackground(Color.LIGHT_GRAY);
-
+        
+        this.setBackground(Color.white);
+        drogi = DANE.drogi;
         java.awt.event.MouseAdapter ma = new java.awt.event.MouseAdapter() {
-
+            
             @Override
             public void mouseMoved(java.awt.event.MouseEvent e) {
-                skala_label.setText("X: " + (int) (e.getX() - widok_x) + " Y: " + (int) (e.getY() - widok_y) + " SKALA: " + skalaProc + "%");
+                skala_label.setText("X: " + (int) worldX(e.getX())
+                        + " Y: " + (int) worldY(e.getY())
+                        + " SKALA: " + skalaProc + "%");
             }
-
+            
             @Override
             public void mousePressed(java.awt.event.MouseEvent e) {
                 prevMouseX = e.getX();
                 prevMouseY = e.getY();
             }
-
+            
             @Override
             public void mouseDragged(java.awt.event.MouseEvent e) {
                 int dx = e.getX() - prevMouseX;
@@ -39,31 +45,24 @@ public class mapa extends javax.swing.JPanel {
                 prevMouseY = e.getY();
                 repaint();
             }
-
+            
             @Override
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent e) {
-                int notches = e.getWheelRotation(); // >0 w dół (oddal), <0 w górę (przybliż)
+                int notches = e.getWheelRotation();
                 int oldProc = skalaProc;
-
-                // krok = 10% bieżącej skali
-                int step = (int) Math.round(skalaProc * 0.1);
-                if (step < 1) {
-                    step = 1; // zabezpieczenie, żeby zawsze coś się zmieniało
-                }
-                skalaProc += -notches * step;   // kółko w górę -> +skala, w dół -> -skala
-                skalaProc = Math.max(10, Math.min(500, skalaProc)); // zakres 10%–500%
-
+                int step = Math.max(1, (int) Math.round(skalaProc * 0.1));
+                skalaProc = Math.max(1, Math.min(500, skalaProc - notches * step));
+                
                 if (skalaProc != oldProc) {
-                    double sOld = oldProc / 100.0;
-                    double sNew = skalaProc / 100.0;
-                    double factor = sNew / sOld;
-
-                    // utrzymaj punkt pod kursorem
-                    double cx = e.getX();
-                    double cy = e.getY();
-                    widok_x = cx - factor * (cx - widok_x);
-                    widok_y = cy - factor * (cy - widok_y);
-                    skala_label.setText("X: " + (int) (e.getX() - widok_x) + " Y: " + (int) (e.getY() - widok_y) + " SKALA: " + skalaProc + "%");
+                    double sOld = oldProc / 100.0, sNew = scale();
+                    double cx = e.getX(), cy = e.getY();
+                    // utrzymaj punkt pod kursorem:
+                    widok_x = cx - (sNew / sOld) * (cx - widok_x);
+                    widok_y = cy - (sNew / sOld) * (cy - widok_y);
+                    
+                    skala_label.setText("X: " + (int) worldX(e.getX())
+                            + " Y: " + (int) worldY(e.getY())
+                            + " SKALA: " + skalaProc + "%");
                     repaint();
                 }
             }
@@ -72,65 +71,151 @@ public class mapa extends javax.swing.JPanel {
         addMouseMotionListener(ma);
         addMouseWheelListener(ma);
     }
-
-//    @Override
-//protected void paintComponent(java.awt.Graphics g) {
-//    super.paintComponent(g);
-//    java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
-//
-//    // zastosuj przesunięcie i skalę BEZ kopii kontekstu
-//    g2d.translate(widok_x, widok_y);
-//    g2d.scale(skalaProc / 100.0, skalaProc / 100.0);
-//
-//    rysujPunkt(0, 0, Color.RED, g2d);
-//}
-//    
+    
     @Override
     protected void paintComponent(java.awt.Graphics g) {
-        // najpierw normalne czyszczenie tła i narysowanie komponentów-dzieci
         super.paintComponent(g);
-
-        // robimy KOPIĘ kontekstu graficznego
-        Graphics2D g2d = (Graphics2D) g.create();
-        rysujLinijke(g2d);
+        java.awt.Graphics2D g2d_static = (java.awt.Graphics2D) g;
+        
+        Graphics2D g2d_zawartosc = (Graphics2D) g.create();
+        g2d_zawartosc.translate(widok_x, widok_y);
+        g2d_zawartosc.scale(skalaProc / 100.0, skalaProc / 100.0);
+        
+        Graphics2D g2d_podzialka_poz = (Graphics2D) g.create();
+        g2d_podzialka_poz.translate(widok_x, 0);
+        g2d_podzialka_poz.scale(skalaProc / 100.0, 1);
+        g2d_podzialka_poz.setColor(Color.BLACK);
+        g2d_podzialka_poz.setStroke(new BasicStroke(1));
+        
+        Graphics2D g2d_podzialka_pion = (Graphics2D) g.create();
+        g2d_podzialka_pion.translate(0, widok_y);
+        g2d_podzialka_pion.scale(1, skalaProc / 100.0);
+        g2d_podzialka_pion.setColor(Color.BLACK);
+        g2d_podzialka_pion.setStroke(new BasicStroke(1));
+        
         try {
-            // zastosuj przesunięcie i skalę tylko na tej kopii
-            g2d.translate(widok_x, widok_y);
-            g2d.scale(skalaProc / 100.0, skalaProc / 100.0);
-
-            // tu rysujesz wszystko co „mapa”
-            rysujPunkt(0, 0, Color.RED, g2d);
-            // możesz dodać rysujLinijke(g2d), rysujSkale(g2d) itp.
+            rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
+            for (Droga d : drogi) {
+                rysujDroge(d, Color.BLACK, g2d_zawartosc);
+            }
+            
         } finally {
             // wyrzucamy kopię, przywracamy oryginalny kontekst dla Swinga
-            g2d.dispose();
+            g2d_zawartosc.dispose();
+            g2d_podzialka_pion.dispose();
+            g2d_podzialka_poz.dispose();
         }
     }
+    
+    private void rysujPodzialke(Graphics2D g2d_podzialka_poz, Graphics2D g2d_podzialka_pion) {
+        int ilosc_podzialek_poz = 8;
+        int ilosc_podzialek_pion = (int) (ilosc_podzialek_poz * this.getHeight() / this.getWidth()) + 1;
+        
+        int[] dopuszczalneSkoki = {10, 20, 50, 100, 200, 250, 500, 750, 1000, 2000, 2500, 5000};
+        
+        int wartosc_skok_surowa = (int) Math.abs(worldMaxX() - worldMinX()) / ilosc_podzialek_poz;
+        
+        int wartosc_skok = dopuszczalneSkoki[0]; // domyślna
+        int roznicaMin = Math.abs(wartosc_skok_surowa - dopuszczalneSkoki[0]);
+        
+        for (int i = 1; i < dopuszczalneSkoki.length; i++) {
+            int roznica = Math.abs(wartosc_skok_surowa - dopuszczalneSkoki[i]);
+            if (roznica < roznicaMin) {
+                roznicaMin = roznica;
+                wartosc_skok = dopuszczalneSkoki[i];
+            }
+        }
+        
+        int offset_poz = (int) (Math.ceil(worldMinX() / wartosc_skok) * wartosc_skok) - wartosc_skok;
+        int offset_pion = (int) (Math.ceil(worldMinY() / wartosc_skok) * wartosc_skok) - wartosc_skok;
+        int i = 0;
+        
+        while (true) {
+            int x_world = wartosc_skok * i + offset_poz; // współrzędna w świecie
+            if (x_world > worldMaxX()) {
+                break;
+            }
+            // rysuj kreskę w przeskalowanym układzie
+            g2d_podzialka_poz.drawLine(x_world, -10, x_world, 10);
 
+            // --- kontr-skalowanie dla tekstu ---
+            AffineTransform old = g2d_podzialka_poz.getTransform();
+            g2d_podzialka_poz.translate(x_world, 0);           // ustaw świat na xw
+            g2d_podzialka_poz.scale(1.0 / scale(), 1.0);  // odwróć skalowanie w osi X
+            g2d_podzialka_poz.drawString(x_world + "", -10, 20);     // tekst w pikselach ekranu
+            g2d_podzialka_poz.setTransform(old);          // przywróć transformację
+            i++;
+        }
+        i = 0;
+        while (true) {
+            
+            int y_world = wartosc_skok * i + offset_pion; // współrzędna w świecie
+            if (y_world > worldMaxY()) {
+                break;
+            }
+            // rysuj kreskę w przeskalowanym układzie
+            g2d_podzialka_pion.drawLine(10, y_world, 0, y_world);
+
+            // --- kontr-skalowanie dla tekstu ---
+            AffineTransform old = g2d_podzialka_pion.getTransform();
+            g2d_podzialka_pion.translate(0, y_world);           // ustaw świat na y_w
+            g2d_podzialka_pion.scale(1.0, 1.0 / scale());  // odwróć skalowanie w osi X
+            g2d_podzialka_pion.drawString(y_world + "", 15, 5);     // tekst w pikselach ekranu
+            g2d_podzialka_pion.setTransform(old);          // przywróć transformację
+            i++;
+        }
+    }
+    
+    private void rysujDroge(Droga droga, Color kolor, Graphics2D g2d) {
+        g2d.setColor(kolor);
+        int il_pkt = droga.punkty.size();
+        for (int i = 1; i < il_pkt; i++) {
+            g2d.drawLine((int) droga.punkty.get(i - 1).X, (int) droga.punkty.get(i - 1).Y, (int) droga.punkty.get(i).X, (int) droga.punkty.get(i).Y);
+        }
+    }
+    
     private void rysujPunkt(double x, double y, Color kolor, Graphics2D g2d) {
-        int r = 10;
+        int r = 100;
         g2d.setColor(kolor);
         x = x - r / 2;
         y = y - r / 2;
         g2d.fillOval((int) x, (int) y, (int) r, (int) r);
     }
-
+    
     private void rysujLinijke(Graphics2D g2d) {
         g2d.setColor(Color.BLACK);
         g2d.setStroke(new BasicStroke(3));
         int odstep = 15;
-        g2d.drawLine(odstep, odstep, this.getWidth() - 2*odstep, odstep);
-
-        
-        int ilosc_przedzialek =5;
-        int szerokosc = (int)(this.getWidth()-2*odstep) / ilosc_przedzialek;
-        int dlugosc_przedzialki = 30;
-        for (int i=1; i<=5; i++){
-            g2d.drawLine(odstep+szerokosc*i, odstep, dlugosc_przedzialki+odstep, odstep);
-        }
-        
-        
-        g2d.drawLine(odstep, odstep, odstep, this.getHeight() - 2*odstep);
+        g2d.drawLine(odstep, odstep, this.getWidth() - 2 * odstep, odstep);
+        g2d.drawLine(odstep, odstep, odstep, this.getHeight() - 2 * odstep);
+    }
+    
+    private double scale() {
+        return skalaProc / 100.0;
+    }
+    
+    private double worldX(int sx) {
+        return (sx - widok_x) / scale();
+    }
+    
+    private double worldY(int sy) {
+        return (sy - widok_y) / scale();
+    }
+    
+    private double worldMinX() {
+        return -widok_x / scale();
+    }
+    
+    private double worldMaxX() {
+        return (-widok_x + getWidth()) / scale();
+    }
+    
+    private double worldMinY() {
+        return -widok_y / scale();
+    }
+    
+    private double worldMaxY() {
+        return (-widok_y + getHeight()) / scale();
     }
 
     /**
@@ -143,47 +228,101 @@ public class mapa extends javax.swing.JPanel {
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        reset_widoku_button = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
         skala_label = new javax.swing.JLabel();
 
         jButton1.setText("jButton1");
         jButton1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 
-        jButton2.setText("jButton2");
+        reset_widoku_button.setText("RESET WIDOKU");
+        reset_widoku_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                reset_widoku_buttonActionPerformed(evt);
+            }
+        });
 
-        skala_label.setBackground(new java.awt.Color(102, 0, 102));
-        skala_label.setForeground(new java.awt.Color(102, 0, 102));
+        jButton3.setText("stop");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+
+        skala_label.setBackground(new java.awt.Color(0, 0, 0));
+        skala_label.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        skala_label.setForeground(new java.awt.Color(0, 0, 0));
         skala_label.setText("jLabel1");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(skala_label, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(22, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(skala_label, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(114, Short.MAX_VALUE)
+                .addContainerGap(551, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(skala_label)
-                        .addGap(378, 378, 378))))
+                        .addComponent(jButton3)
+                        .addGap(36, 36, 36))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(291, 291, 291)
-                .addComponent(skala_label)
-                .addContainerGap(416, Short.MAX_VALUE))
+                .addContainerGap(678, Short.MAX_VALUE)
+                .addComponent(jButton3)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void reset_widoku_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reset_widoku_buttonActionPerformed
+        // TODO add your handling code here:
+        skalaProc = 100;
+        widok_x = 30;
+        widok_y = 30;
+        repaint();
+    }//GEN-LAST:event_reset_widoku_buttonActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        System.out.println("STOP");
+
+    }//GEN-LAST:event_jButton3ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JButton reset_widoku_button;
     private javax.swing.JLabel skala_label;
     // End of variables declaration//GEN-END:variables
 }

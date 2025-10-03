@@ -1,2 +1,0 @@
-mgr.WatekPobierz
-mgr.stanRealTime
