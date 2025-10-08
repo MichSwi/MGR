@@ -20,12 +20,14 @@ public class Punkt {
     public double LON;
     public TypPunkt typ;
     public Map<String, String> tags = new HashMap<>();
+    public int ilosc_uzyc;
 
     Punkt(double LAT, double LON, TypPunkt typ, long ID) {
         this.LAT = LAT;
         this.LON = LON;
         this.typ = typ;
         this.ID = ID;
+        this.ilosc_uzyc = 0;
     }
 
     public Punkt(double lat, double lon) {

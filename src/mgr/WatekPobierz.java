@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import javax.swing.*;
 import java.util.List;
 import java.util.Locale;
@@ -147,14 +148,18 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
     @Override
     protected void done() {
+
         punktyLista.clear();
         punktyLista.putAll(allNodes);
 
         DANE.drogi.clear();
         DANE.drogi.addAll(ways);
 
-        TrafficFlow.clear();
-        TrafficFlow.addAll(ruchUliczny);
+//        TrafficFlow.clear();
+//        TrafficFlow.addAll(ruchUliczny);
+        DANE.ustawOdleglosci();
+        DANE.ustawStartKoniec();
+        DANE.ustawPolaczenia();
 
         System.out.println("DONE");
     }
@@ -283,8 +288,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
                 Punkt p = new Punkt(lat, lon, TypPunkt.DROGA_PKT, id);
 
-                // jeśli potrzebujesz XY do rysowania – przywróć tę linię:
-                // p.ustawXY(_1_W_LAT, _2_S_LON, _3_E_SZER_R, _4_N_WYS);
                 NodeList tags = e.getElementsByTagName("tag");
                 for (int t = 0; t < tags.getLength(); t++) {
                     Element tag = (Element) tags.item(t);
@@ -298,39 +301,77 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
             System.out.println("➡ Wszystkich node: " + allNodes.size());
 
-            // --- WAYS (z punktami i tagami) ---
+//          ===== WAYS =====
             for (int i = 0; i < wList.getLength(); i++) {
-                Element w = (Element) wList.item(i);
-                long id = Long.parseLong(w.getAttribute("id"));
-                Droga way = new Droga(id);
+                int licznikSegmentow = 0;
+                Element elemWay = (Element) wList.item(i);
+                long idOSM = Long.parseLong(elemWay.getAttribute("id"));
 
-                // punkty z ref
-                NodeList nds = w.getElementsByTagName("nd");
-                for (int j = 0; j < nds.getLength(); j++) {
-                    Element nd = (Element) nds.item(j);
-                    long ref = Long.parseLong(nd.getAttribute("ref"));
-                    Punkt node = allNodes.get(ref);
-                    if (node != null) {
-                        node.ustawXY();
-                        way.punkty.add(node);
+                // pierwszy segment
+                long idSeg = idOSM * 100L + licznikSegmentow;
+                Droga biezaca = new Droga(idSeg);
+
+                // tagi
+                NodeList tagi = elemWay.getElementsByTagName("tag");
+                for (int k = 0; k < tagi.getLength(); k++) {
+                    Element tag = (Element) tagi.item(k);
+                    biezaca.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
+                    if ("oneway".equals(tag.getAttribute("k")) && "true".equalsIgnoreCase(tag.getAttribute("v"))) {
+                        System.out.println("Znaleziono oneway=true!");
+                        biezaca.jednokierunkowa = true; // jeśli masz takie pole
+                    }
+                    if ("name".equals(tag.getAttribute("k"))){
+                        biezaca.nazwa = tag.getAttribute("v");
                     }
                 }
 
-                // tagi dla way
-                NodeList tags = w.getElementsByTagName("tag");
-                for (int k = 0; k < tags.getLength(); k++) {
-                    Element tag = (Element) tags.item(k);
-                    way.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
-                }
-                ilosc++;
-                publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
-                ways.add(way);
-            }
-            System.out.println("➡ Wczytano dróg: " + ways.size());
+                // punkty
+                NodeList nds = elemWay.getElementsByTagName("nd");
+                for (int j = 0; j < nds.getLength(); j++) {
+                    Element nd = (Element) nds.item(j);
+                    long ref = Long.parseLong(nd.getAttribute("ref"));
+                    Punkt wezel = allNodes.get(ref);
+                    if (wezel == null) {
+                        continue;
+                    }
 
+                    wezel.ustawXY();
+
+                    if (wezel.ilosc_uzyc >= 1 && j != 0) {
+                        if (!biezaca.punkty.isEmpty()) {
+                            biezaca.punkty.add(wezel);
+                            wezel.ilosc_uzyc++;
+                            ways.add(biezaca);
+                            ilosc++;
+                            publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
+                        }
+
+                        // nowy segment z NOWYM ID
+                        licznikSegmentow++;
+                        long idSegNowy = idOSM * 100L + licznikSegmentow;
+                        Droga nowa = new Droga(idSegNowy);
+                        nowa.tags.putAll(biezaca.tags);
+
+                        biezaca = nowa;
+                        biezaca.punkty.add(wezel);
+                        wezel.ilosc_uzyc++;
+                    } else {
+                        biezaca.punkty.add(wezel);
+                        wezel.ilosc_uzyc++;
+                    }
+                }
+
+                if (!biezaca.punkty.isEmpty()) {
+                    ways.add(biezaca);
+                    ilosc++;
+                    publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
+                }
+            }
+            System.out.println("============");
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private void pobierzTF() {
@@ -434,7 +475,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     private void czytajTF() throws IOException, JSONException {
         int ilosc = 0;
         //String content = Files.readString(Path.of(filePath));
-        String content = Files.readString(Paths.get("POBRANE_PLIKI/" + DANE.nazwaPliku));
+        String content = Files.readString(Paths.get("POBRANE_PLIKI/" + DANE.nazwaPliku+".xml"));
         JSONObject root = new JSONObject(content);
         JSONArray results = root.getJSONArray("results");
         int ilosc_wszystkich = results.length();
@@ -462,7 +503,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     speed, freeFlow, jam, conf, points));
         }
         //return out;
-        ruchUliczny = out;
+        DANE.ruchUliczny = out;
     }
 
     private List<Punkt> parseShape(JSONObject loc) {

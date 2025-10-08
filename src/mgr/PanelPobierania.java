@@ -49,20 +49,26 @@ public class PanelPobierania extends javax.swing.JPanel {
         DANE._3_E_SZER_R = 0;
 
         // NEWS: 54.160, 19.380, 54.175, 19.430
-//        jTextField1.setText("13.3905");
-//        jTextField2.setText("52.5110");
-//        jTextField3.setText("13.4195"); //BERLIN
-//        jTextField4.setText("52.5290");
+        jTextField1.setText("13.3905");
+        jTextField2.setText("52.5110");
+        jTextField3.setText("13.4195"); //BERLIN
+        jTextField4.setText("52.5290");
 
 //        jTextField1.setText("19.3935"); // W
 //        jTextField2.setText("54.1430"); // S   ELBLAG
 //        jTextField3.setText("19.4241"); // E
 //        jTextField4.setText("54.1910"); // N
 
-        jTextField1.setText("18.5942"); // SW lon = 18.6097 - 0.0155
-        jTextField2.setText("54.3729"); // SW lat = 54.3819 - 0.0090
-        jTextField3.setText("18.6252"); // NE lon = 18.6097 + 0.0155
-        jTextField4.setText("54.3909"); // NE lat = 54.3819 + 0.0090   WRZESZCZ
+//        jTextField1.setText("18.5942"); // SW lon = 18.6097 - 0.0155
+//        jTextField2.setText("54.3729"); // SW lat = 54.3819 - 0.0090
+//        jTextField3.setText("18.6252"); // NE lon = 18.6097 + 0.0155
+//        jTextField4.setText("54.3909"); // NE lat = 54.3819 + 0.0090   WRZESZCZ 2km 2km
+        
+//        jTextField1.setText("18.6083"); // lon - 0.0014
+//jTextField2.setText("54.3810"); // lat - 0.0009
+//// NE (+100m)
+//jTextField3.setText("18.6111"); // lon + 0.0014
+//jTextField4.setText("54.3828"); // lat + 0.0009  // WRZESZ 100m X 100m
     }
 
     private void przelaczTryb() {
@@ -235,6 +241,7 @@ public class PanelPobierania extends javax.swing.JPanel {
         jLabel6.setText("Plik pomyślnie zapisano w: ////");
 
         jTextFieldNazwaPliku.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jTextFieldNazwaPliku.setText("el");
 
         jButtonPobierz.setText("Pobierz");
         jButtonPobierz.addActionListener(new java.awt.event.ActionListener() {
@@ -263,6 +270,8 @@ public class PanelPobierania extends javax.swing.JPanel {
         jLabelPobOSM1.setText("Czytanie OSM");
 
         jLabelPobTF1.setText("Czytanie TF");
+
+        jCheckBox2.setSelected(true);
 
         jCheckBox5.setText("text stworz,pobierz czy cos");
 

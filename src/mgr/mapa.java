@@ -6,35 +6,37 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class mapa extends javax.swing.JPanel {
-    
+
     private int skalaProc = 100;
     private double widok_x = 30;
     private double widok_y = 30;
     private int prevMouseX, prevMouseY;
     private List<Droga> drogi;
-    
+    Color czerw_przezr = new Color(255, 0, 0, 44); // czerwony, 25% widoczności
+
     public mapa() {
         initComponents();
-        
+
         this.setBackground(Color.white);
         drogi = DANE.drogi;
         java.awt.event.MouseAdapter ma = new java.awt.event.MouseAdapter() {
-            
+
             @Override
             public void mouseMoved(java.awt.event.MouseEvent e) {
                 skala_label.setText("X: " + (int) worldX(e.getX())
                         + " Y: " + (int) worldY(e.getY())
                         + " SKALA: " + skalaProc + "%");
             }
-            
+
             @Override
             public void mousePressed(java.awt.event.MouseEvent e) {
                 prevMouseX = e.getX();
                 prevMouseY = e.getY();
             }
-            
+
             @Override
             public void mouseDragged(java.awt.event.MouseEvent e) {
                 int dx = e.getX() - prevMouseX;
@@ -45,21 +47,21 @@ public class mapa extends javax.swing.JPanel {
                 prevMouseY = e.getY();
                 repaint();
             }
-            
+
             @Override
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent e) {
                 int notches = e.getWheelRotation();
                 int oldProc = skalaProc;
                 int step = Math.max(1, (int) Math.round(skalaProc * 0.1));
                 skalaProc = Math.max(1, Math.min(500, skalaProc - notches * step));
-                
+
                 if (skalaProc != oldProc) {
                     double sOld = oldProc / 100.0, sNew = scale();
                     double cx = e.getX(), cy = e.getY();
                     // utrzymaj punkt pod kursorem:
                     widok_x = cx - (sNew / sOld) * (cx - widok_x);
                     widok_y = cy - (sNew / sOld) * (cy - widok_y);
-                    
+
                     skala_label.setText("X: " + (int) worldX(e.getX())
                             + " Y: " + (int) worldY(e.getY())
                             + " SKALA: " + skalaProc + "%");
@@ -71,34 +73,43 @@ public class mapa extends javax.swing.JPanel {
         addMouseMotionListener(ma);
         addMouseWheelListener(ma);
     }
-    
+
     @Override
     protected void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
         java.awt.Graphics2D g2d_static = (java.awt.Graphics2D) g;
-        
+
         Graphics2D g2d_zawartosc = (Graphics2D) g.create();
         g2d_zawartosc.translate(widok_x, widok_y);
         g2d_zawartosc.scale(skalaProc / 100.0, skalaProc / 100.0);
-        
+
         Graphics2D g2d_podzialka_poz = (Graphics2D) g.create();
         g2d_podzialka_poz.translate(widok_x, 0);
         g2d_podzialka_poz.scale(skalaProc / 100.0, 1);
         g2d_podzialka_poz.setColor(Color.BLACK);
         g2d_podzialka_poz.setStroke(new BasicStroke(1));
-        
+
         Graphics2D g2d_podzialka_pion = (Graphics2D) g.create();
         g2d_podzialka_pion.translate(0, widok_y);
         g2d_podzialka_pion.scale(1, skalaProc / 100.0);
         g2d_podzialka_pion.setColor(Color.BLACK);
         g2d_podzialka_pion.setStroke(new BasicStroke(1));
-        
+
         try {
             rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
             for (Droga d : drogi) {
-                rysujDroge(d, Color.BLACK, g2d_zawartosc);
+                rysujDroge(d, losowyKolor(), g2d_zawartosc);
+//                for (Punkt pkt : d.punkty){
+//                    rysujPunkt(pkt.X, pkt.Y, czerw_przezr, g2d_zawartosc);
+//                }
             }
-            
+
+            for (TrafficSegment TF : DANE.ruchUliczny) {
+                for (Punkt pkt : TF.points) {
+                    pkt.ustawXY();
+                    rysujPunkt(pkt.X, pkt.Y, czerw_przezr, g2d_zawartosc);
+                }
+            }
         } finally {
             // wyrzucamy kopię, przywracamy oryginalny kontekst dla Swinga
             g2d_zawartosc.dispose();
@@ -106,18 +117,18 @@ public class mapa extends javax.swing.JPanel {
             g2d_podzialka_poz.dispose();
         }
     }
-    
+
     private void rysujPodzialke(Graphics2D g2d_podzialka_poz, Graphics2D g2d_podzialka_pion) {
         int ilosc_podzialek_poz = 8;
         int ilosc_podzialek_pion = (int) (ilosc_podzialek_poz * this.getHeight() / this.getWidth()) + 1;
-        
+
         int[] dopuszczalneSkoki = {10, 20, 50, 100, 200, 250, 500, 750, 1000, 2000, 2500, 5000};
-        
+
         int wartosc_skok_surowa = (int) Math.abs(worldMaxX() - worldMinX()) / ilosc_podzialek_poz;
-        
+
         int wartosc_skok = dopuszczalneSkoki[0]; // domyślna
         int roznicaMin = Math.abs(wartosc_skok_surowa - dopuszczalneSkoki[0]);
-        
+
         for (int i = 1; i < dopuszczalneSkoki.length; i++) {
             int roznica = Math.abs(wartosc_skok_surowa - dopuszczalneSkoki[i]);
             if (roznica < roznicaMin) {
@@ -125,11 +136,11 @@ public class mapa extends javax.swing.JPanel {
                 wartosc_skok = dopuszczalneSkoki[i];
             }
         }
-        
+
         int offset_poz = (int) (Math.ceil(worldMinX() / wartosc_skok) * wartosc_skok) - wartosc_skok;
         int offset_pion = (int) (Math.ceil(worldMinY() / wartosc_skok) * wartosc_skok) - wartosc_skok;
         int i = 0;
-        
+
         while (true) {
             int x_world = wartosc_skok * i + offset_poz; // współrzędna w świecie
             if (x_world > worldMaxX()) {
@@ -148,7 +159,7 @@ public class mapa extends javax.swing.JPanel {
         }
         i = 0;
         while (true) {
-            
+
             int y_world = wartosc_skok * i + offset_pion; // współrzędna w świecie
             if (y_world > worldMaxY()) {
                 break;
@@ -165,7 +176,7 @@ public class mapa extends javax.swing.JPanel {
             i++;
         }
     }
-    
+
     private void rysujDroge(Droga droga, Color kolor, Graphics2D g2d) {
         g2d.setColor(kolor);
         int il_pkt = droga.punkty.size();
@@ -173,15 +184,15 @@ public class mapa extends javax.swing.JPanel {
             g2d.drawLine((int) droga.punkty.get(i - 1).X, (int) droga.punkty.get(i - 1).Y, (int) droga.punkty.get(i).X, (int) droga.punkty.get(i).Y);
         }
     }
-    
+
     private void rysujPunkt(double x, double y, Color kolor, Graphics2D g2d) {
-        int r = 100;
+        int r = 40;
         g2d.setColor(kolor);
         x = x - r / 2;
         y = y - r / 2;
         g2d.fillOval((int) x, (int) y, (int) r, (int) r);
     }
-    
+
     private void rysujLinijke(Graphics2D g2d) {
         g2d.setColor(Color.BLACK);
         g2d.setStroke(new BasicStroke(3));
@@ -189,31 +200,31 @@ public class mapa extends javax.swing.JPanel {
         g2d.drawLine(odstep, odstep, this.getWidth() - 2 * odstep, odstep);
         g2d.drawLine(odstep, odstep, odstep, this.getHeight() - 2 * odstep);
     }
-    
+
     private double scale() {
         return skalaProc / 100.0;
     }
-    
+
     private double worldX(int sx) {
         return (sx - widok_x) / scale();
     }
-    
+
     private double worldY(int sy) {
         return (sy - widok_y) / scale();
     }
-    
+
     private double worldMinX() {
         return -widok_x / scale();
     }
-    
+
     private double worldMaxX() {
         return (-widok_x + getWidth()) / scale();
     }
-    
+
     private double worldMinY() {
         return -widok_y / scale();
     }
-    
+
     private double worldMaxY() {
         return (-widok_y + getHeight()) / scale();
     }
@@ -313,10 +324,15 @@ public class mapa extends javax.swing.JPanel {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        DANE.stopDebug();
         System.out.println("STOP");
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    static Color losowyKolor() {
+        var r = ThreadLocalRandom.current();
+        return new Color(r.nextInt(256), r.nextInt(256), r.nextInt(256)); // nowy za każdym wywołaniem
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

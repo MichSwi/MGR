@@ -18,6 +18,7 @@ public class oknoMapy extends javax.swing.JFrame {
     public oknoMapy() {
         initComponents();
         System.out.println("otwarto okno mapy");
+
     }
 
     /**
