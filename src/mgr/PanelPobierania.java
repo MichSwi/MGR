@@ -4,14 +4,25 @@
  */
 package mgr;
 
+import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JTextField;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -27,6 +38,8 @@ public class PanelPobierania extends javax.swing.JPanel {
     private List<TrafficSegment> TrafficFlow = new ArrayList<>();
     private List<Droga> drogi = new ArrayList<>();
     private Map<Long, Punkt> punktyLista = new HashMap<>();
+
+    private Double temp_LAT, temp_LON;
 
     public PanelPobierania() {
         initComponents();
@@ -58,15 +71,15 @@ public class PanelPobierania extends javax.swing.JPanel {
 //        jTextField2.setText("54.1430"); // S   ELBLAG
 //        jTextField3.setText("19.4241"); // E
 //        jTextField4.setText("54.1910"); // N
-
 //        jTextField1.setText("18.5942"); // SW lon = 18.6097 - 0.0155
 //        jTextField2.setText("54.3729"); // SW lat = 54.3819 - 0.0090
 //        jTextField3.setText("18.6252"); // NE lon = 18.6097 + 0.0155
 //        jTextField4.setText("54.3909"); // NE lat = 54.3819 + 0.0090   WRZESZCZ 2km 2km
-        
 //        jTextField1.setText("18.6083"); // lon - 0.0014
 //jTextField2.setText("54.3810"); // lat - 0.0009
-//// NE (+100m)
+    
+
+    //// NE (+100m)
 //jTextField3.setText("18.6111"); // lon + 0.0014
 //jTextField4.setText("54.3828"); // lat + 0.0009  // WRZESZ 100m X 100m
     }
@@ -122,7 +135,12 @@ public class PanelPobierania extends javax.swing.JPanel {
 
         try {
             doWyswietlenia = wpisane.replace(",", ".");
-            double wartosc = Double.parseDouble(doWyswietlenia);
+            double wartosc;
+            if (doWyswietlenia.endsWith(" km")) {
+                wartosc = Double.parseDouble(doWyswietlenia.trim().substring(0, doWyswietlenia.trim().length() - 3));
+            } else {
+                wartosc = Double.parseDouble(doWyswietlenia);
+            }
 
             if (czyWspolzedna) {
                 df = new DecimalFormat("0.000000");
@@ -134,8 +152,11 @@ public class PanelPobierania extends javax.swing.JPanel {
 
             doWyswietlenia = df.format(wartosc);
             doWyswietlenia = wpisane.replace(",", ".");
-            textField.setText(doWyswietlenia + koncowka);
-
+            if (doWyswietlenia.trim().endsWith(" km")) {
+                textField.setText(doWyswietlenia);
+            } else {
+                textField.setText(doWyswietlenia + koncowka);
+            }
         } catch (NumberFormatException e) {
             textField.setText("");
         }
@@ -177,6 +198,16 @@ public class PanelPobierania extends javax.swing.JPanel {
         jCheckBox3 = new javax.swing.JCheckBox();
         jCheckBox4 = new javax.swing.JCheckBox();
         jCheckBox5 = new javax.swing.JCheckBox();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        miasto_input = new javax.swing.JTextField();
+        miasto_info = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
+        wys_input = new javax.swing.JTextField();
+        szer_input = new javax.swing.JTextField();
 
         setAutoscrolls(true);
 
@@ -275,18 +306,140 @@ public class PanelPobierania extends javax.swing.JPanel {
 
         jCheckBox5.setText("text stworz,pobierz czy cos");
 
+        jLabel8.setText("Wpisz nazwę miasta:");
+
+        jButton1.setText("Wyszukaj");
+        jButton1.setEnabled(false);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        miasto_input.setText("Wpisz miasto");
+        miasto_input.setToolTipText("");
+        miasto_input.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                miasto_inputFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                miasto_inputFocusLost(evt);
+            }
+        });
+        miasto_input.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+                miasto_inputCaretPositionChanged(evt);
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+            }
+        });
+        miasto_input.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                miasto_inputKeyReleased(evt);
+            }
+        });
+
+        jLabel9.setText("Wysokość obszaru:");
+
+        jLabel10.setText("Szerokość obszaru:");
+
+        jButton2.setText("Wpisz współrzędne");
+        jButton2.setEnabled(false);
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        wys_input.setEnabled(false);
+        wys_input.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                wys_inputActionPerformed(evt);
+            }
+        });
+        wys_input.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                wys_inputKeyReleased(evt);
+            }
+        });
+
+        szer_input.setEnabled(false);
+        szer_input.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                szer_inputActionPerformed(evt);
+            }
+        });
+        szer_input.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                szer_inputKeyReleased(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(119, 119, 119)
+                        .addComponent(jButton1))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addGap(52, 52, 52)
+                                .addComponent(miasto_input, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(miasto_info, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                            .addComponent(jLabel9)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(wys_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                            .addComponent(jLabel10)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(szer_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(19, 19, 19))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(90, 90, 90)
+                        .addComponent(jButton2)))
+                .addContainerGap(46, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(11, 11, 11)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel8)
+                            .addComponent(miasto_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton1)
+                        .addGap(18, 18, 18)
+                        .addComponent(miasto_info, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel9))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(wys_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(szer_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(26, 26, 26)
+                .addComponent(jButton2)
+                .addContainerGap(59, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(107, 107, 107)
-                .addComponent(jRadioButtonGran)
-                .addGap(38, 38, 38)
-                .addComponent(jRadioButtonpProst)
-                .addGap(28, 28, 28)
-                .addComponent(jRadioButtonOkrag)
-                .addGap(0, 352, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -297,30 +450,29 @@ public class PanelPobierania extends javax.swing.JPanel {
                         .addComponent(jButtonPobierz)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jButton4)
-                .addGap(76, 76, 76))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(45, 45, 45)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(99, 99, 99)
                         .addComponent(jLabel5)
                         .addGap(18, 18, 18)
                         .addComponent(jTextFieldNazwaPliku, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(119, 119, 119)
+                        .addGap(20, 20, 20)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(50, 50, 50)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+                            .addComponent(jTextField1)
                             .addComponent(jTextField2)
                             .addComponent(jTextField3)
-                            .addComponent(jTextField4))))
-                .addGap(87, 87, 87)
+                            .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 125, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jCheckBox5)
                     .addGroup(layout.createSequentialGroup()
@@ -346,6 +498,18 @@ public class PanelPobierania extends javax.swing.JPanel {
                         .addGap(18, 18, 18)
                         .addComponent(jCheckBox3)))
                 .addGap(135, 135, 135))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jButton4)
+                .addGap(76, 76, 76))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(107, 107, 107)
+                .addComponent(jRadioButtonGran)
+                .addGap(38, 38, 38)
+                .addComponent(jRadioButtonpProst)
+                .addGap(28, 28, 28)
+                .addComponent(jRadioButtonOkrag)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -355,61 +519,62 @@ public class PanelPobierania extends javax.swing.JPanel {
                     .addComponent(jRadioButtonGran)
                     .addComponent(jRadioButtonpProst)
                     .addComponent(jRadioButtonOkrag))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(45, 45, 45)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(54, 54, 54)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(49, 49, 49)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabelPobOSM)
                             .addComponent(jCheckBox1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jProgressBarOSMDOWNLOAD, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelPobOSM1)
-                    .addComponent(jCheckBox2))
-                .addGap(1, 1, 1)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jProgressBarOSMREAD, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel3)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addComponent(jProgressBarOSMDOWNLOAD, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(24, 24, 24)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabelPobOSM1)
+                                    .addComponent(jCheckBox2))
+                                .addGap(7, 7, 7)
+                                .addComponent(jProgressBarOSMREAD, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(186, 186, 186)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabelPobTF)
+                                    .addComponent(jCheckBox3)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel1))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel2))
+                                .addGap(38, 38, 38)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(27, 27, 27)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jTextFieldNazwaPliku, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel5))))
+                        .addGap(25, 25, 25)
+                        .addComponent(jProgressBarTFDOWNLOAD, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4)
-                            .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextFieldNazwaPliku, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel5)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(115, 115, 115)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabelPobTF)
-                            .addComponent(jCheckBox3))
-                        .addGap(25, 25, 25)
-                        .addComponent(jProgressBarTFDOWNLOAD, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelPobTF1)
-                    .addComponent(jCheckBox4))
-                .addGap(6, 6, 6)
-                .addComponent(jProgressBarTFREAD, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31)
-                .addComponent(jCheckBox5)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 79, Short.MAX_VALUE)
+                            .addComponent(jLabelPobTF1)
+                            .addComponent(jCheckBox4))
+                        .addGap(6, 6, 6)
+                        .addComponent(jProgressBarTFREAD, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(31, 31, 31)
+                        .addComponent(jCheckBox5)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel7))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(124, 124, 124)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonPobierz)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel6)
@@ -460,9 +625,9 @@ public class PanelPobierania extends javax.swing.JPanel {
     private void jButtonPobierzActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPobierzActionPerformed
         // TODO add your handling code here:
         if (!jTextField1.getText().isEmpty()
-                || !jTextField2.getText().isEmpty()
-                || !jTextField3.getText().isEmpty()
-                || !jTextField4.getText().isEmpty()) {
+                && !jTextField2.getText().isEmpty()
+                && !jTextField3.getText().isEmpty()
+                && !jTextField4.getText().isEmpty()) {
 
             DANE._1_W_LAT = Double.parseDouble(jTextField1.getText());
             DANE._2_S_LON = Double.parseDouble(jTextField2.getText());
@@ -493,6 +658,123 @@ public class PanelPobierania extends javax.swing.JPanel {
         // TODO add your handling code here:
         System.out.println("STOP DEBUG)");
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+
+        String miasto = miasto_input.getText();
+        String url = "https://nominatim.openstreetmap.org/search?format=json&q=" + URLEncoder.encode(miasto, java.nio.charset.StandardCharsets.UTF_8);
+
+        try (InputStream in = new URL(url).openStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+
+            JSONArray arr = new JSONArray(sb.toString());
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject o = arr.getJSONObject(i);
+                if ("city".equals(o.optString("addresstype"))
+                        || "town".equals(o.optString("addresstype"))
+                        || "village".equals(o.optString("addresstype"))) {
+                    this.temp_LAT = Double.parseDouble(o.getString("lat"));
+                    this.temp_LON = Double.parseDouble(o.getString("lon"));
+                    miasto_info.setVisible(true);
+                    miasto_info.setText("Znaleziono: " + o.getString("display_name"));
+                    miasto_info.setForeground(Color.green);
+                    wys_input.setEnabled(true);
+                    szer_input.setEnabled(true);
+
+                    break;
+                } else {
+                    miasto_info.setText("Nie udało się znaleźć \"" + miasto + "\"");
+                    miasto_info.setForeground(Color.RED);
+                    wys_input.setEnabled(false);
+                    szer_input.setEnabled(false);
+                    wys_input.setText("");
+                    szer_input.setText("");
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+
+        jRadioButtonGran.setSelected(true);
+        this.tryb = 1;
+        double szer = Double.parseDouble(szer_input.getText().substring(0, szer_input.getText().length() - 3));
+        double wys = Double.parseDouble(wys_input.getText().substring(0, wys_input.getText().length() - 3));
+        szer = szer * 0.009;
+        wys = wys * 0.009;
+
+        jTextField1.setText(Double.toString((temp_LON - szer / 2)));
+        jTextField2.setText(Double.toString(temp_LAT - wys / 2));
+        jTextField3.setText(Double.toString(temp_LON + szer / 2));
+        jTextField4.setText(Double.toString(temp_LAT + wys / 2));
+
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void wys_inputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wys_inputActionPerformed
+        // TODO add your handling code here:
+        FormatujDane(wys_input, false);
+    }//GEN-LAST:event_wys_inputActionPerformed
+
+    private void szer_inputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_szer_inputActionPerformed
+        // TODO add your handling code here:
+        FormatujDane(szer_input, false);
+
+    }//GEN-LAST:event_szer_inputActionPerformed
+
+    private void miasto_inputFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_miasto_inputFocusGained
+        // TODO add your handling code here:
+
+        if (miasto_input.getText().equals("Wpisz miasto")) {
+            miasto_input.setText("");
+        }
+    }//GEN-LAST:event_miasto_inputFocusGained
+
+    private void miasto_inputFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_miasto_inputFocusLost
+        // TODO add your handling code here:
+        if (miasto_input.getText().isBlank()) {
+            miasto_input.setText("Wpisz miasto");
+        }
+    }//GEN-LAST:event_miasto_inputFocusLost
+
+    private void miasto_inputCaretPositionChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_miasto_inputCaretPositionChanged
+        // TODO add your handling code here:
+        if (miasto_input.getText().isBlank() == false) {
+            jButton1.setEnabled(true);
+        } else {
+            jButton1.setEnabled(false);
+        }
+    }//GEN-LAST:event_miasto_inputCaretPositionChanged
+
+    private void miasto_inputKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_miasto_inputKeyReleased
+        // TODO add your handling code here:
+        if (miasto_input.getText().isBlank() == false) {
+            jButton1.setEnabled(true);
+        } else {
+            jButton1.setEnabled(false);
+        }
+    }//GEN-LAST:event_miasto_inputKeyReleased
+
+    private void wys_inputKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_wys_inputKeyReleased
+        // TODO add your handling code here:
+
+
+    }//GEN-LAST:event_wys_inputKeyReleased
+
+    private void szer_inputKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_szer_inputKeyReleased
+        // TODO add your handling code here:
+
+
+    }//GEN-LAST:event_szer_inputKeyReleased
 
     private void wywolajListenery() {
         jTextField1.addFocusListener(new FocusAdapter() {
@@ -529,10 +811,83 @@ public class PanelPobierania extends javax.swing.JPanel {
                 DANE.nazwaPliku = jTextFieldNazwaPliku.getText().trim();
             }
         });
+        wys_input.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                FormatujDane(wys_input, false);
+            }
+        });
+        szer_input.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                FormatujDane(szer_input, false);
+            }
+        });
+
+        wys_input.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                FormatujDane(wys_input, false);
+
+                if (wys_input.getText().isBlank() == false) {
+
+                    try {
+                        String wys = wys_input.getText().trim().substring(0, wys_input.getText().trim().length() - 3);;
+                        String szer = szer_input.getText().trim().substring(0, szer_input.getText().trim().length() - 3);
+                        if (wys_input.getText().isBlank() == false
+                                && szer_input.getText().isBlank() == false
+                                && Double.parseDouble(wys) > 0
+                                && Double.parseDouble(szer) > 0) {
+                            jButton2.setEnabled(true);
+                        } else {
+                            jButton2.setEnabled(false);
+                        }
+                    } catch (NumberFormatException e2) {
+                        jButton2.setEnabled(false);
+                    }
+                } else {
+                    jButton2.setEnabled(false);
+                }
+            }
+        });
+
+        szer_input.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                FormatujDane(szer_input, false);
+
+                if (szer_input.getText().isBlank() == false) {
+
+                    try {
+                        String wys = wys_input.getText().trim().substring(0, wys_input.getText().trim().length() - 3);;
+                        String szer = szer_input.getText().trim().substring(0, szer_input.getText().trim().length() - 3);
+                        if (wys_input.getText().isBlank() == false
+                                && szer_input.getText().isBlank() == false
+                                && Double.parseDouble(wys) > 0
+                                && Double.parseDouble(szer) > 0) {
+                            jButton2.setEnabled(true);
+                        } else {
+                            jButton2.setEnabled(false);
+                        }
+                    } catch (NumberFormatException e2) {
+                        jButton2.setEnabled(false);
+                    }
+                } else {
+                    jButton2.setEnabled(false);
+                }
+            }
+        });
+        
+        
+        miasto_input.addActionListener(e -> jButton1.doClick());
+        wys_input.addActionListener(e -> jButton2.doClick());
+        szer_input.addActionListener(e -> jButton2.doClick());
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButtonPobierz;
     private javax.swing.JCheckBox jCheckBox1;
@@ -541,16 +896,20 @@ public class PanelPobierania extends javax.swing.JPanel {
     private javax.swing.JCheckBox jCheckBox4;
     private javax.swing.JCheckBox jCheckBox5;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelPobOSM;
     private javax.swing.JLabel jLabelPobOSM1;
     private javax.swing.JLabel jLabelPobTF;
     private javax.swing.JLabel jLabelPobTF1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JProgressBar jProgressBarOSMDOWNLOAD;
     private javax.swing.JProgressBar jProgressBarOSMREAD;
     private javax.swing.JProgressBar jProgressBarTFDOWNLOAD;
@@ -563,5 +922,9 @@ public class PanelPobierania extends javax.swing.JPanel {
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextFieldNazwaPliku;
+    private javax.swing.JLabel miasto_info;
+    private javax.swing.JTextField miasto_input;
+    private javax.swing.JTextField szer_input;
+    private javax.swing.JTextField wys_input;
     // End of variables declaration//GEN-END:variables
 }
