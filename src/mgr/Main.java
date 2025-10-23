@@ -6,8 +6,14 @@ package mgr;
  */
 import com.formdev.flatlaf.FlatDarkLaf;
 import java.awt.Color;
+import java.io.IOException;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Instant;
 
 /**
  *
@@ -41,6 +47,7 @@ public class Main extends javax.swing.JFrame {
         panelPobierania1 = new mgr.PanelPobierania();
         jButton4 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -65,6 +72,13 @@ public class Main extends javax.swing.JFrame {
             }
         });
 
+        jButton2.setText("google test");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -72,16 +86,18 @@ public class Main extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(48, 48, 48)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 100, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(panelPobierania1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(67, 67, 67)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(148, 148, 148)
-                        .addComponent(jButton4)
-                        .addGap(419, 419, 419))
+                        .addComponent(jButton4))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(34, 34, 34)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(419, 419, 419))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -95,8 +111,13 @@ public class Main extends javax.swing.JFrame {
                 .addGap(44, 44, 44))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(panelPobierania1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(panelPobierania1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(264, 264, 264))))
         );
 
         pack();
@@ -112,6 +133,49 @@ public class Main extends javax.swing.JFrame {
         oknoMapy oknoMapy = new oknoMapy();
         oknoMapy.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+
+        String apiKey = "AIzaSyCNCIPxi11dRfssaVUFOu3an-HZjBhcA3U";
+        String departureTime = Instant.now().plusSeconds(120).toString(); // +2 min
+        String jsonBody = """
+    {
+      "origins": [
+        {"waypoint": {"location": {"latLng": {"latitude": 52.2297, "longitude": 21.0122}}}},
+        {"waypoint": {"location": {"latLng": {"latitude": 52.4064, "longitude": 16.9252}}}},
+        {"waypoint": {"location": {"latLng": {"latitude": 50.0614, "longitude": 19.9372}}}}
+      ],
+      "destinations": [
+        {"waypoint": {"location": {"latLng": {"latitude": 52.2300, "longitude": 21.0150}}}},
+        {"waypoint": {"location": {"latLng": {"latitude": 52.4100, "longitude": 16.9400}}}},
+        {"waypoint": {"location": {"latLng": {"latitude": 50.0700, "longitude": 19.9500}}}}
+      ],
+      "travelMode": "DRIVE",
+      "routingPreference": "TRAFFIC_AWARE",
+      "departureTime": "%s"
+    }
+    """.formatted(departureTime);
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix"))
+                .header("Content-Type", "application/json")
+                .header("X-Goog-FieldMask", "*")
+                .header("X-Goog-Api-Key", apiKey)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        // sync (prosto); możesz też użyć sendAsync, by nie blokować GUI
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.statusCode());
+            System.out.println(response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -150,6 +214,7 @@ public class Main extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private mgr.PanelPobierania panelPobierania1;

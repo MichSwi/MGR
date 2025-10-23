@@ -25,15 +25,15 @@ public class DANE {
         for (int i = 0; i <= drogi.size(); i++) {
             // iteruje po reszcie drog
             for (int pozostale = i + 1; pozostale <= drogi.size() - 1; pozostale++) {
-                System.out.println("droga bazowa:" + i + " sprawdzam: " + pozostale);
+//                System.out.println("droga bazowa:" + i + " sprawdzam: " + pozostale);
                 if (drogi.get(i).pkt_start.ID == drogi.get(pozostale).pkt_start.ID || drogi.get(i).pkt_start.ID == drogi.get(pozostale).pkt_koniec.ID) {
                     drogi.get(i).polaczenia_ID.add(drogi.get(pozostale).ID);
                     drogi.get(pozostale).polaczenia_ID.add(drogi.get(i).ID);
-                    System.out.println(" DODAŁEM ");
+//                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
                 } else if (drogi.get(i).pkt_koniec.ID == drogi.get(pozostale).pkt_start.ID || drogi.get(i).pkt_koniec.ID == drogi.get(pozostale).pkt_koniec.ID) {
                     drogi.get(i).polaczenia_ID.add(drogi.get(pozostale).ID);
                     drogi.get(pozostale).polaczenia_ID.add(drogi.get(i).ID);
-                    System.out.println(" DODAŁEM ");
+//                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
                 }
             }
         }

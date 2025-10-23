@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -98,18 +97,25 @@ public class mapa extends javax.swing.JPanel {
         try {
             rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
             for (Droga d : drogi) {
-                rysujDroge(d, losowyKolor(), g2d_zawartosc);
-//                for (Punkt pkt : d.punkty){
-//                    rysujPunkt(pkt.X, pkt.Y, czerw_przezr, g2d_zawartosc);
-//                }
-            }
-
-            for (TrafficSegment TF : DANE.ruchUliczny) {
-                for (Punkt pkt : TF.points) {
-                    pkt.ustawXY();
-                    rysujPunkt(pkt.X, pkt.Y, czerw_przezr, g2d_zawartosc);
+                if (d.maxspeed != -1) {
+                    rysujDroge(d, Color.GREEN, g2d_zawartosc);
+                } else {
+                    rysujDroge(d, Color.RED, g2d_zawartosc);
+                }
+                
+                for (Punkt p : d.punkty){
+                    if(p.tags.get("crossing")!=null){
+                        rysujPunkt(p.X,p.Y,czerw_przezr,g2d_zawartosc);
+                    }
                 }
             }
+            
+//            for (TrafficSegment TF : DANE.ruchUliczny) {
+//                for (Punkt pkt : TF.points) {
+//                    pkt.ustawXY();
+//                    rysujPunkt(pkt.X, pkt.Y, czerw_przezr, g2d_zawartosc);
+//                }
+//            }
         } finally {
             // wyrzucamy kopię, przywracamy oryginalny kontekst dla Swinga
             g2d_zawartosc.dispose();

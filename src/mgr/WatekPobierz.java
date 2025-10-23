@@ -320,8 +320,11 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                         System.out.println("Znaleziono oneway=true!");
                         biezaca.jednokierunkowa = true; // jeśli masz takie pole
                     }
-                    if ("name".equals(tag.getAttribute("k"))){
+                    if ("name".equals(tag.getAttribute("k"))) {
                         biezaca.nazwa = tag.getAttribute("v");
+                    }
+                    if ("maxspeed".equals(tag.getAttribute("k"))) {
+                        biezaca.maxspeed = Integer.parseInt(tag.getAttribute("v"));
                     }
                 }
 
@@ -385,8 +388,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         if (tryb == 2) {
             double lat = DANE._1_W_LAT; //polnoc poludnie
             double lon = DANE._2_S_LON; //wschod zachod
-            double offset_LON = DANE._3_E_SZER_R;
-            double offset_LAT = DANE._4_N_WYS;
+            double offset_LON = DANE._3_E_SZER_R / 2;
+            double offset_LAT = DANE._4_N_WYS / 2;
 
             // Wyliczenie granic prostokąta
             minLat = lat - offset_LAT;
@@ -475,7 +478,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     private void czytajTF() throws IOException, JSONException {
         int ilosc = 0;
         //String content = Files.readString(Path.of(filePath));
-        String content = Files.readString(Paths.get("POBRANE_PLIKI/" + DANE.nazwaPliku+".xml"));
+        String content = Files.readString(Paths.get("POBRANE_PLIKI/" + DANE.nazwaPliku + ".xml"));
         JSONObject root = new JSONObject(content);
         JSONArray results = root.getJSONArray("results");
         int ilosc_wszystkich = results.length();
