@@ -17,7 +17,10 @@ public class DANE {
     public static List<Boolean> coZaznaczone = new ArrayList<>();
     public static String nazwaPliku;
     public static List<Droga> drogi = new ArrayList<>();
-    public static List<TrafficSegment> ruchUliczny;
+    public static List<TrafficSegment> ruchUliczny = new ArrayList<>();
+    public static Punkt punkStartowyAlgorytmu = new Punkt();
+    public static Punkt punkKoncowyAlgorytmu = new Punkt();
+    
 
     public static void ustawPolaczenia() {
         // biore droge
@@ -53,13 +56,17 @@ public class DANE {
     }
 
     public static void ustawRuchUliczny() {
-        for (Droga dr : drogi) {
-            for (TrafficSegment TF : ruchUliczny) {
-                if (dr.nazwa.equals(TF.street)) {
+        int ilosc_dodanego_ruchu=0;
+        
+        for (TrafficSegment TF : ruchUliczny) {
+            for (Droga dr : drogi){
+                if (TF.street.equals(dr.nazwa)){
                     dr.ruchUliczny = TF;
+                    ilosc_dodanego_ruchu++;
                 }
             }
-        }
+        }        
+        System.out.println("dodano info u ruchu ulicznym:"+ilosc_dodanego_ruchu);
     }
 
     public static void stopDebug() {

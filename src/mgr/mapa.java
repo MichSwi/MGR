@@ -4,10 +4,15 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import static java.lang.Math.abs;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class mapa extends javax.swing.JPanel {
+
+    public Punkt ZaznaczonyPunkt;
+    public int clickX;
+    public int clickY;
 
     private int skalaProc = 100;
     private double widok_x = 30;
@@ -96,20 +101,29 @@ public class mapa extends javax.swing.JPanel {
 
         try {
             rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
+            if (ZaznaczonyPunkt != null) {
+                zaznaczPunkt(g2d_zawartosc, ZaznaczonyPunkt);
+            }
+
             for (Droga d : drogi) {
-                if (d.maxspeed != -1) {
-                    rysujDroge(d, Color.GREEN, g2d_zawartosc);
+//                if (d.maxspeed != -1) {
+//                    rysujDroge(d, Color.GREEN, g2d_zawartosc);
+//                } else {
+//                    rysujDroge(d, Color.RED, g2d_zawartosc);
+//                }
+                  if (d.ruchUliczny!=null){
+                      rysujDroge(d, Color.GREEN, g2d_zawartosc);
                 } else {
                     rysujDroge(d, Color.RED, g2d_zawartosc);
-                }
-                
-                for (Punkt p : d.punkty){
-                    if(p.tags.get("crossing")!=null){
-                        rysujPunkt(p.X,p.Y,czerw_przezr,g2d_zawartosc);
+                  }
+
+                for (Punkt p : d.punkty) {
+                    if (p.tags.get("crossing") != null) {
+                        rysujPunkt(p.X, p.Y, czerw_przezr, g2d_zawartosc);
                     }
                 }
             }
-            
+
 //            for (TrafficSegment TF : DANE.ruchUliczny) {
 //                for (Punkt pkt : TF.points) {
 //                    pkt.ustawXY();
@@ -124,12 +138,15 @@ public class mapa extends javax.swing.JPanel {
         }
     }
 
+    private void zaznaczPunkt(Graphics2D g2d_zawartosc, Punkt pkt) {
+        rysujPunkt(pkt.X, pkt.Y, losowyKolor(), g2d_zawartosc);
+    }
+
     private void rysujPodzialke(Graphics2D g2d_podzialka_poz, Graphics2D g2d_podzialka_pion) {
         int ilosc_podzialek_poz = 8;
         int ilosc_podzialek_pion = (int) (ilosc_podzialek_poz * this.getHeight() / this.getWidth()) + 1;
 
         int[] dopuszczalneSkoki = {10, 20, 50, 100, 200, 250, 500, 750, 1000, 2000, 2500, 5000};
-
         int wartosc_skok_surowa = (int) Math.abs(worldMaxX() - worldMinX()) / ilosc_podzialek_poz;
 
         int wartosc_skok = dopuszczalneSkoki[0]; // domyślna
@@ -249,9 +266,22 @@ public class mapa extends javax.swing.JPanel {
         jButton3 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         skala_label = new javax.swing.JLabel();
+        infoKlik = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        infoX = new javax.swing.JLabel();
+        infoY = new javax.swing.JLabel();
+        infoUlica = new javax.swing.JLabel();
+        CZYHERE = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
 
         jButton1.setText("jButton1");
         jButton1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                formMouseClicked(evt);
+            }
+        });
 
         reset_widoku_button.setText("RESET WIDOKU");
         reset_widoku_button.addActionListener(new java.awt.event.ActionListener() {
@@ -291,6 +321,60 @@ public class mapa extends javax.swing.JPanel {
                 .addContainerGap(8, Short.MAX_VALUE))
         );
 
+        jLabel1.setText("Info o kliku");
+
+        infoX.setText("X:");
+
+        infoY.setText("Y:");
+
+        infoUlica.setText("Ulica:");
+
+        CZYHERE.setText("czy ma HERE");
+
+        javax.swing.GroupLayout infoKlikLayout = new javax.swing.GroupLayout(infoKlik);
+        infoKlik.setLayout(infoKlikLayout);
+        infoKlikLayout.setHorizontalGroup(
+            infoKlikLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(infoKlikLayout.createSequentialGroup()
+                .addGroup(infoKlikLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(infoKlikLayout.createSequentialGroup()
+                        .addGap(78, 78, 78)
+                        .addComponent(jLabel1))
+                    .addGroup(infoKlikLayout.createSequentialGroup()
+                        .addGap(16, 16, 16)
+                        .addGroup(infoKlikLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(infoX)
+                            .addGroup(infoKlikLayout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addGroup(infoKlikLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(infoUlica)
+                                    .addComponent(infoY)
+                                    .addComponent(CZYHERE))))))
+                .addContainerGap(135, Short.MAX_VALUE))
+        );
+        infoKlikLayout.setVerticalGroup(
+            infoKlikLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(infoKlikLayout.createSequentialGroup()
+                .addGap(28, 28, 28)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(infoX)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(infoY)
+                .addGap(18, 18, 18)
+                .addComponent(infoUlica)
+                .addGap(28, 28, 28)
+                .addComponent(CZYHERE)
+                .addContainerGap(55, Short.MAX_VALUE))
+        );
+
+        jButton2.setText("ukryj");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -305,12 +389,22 @@ public class mapa extends javax.swing.JPanel {
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jButton3)
-                        .addGap(36, 36, 36))))
+                        .addGap(36, 36, 36))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(infoKlik, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(15, 15, 15))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jButton2)
+                        .addGap(118, 118, 118))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(678, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(jButton2)
+                .addGap(12, 12, 12)
+                .addComponent(infoKlik, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 521, Short.MAX_VALUE)
                 .addComponent(jButton3)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -335,14 +429,65 @@ public class mapa extends javax.swing.JPanel {
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
+        // TODO add your handling code here:
+        this.clickX = (int) worldX(evt.getX());
+        this.clickY = (int) worldY(evt.getY());
+
+        infoX.setText("X: " + clickX);
+        infoY.setText("Y: " + clickY);
+
+        for (Droga dr : DANE.drogi) {
+            if (abs(dr.pkt_start.X - clickX) < 20 && abs(dr.pkt_start.Y - clickY) < 20) {
+
+                this.ZaznaczonyPunkt = dr.pkt_start;
+
+                infoUlica.setText("Ulica: " + dr.nazwa);
+                repaint();
+                return;
+
+            } else if (abs(dr.pkt_koniec.X - clickX) < 20 && abs(dr.pkt_koniec.Y - clickY) < 20) {
+                this.ZaznaczonyPunkt = dr.pkt_koniec;
+
+                infoUlica.setText("Ulica: " + dr.nazwa);
+                repaint();
+                return;
+            }
+        }
+
+        this.ZaznaczonyPunkt = null;
+        infoUlica.setText("Ulica: " + "-");
+
+        
+        CZYHERE.setText("ma");
+        repaint();
+    }//GEN-LAST:event_formMouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        infoKlik.setVisible(!infoKlik.isVisible());
+        if (infoKlik.isVisible()) {
+            jButton2.setText("Ukryj");
+        } else {
+            jButton2.setText("Pokaz");
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     static Color losowyKolor() {
         var r = ThreadLocalRandom.current();
         return new Color(r.nextInt(256), r.nextInt(256), r.nextInt(256)); // nowy za każdym wywołaniem
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel CZYHERE;
+    private javax.swing.JPanel infoKlik;
+    private javax.swing.JLabel infoUlica;
+    private javax.swing.JLabel infoX;
+    private javax.swing.JLabel infoY;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton reset_widoku_button;
     private javax.swing.JLabel skala_label;

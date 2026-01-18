@@ -44,7 +44,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
     private static final String API_KEY = "opXIV-5dVqM7Ia_DQmr9L2giM4hKSk07FwlE7zi2_h0";
 
-    private List<TrafficSegment> TrafficFlow;
     private Map<Long, Punkt> punktyLista;
     private JProgressBar pasekPostepuTF;
     private JProgressBar pasekPostepuOSM;
@@ -57,17 +56,18 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     private List<Droga> ways = new ArrayList<>();
 
     //czytanie TF
-    private List<TrafficSegment> ruchUliczny;
+    private List<TrafficSegment> ruchUliczny = new ArrayList<>();
 
+                infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._2_S_LON, DANE._1_W_LAT, tryb);
+    
     public WatekPobierz(
-            List<TrafficSegment> TrafficFlow,
+
             List<Droga> drogi,
             Map<Long, Punkt> punktyLista,
             JProgressBar pasekPostepuOSM, JProgressBar pasekPostepuTF,
             JProgressBar pasekPostepuCzytajOSM, JProgressBar pasekPostepuCzytajTF,
             int tryb) {
 
-        this.TrafficFlow = TrafficFlow;
         this.punktyLista = punktyLista;
         this.pasekPostepuOSM = pasekPostepuOSM;
         this.pasekPostepuTF = pasekPostepuTF;
@@ -86,6 +86,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
         //czytanie OSM
         if (DANE.coZaznaczone.get(1)) {
+            info.wczytajPlik(DANE.nazwaPliku + ".txt");
             czytajOSM();
         }
 
@@ -101,7 +102,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
         //zapisz dodatkowe info
         if (DANE.coZaznaczone.get(4)) {
-            infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._2_S_LON, DANE._1_W_LAT, tryb);
             info.zapiszPlik();
         }
 
@@ -154,12 +154,14 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
         DANE.drogi.clear();
         DANE.drogi.addAll(ways);
+        
+        DANE.ruchUliczny.clear();
+        DANE.ruchUliczny.addAll(this.ruchUliczny);
 
-//        TrafficFlow.clear();
-//        TrafficFlow.addAll(ruchUliczny);
         DANE.ustawOdleglosci();
         DANE.ustawStartKoniec();
         DANE.ustawPolaczenia();
+        DANE.ustawRuchUliczny();
 
         System.out.println("DONE");
     }
@@ -482,7 +484,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         JSONObject root = new JSONObject(content);
         JSONArray results = root.getJSONArray("results");
         int ilosc_wszystkich = results.length();
-        List<TrafficSegment> out = new ArrayList<>();
         for (int i = 0; i < results.length(); i++) {
             JSONObject obj = results.getJSONObject(i);
             JSONObject loc = obj.getJSONObject("location");
@@ -502,11 +503,9 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             ilosc++;
             publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 4));
 
-            out.add(new TrafficSegment(street, id, length, funcClass,
+            ruchUliczny.add(new TrafficSegment(street, id, length, funcClass,
                     speed, freeFlow, jam, conf, points));
         }
-        //return out;
-        DANE.ruchUliczny = out;
     }
 
     private List<Punkt> parseShape(JSONObject loc) {

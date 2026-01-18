@@ -4,6 +4,7 @@
  */
 package mgr;
 
+import static java.lang.Math.abs;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,9 @@ public class Punkt {
         this.LON = lon;
     }
 
+    public Punkt() {
+    }
+
     public void ustawXY() {
 
         double szer_mapy = 1000;
@@ -50,4 +54,14 @@ public class Punkt {
     private double mapuj(double x, double in_min, double in_max, double out_min, double out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
+
+    public String getNazwa() {
+        for (Droga dr : DANE.drogi) {
+            if (this.equals(dr.pkt_start) || this.equals(dr.pkt_koniec)) {
+                return dr.nazwa;
+            }
+        }
+        return "blad";
+    }
+
 }

@@ -11,15 +11,13 @@ package mgr;
 public class oknoMapy extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(oknoMapy.class.getName());
-
-    /**
-     * Creates new form oknoMapy
-     */
+    
     public oknoMapy() {
         initComponents();
         System.out.println("otwarto okno mapy");
-
     }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -31,14 +29,139 @@ public class oknoMapy extends javax.swing.JFrame {
     private void initComponents() {
 
         mapa1 = new mgr.mapa();
+        jPanel1 = new javax.swing.JPanel();
+        LabelPktStart = new javax.swing.JLabel();
+        LabelPktEnd = new javax.swing.JLabel();
+        wybierzPktStart = new javax.swing.JButton();
+        wybierzPktKoniec = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         mapa1.setPreferredSize(new java.awt.Dimension(1000, 675));
-        getContentPane().add(mapa1, java.awt.BorderLayout.CENTER);
+
+        jPanel1.setBackground(new java.awt.Color(204, 255, 255));
+
+        LabelPktStart.setForeground(new java.awt.Color(0, 0, 0));
+        LabelPktStart.setText("start");
+
+        LabelPktEnd.setForeground(new java.awt.Color(0, 0, 0));
+        LabelPktEnd.setText("end");
+
+        wybierzPktStart.setText("Wybierz punkt początkowy:");
+        wybierzPktStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                wybierzPktStartActionPerformed(evt);
+            }
+        });
+
+        wybierzPktKoniec.setText("Wybierz punkt końcowy:");
+        wybierzPktKoniec.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                wybierzPktKoniecActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(wybierzPktStart)
+                    .addComponent(wybierzPktKoniec))
+                .addGap(37, 37, 37)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(LabelPktEnd)
+                    .addComponent(LabelPktStart))
+                .addContainerGap(182, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(11, 11, 11)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(LabelPktStart)
+                    .addComponent(wybierzPktStart))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(LabelPktEnd)
+                    .addComponent(wybierzPktKoniec))
+                .addGap(15, 15, 15))
+        );
+
+        jButton1.setText("start ALGGEN");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mapa1, javax.swing.GroupLayout.PREFERRED_SIZE, 795, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(26, 26, 26)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(89, 89, 89)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(279, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(mapa1, javax.swing.GroupLayout.PREFERRED_SIZE, 616, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(78, Short.MAX_VALUE))
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void wybierzPktKoniecActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wybierzPktKoniecActionPerformed
+        // TODO add your handling code here:
+        
+        Punkt zaznaczony=mapa1.ZaznaczonyPunkt;
+        DANE.punkKoncowyAlgorytmu=zaznaczony;
+        
+        this.LabelPktEnd.setText(zaznaczony.getNazwa());
+        
+        if (DANE.punkKoncowyAlgorytmu.equals(DANE.punkStartowyAlgorytmu)){
+            DANE.punkStartowyAlgorytmu=new Punkt();
+            this.LabelPktStart.setText("");
+        }
+    }//GEN-LAST:event_wybierzPktKoniecActionPerformed
+
+    private void wybierzPktStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wybierzPktStartActionPerformed
+        // TODO add your handling code here:
+        
+        Punkt zaznaczony=mapa1.ZaznaczonyPunkt;
+        DANE.punkStartowyAlgorytmu=zaznaczony;
+        
+        this.LabelPktStart.setText(zaznaczony.getNazwa());
+        
+        if (DANE.punkStartowyAlgorytmu.equals(DANE.punkKoncowyAlgorytmu)){
+            DANE.punkKoncowyAlgorytmu=new Punkt();
+            this.LabelPktEnd.setText("");
+        }
+    }//GEN-LAST:event_wybierzPktStartActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+         ALGGEN alg = new ALGGEN();
+         alg.inicjalizacja();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -66,6 +189,12 @@ public class oknoMapy extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel LabelPktEnd;
+    private javax.swing.JLabel LabelPktStart;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JPanel jPanel1;
     private mgr.mapa mapa1;
+    private javax.swing.JButton wybierzPktKoniec;
+    private javax.swing.JButton wybierzPktStart;
     // End of variables declaration//GEN-END:variables
 }

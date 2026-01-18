@@ -71,7 +71,7 @@ public class infoTXT {
     }
 
     public void zapiszPlik() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter("POBRANE_PLIKI\\" + nazwaPliku))) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("POBRANE_PLIKI\\" + nazwaPliku + ".txt"))) {
             pw.println(nazwaPliku);
             String godzina = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
             String data = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));

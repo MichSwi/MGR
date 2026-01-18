@@ -23,8 +23,6 @@ public class Droga {
     public List<Punkt> punkty;
     public LinkedList<Long> polaczenia_ID = new LinkedList<>();
     public boolean jednokierunkowa=false;
-    private Punkt start;
-    private Punkt koniec;
     Map<String, String> tags;
     public Punkt pkt_start, pkt_koniec;
     public TrafficSegment ruchUliczny;
@@ -37,8 +35,6 @@ public class Droga {
         this.punkty = punkty;
         this.polaczenia_ID = polaczenia_ID;
         this.jednokierunkowa = jednokierunkowa;
-        this.start = start;
-        this.koniec = koniec;
         tags = new HashMap<>();
 
     }

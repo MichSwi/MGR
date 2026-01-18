@@ -640,7 +640,7 @@ public class PanelPobierania extends javax.swing.JPanel {
             DANE.coZaznaczone.add(jCheckBox4.isSelected());
             DANE.coZaznaczone.add(jCheckBox5.isSelected());
 
-            WatekPobierz watekPobierania = new WatekPobierz(TrafficFlow, drogi, punktyLista,
+            WatekPobierz watekPobierania = new WatekPobierz(drogi, punktyLista,
                     jProgressBarOSMDOWNLOAD, jProgressBarTFDOWNLOAD,
                     jProgressBarOSMREAD, jProgressBarTFREAD,
                     tryb);
@@ -824,32 +824,32 @@ public class PanelPobierania extends javax.swing.JPanel {
             }
         });
 
-        wys_input.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                FormatujDane(wys_input, false);
-
-                if (wys_input.getText().isBlank() == false) {
-
-                    try {
-                        String wys = wys_input.getText().trim().substring(0, wys_input.getText().trim().length() - 3);;
-                        String szer = szer_input.getText().trim().substring(0, szer_input.getText().trim().length() - 3);
-                        if (wys_input.getText().isBlank() == false
-                                && szer_input.getText().isBlank() == false
-                                && Double.parseDouble(wys) > 0
-                                && Double.parseDouble(szer) > 0) {
-                            jButton2.setEnabled(true);
-                        } else {
-                            jButton2.setEnabled(false);
-                        }
-                    } catch (NumberFormatException e2) {
-                        jButton2.setEnabled(false);
-                    }
-                } else {
-                    jButton2.setEnabled(false);
-                }
-            }
-        });
+//        wys_input.addKeyListener(new KeyAdapter() {
+//            @Override
+//            public void keyReleased(KeyEvent e) {
+//                FormatujDane(wys_input, false);
+//
+//                if (wys_input.getText().isBlank() == false) {
+//
+//                    try {
+//                        String wys = wys_input.getText().trim().substring(0, wys_input.getText().trim().length() - 3);;
+//                        String szer = szer_input.getText().trim().substring(0, szer_input.getText().trim().length() - 3);
+//                        if (wys_input.getText().isBlank() == false
+//                                && szer_input.getText().isBlank() == false
+//                                && Double.parseDouble(wys) > 0
+//                                && Double.parseDouble(szer) > 0) {
+//                            jButton2.setEnabled(true);
+//                        } else {
+//                            jButton2.setEnabled(false);
+//                        }
+//                    } catch (NumberFormatException e2) {
+//                        jButton2.setEnabled(false);
+//                    }
+//                } else {
+//                    jButton2.setEnabled(false);
+//                }
+//            }
+//        });
 
         szer_input.addKeyListener(new KeyAdapter() {
             @Override
