@@ -56,12 +56,35 @@ public class Punkt {
     }
 
     public String getNazwa() {
-        for (Droga dr : DANE.drogi) {
+        
+        
+        for (Long id : DANE.drogi.keySet()){
+            Droga dr = DANE.drogi.get(id);
             if (this.equals(dr.pkt_start) || this.equals(dr.pkt_koniec)) {
                 return dr.nazwa;
             }
         }
         return "blad";
+    }
+    
+    public Droga getDroga(){
+        for (Long id : DANE.drogi.keySet()){
+            Droga dr = DANE.drogi.get(id);
+            if (dr.punkty.contains(this)){
+                return dr;
+            }
+        }
+        return null;
+    }
+    
+    public Long getDrogaID(){
+        for (Long id : DANE.drogi.keySet()){
+            Droga dr = DANE.drogi.get(id);
+            if (dr.punkty.contains(this)){
+                return dr.ID;
+            }
+        }
+        return null;
     }
 
 }

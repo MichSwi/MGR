@@ -53,7 +53,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
     //czytanie osm
     private Map<Long, Punkt> allNodes = new HashMap<>();
-    private List<Droga> ways = new ArrayList<>();
 
     //czytanie TF
     private List<TrafficSegment> ruchUliczny = new ArrayList<>();
@@ -151,9 +150,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
         punktyLista.clear();
         punktyLista.putAll(allNodes);
-
-        DANE.drogi.clear();
-        DANE.drogi.addAll(ways);
         
         DANE.ruchUliczny.clear();
         DANE.ruchUliczny.addAll(this.ruchUliczny);
@@ -346,7 +342,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                         if (!biezaca.punkty.isEmpty()) {
                             biezaca.punkty.add(wezel);
                             wezel.ilosc_uzyc++;
-                            ways.add(biezaca);
+                            
+                            DANE.drogi.put(biezaca.ID, biezaca);
                             ilosc++;
                             publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
                         }
@@ -367,7 +364,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 }
 
                 if (!biezaca.punkty.isEmpty()) {
-                    ways.add(biezaca);
+                    DANE.drogi.put(biezaca.ID, biezaca);
                     ilosc++;
                     publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
                 }

@@ -2,14 +2,21 @@ package mgr;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ALGGEN {
 
-    private List<Droga> drogi;
+    private Map<Long, Droga> drogi = DANE.drogi;
+
     private Punkt pktStart;
     private Punkt pktKoniec;
     private Droga drogaStart;
     private Droga drogaKoniec;
+
+    private List<Droga> SCIEZKA = new ArrayList<>();
+    private Droga AKTUALNY_ETAP;
+    private List<Long> UZYTE_DROGI = new ArrayList<>();
 
     public ALGGEN() {
         this.drogi = DANE.drogi;
@@ -20,7 +27,9 @@ public class ALGGEN {
     }
 
     private void znajdzDrogiPoczatkowe() {
-        for (Droga dr : drogi) {
+        for (Long ID : drogi.keySet()) {
+            Droga dr = drogi.get(ID);
+//        for (Droga dr : drogi) {
             if (pktStart.equals(dr.pkt_start) || pktStart.equals(dr.pkt_koniec)) {
                 drogaStart = dr;
             }
@@ -71,7 +80,8 @@ public class ALGGEN {
             }
 
             //szukam wylosowanej drogi i ja dodaje do sciezki, zmieniam etap
-            for (Droga dr : drogi) {
+            for (Long id : drogi.keySet()) {
+                Droga dr = drogi.get(id);
                 if (dr.ID == wybrane_id) {
                     sciezka.add(dr);
                     etap = dr;
@@ -112,15 +122,72 @@ public class ALGGEN {
                 System.out.println(sciezka);
                 break;
             }
-            
-            
-            
+
         }
         System.out.println("zakonczono petle glowna");
     }
 
+    private void restart() {
+        AKTUALNY_ETAP = this.drogaStart;
+        SCIEZKA.clear();
+        UZYTE_DROGI.clear();
+    }
+
+    private void dodaj_kolejna_sciezke() {
+        List<Long> mozliwe_kierunki = AKTUALNY_ETAP.polaczenia_ID;
+        while (true) {
+            int random = new java.util.Random().nextInt(mozliwe_kierunki.size());
+            Long wylosowane_id = AKTUALNY_ETAP.polaczenia_ID.get(random);
+            if (!UZYTE_DROGI.contains(wylosowane_id)) {
+                // wylosowany nowy
+                System.out.println("========WYLOSOWANY NOWY=====");
+
+                for (Long id : drogi.keySet()) {
+                    Droga dr = drogi.get(id);
+                    if (dr.ID == wylosowane_id) {
+                        SCIEZKA.add(dr);
+                        AKTUALNY_ETAP = dr;
+                        break;
+                    }
+                }
+                break;
+            } else if (UZYTE_DROGI.containsAll(mozliwe_kierunki)) {
+                // wszystkie byly juz wylosowane
+                System.out.println("wszystkie byly juz wylosowane, restart");
+                restart();
+                break;
+            }
+
+            // jesli zawiera wylosowana -> losuj dalej
+        }
+    }
+
     public void start() {
-        // tu uruchom algorytm genetyczny
-        // np. inicjalizacja populacji itd.
+        UZYTE_DROGI.clear();
+        SCIEZKA.clear();
+        AKTUALNY_ETAP = this.drogaStart;
+
+        int iter = 0;
+        while (true) {
+
+            dodaj_kolejna_sciezke();
+
+            System.out.println("Dlugosc sciezki: " + SCIEZKA.size() + " Aktualny etap: " + AKTUALNY_ETAP.nazwa + " Szukany: " + this.drogaKoniec.nazwa);
+            if (AKTUALNY_ETAP.equals(this.drogaKoniec)) {
+                System.out.println("WYZNACZONA SCIEZKA:");
+                for (int i = 0; i < SCIEZKA.size(); i++) {
+                    System.out.println(SCIEZKA.get(i).nazwa);
+                }
+                break;
+            }
+
+            if (SCIEZKA.size() > 10) {
+                System.out.println("restart bo za dluga");
+                restart();
+            }
+
+            iter++;
+            System.out.println("iteracja glownej petli: " + iter);
+        }
     }
 }
