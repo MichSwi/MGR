@@ -153,6 +153,8 @@
                                       <Component id="infoUlica" min="-2" max="-2" attributes="0"/>
                                       <Component id="infoY" min="-2" max="-2" attributes="0"/>
                                       <Component id="CZYHERE" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="infoID" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="infoNetBeansID" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
@@ -173,9 +175,13 @@
                   <Component id="infoY" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="infoUlica" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="infoID" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="infoNetBeansID" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="16" max="32767" attributes="0"/>
                   <Component id="CZYHERE" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="55" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -204,6 +210,16 @@
         <Component class="javax.swing.JLabel" name="CZYHERE">
           <Properties>
             <Property name="text" type="java.lang.String" value="czy ma HERE"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="infoID">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="ID: "/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="infoNetBeansID">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Netbeans ID:"/>
           </Properties>
         </Component>
       </SubComponents>

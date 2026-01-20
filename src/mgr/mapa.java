@@ -277,6 +277,8 @@ public class mapa extends javax.swing.JPanel {
         infoY = new javax.swing.JLabel();
         infoUlica = new javax.swing.JLabel();
         CZYHERE = new javax.swing.JLabel();
+        infoID = new javax.swing.JLabel();
+        infoNetBeansID = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
 
         jButton1.setText("jButton1");
@@ -336,6 +338,10 @@ public class mapa extends javax.swing.JPanel {
 
         CZYHERE.setText("czy ma HERE");
 
+        infoID.setText("ID: ");
+
+        infoNetBeansID.setText("Netbeans ID:");
+
         javax.swing.GroupLayout infoKlikLayout = new javax.swing.GroupLayout(infoKlik);
         infoKlik.setLayout(infoKlikLayout);
         infoKlikLayout.setHorizontalGroup(
@@ -354,7 +360,9 @@ public class mapa extends javax.swing.JPanel {
                                 .addGroup(infoKlikLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(infoUlica)
                                     .addComponent(infoY)
-                                    .addComponent(CZYHERE))))))
+                                    .addComponent(CZYHERE)
+                                    .addComponent(infoID)
+                                    .addComponent(infoNetBeansID))))))
                 .addContainerGap(135, Short.MAX_VALUE))
         );
         infoKlikLayout.setVerticalGroup(
@@ -368,9 +376,13 @@ public class mapa extends javax.swing.JPanel {
                 .addComponent(infoY)
                 .addGap(18, 18, 18)
                 .addComponent(infoUlica)
-                .addGap(28, 28, 28)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(infoID)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(infoNetBeansID)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
                 .addComponent(CZYHERE)
-                .addContainerGap(55, Short.MAX_VALUE))
+                .addGap(17, 17, 17))
         );
 
         jButton2.setText("ukryj");
@@ -450,6 +462,8 @@ public class mapa extends javax.swing.JPanel {
                 this.ZaznaczonyPunkt = dr.pkt_start;
 
                 infoUlica.setText("Ulica: " + dr.nazwa);
+                infoID.setText("ID: " + dr.ID);
+                infoNetBeansID.setText("NetBeansID: " + dr);
                 repaint();
                 return;
 
@@ -457,6 +471,8 @@ public class mapa extends javax.swing.JPanel {
                 this.ZaznaczonyPunkt = dr.pkt_koniec;
 
                 infoUlica.setText("Ulica: " + dr.nazwa);
+                infoID.setText("ID: " + dr.ID);
+                infoNetBeansID.setText("NetBeansID: " + dr);
                 repaint();
                 return;
             }
@@ -464,7 +480,8 @@ public class mapa extends javax.swing.JPanel {
 
         this.ZaznaczonyPunkt = null;
         infoUlica.setText("Ulica: " + "-");
-
+        infoID.setText("ID: ");
+        infoNetBeansID.setText("NetBeansID: ");
         CZYHERE.setText("ma");
         repaint();
     }//GEN-LAST:event_formMouseClicked
@@ -486,7 +503,9 @@ public class mapa extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel CZYHERE;
+    private javax.swing.JLabel infoID;
     private javax.swing.JPanel infoKlik;
+    private javax.swing.JLabel infoNetBeansID;
     private javax.swing.JLabel infoUlica;
     private javax.swing.JLabel infoX;
     private javax.swing.JLabel infoY;

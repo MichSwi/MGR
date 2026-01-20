@@ -13,11 +13,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import javax.swing.*;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.json.JSONArray;
@@ -57,10 +58,9 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     //czytanie TF
     private List<TrafficSegment> ruchUliczny = new ArrayList<>();
 
-                infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._2_S_LON, DANE._1_W_LAT, tryb);
-    
-    public WatekPobierz(
+    infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._2_S_LON, DANE._1_W_LAT, tryb);
 
+    public WatekPobierz(
             List<Droga> drogi,
             Map<Long, Punkt> punktyLista,
             JProgressBar pasekPostepuOSM, JProgressBar pasekPostepuTF,
@@ -150,7 +150,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
         punktyLista.clear();
         punktyLista.putAll(allNodes);
-        
+
         DANE.ruchUliczny.clear();
         DANE.ruchUliczny.addAll(this.ruchUliczny);
 
@@ -299,7 +299,25 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
             System.out.println("➡ Wszystkich node: " + allNodes.size());
 
-//          ===== WAYS =====
+            // ===== policz, ile różnych WAY używa danego node =====
+            Map<Long, Integer> nodeWayLicznik = new HashMap<>();
+
+            for (int i = 0; i < wList.getLength(); i++) {
+                Element elemWay = (Element) wList.item(i);
+                NodeList nds = elemWay.getElementsByTagName("nd");
+
+                Set<Long> unikalneRefWWay = new HashSet<>();
+
+                for (int j = 0; j < nds.getLength(); j++) {
+                    Element nd = (Element) nds.item(j);
+                    long ref = Long.parseLong(nd.getAttribute("ref"));
+                    if (unikalneRefWWay.add(ref)) {
+                        nodeWayLicznik.merge(ref, 1, Integer::sum);
+                    }
+                }
+            }
+
+// ===== WAYS budowanie segmentow i ciecie w wezlach =====
             for (int i = 0; i < wList.getLength(); i++) {
                 int licznikSegmentow = 0;
                 Element elemWay = (Element) wList.item(i);
@@ -314,9 +332,9 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 for (int k = 0; k < tagi.getLength(); k++) {
                     Element tag = (Element) tagi.item(k);
                     biezaca.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
+
                     if ("oneway".equals(tag.getAttribute("k")) && "true".equalsIgnoreCase(tag.getAttribute("v"))) {
-                        System.out.println("Znaleziono oneway=true!");
-                        biezaca.jednokierunkowa = true; // jeśli masz takie pole
+                        biezaca.jednokierunkowa = true;
                     }
                     if ("name".equals(tag.getAttribute("k"))) {
                         biezaca.nazwa = tag.getAttribute("v");
@@ -338,17 +356,21 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
                     wezel.ustawXY();
 
-                    if (wezel.ilosc_uzyc >= 1 && j != 0) {
+                    boolean czyWspolnyNode = nodeWayLicznik.getOrDefault(ref, 0) >= 2;
+                    boolean czyPoczatekLubKoniec = (j != 0 && j != nds.getLength() - 1);
+
+                    // ciecie na wezle wspolnym jesli to punk nie koniec i nie poczatek
+                    if (czyWspolnyNode && czyPoczatekLubKoniec) {
+
+                        // zamkniecie starego segmentu
                         if (!biezaca.punkty.isEmpty()) {
                             biezaca.punkty.add(wezel);
-                            wezel.ilosc_uzyc++;
-                            
                             DANE.drogi.put(biezaca.ID, biezaca);
                             ilosc++;
                             publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
                         }
 
-                        // nowy segment z NOWYM ID
+                        // nowy segment (węzeł jako POCZĄTEK)
                         licznikSegmentow++;
                         long idSegNowy = idOSM * 100L + licznikSegmentow;
                         Droga nowa = new Droga(idSegNowy);
@@ -356,19 +378,90 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
                         biezaca = nowa;
                         biezaca.punkty.add(wezel);
-                        wezel.ilosc_uzyc++;
+
                     } else {
                         biezaca.punkty.add(wezel);
-                        wezel.ilosc_uzyc++;
                     }
                 }
 
+                // zapisz ostatni segment
                 if (!biezaca.punkty.isEmpty()) {
                     DANE.drogi.put(biezaca.ID, biezaca);
                     ilosc++;
                     publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
                 }
             }
+
+            ////          ===== WAYS =====
+//            for (int i = 0; i < wList.getLength(); i++) {
+//                int licznikSegmentow = 0;
+//                Element elemWay = (Element) wList.item(i);
+//                long idOSM = Long.parseLong(elemWay.getAttribute("id"));
+//
+//                // pierwszy segment
+//                long idSeg = idOSM * 100L + licznikSegmentow;
+//                Droga biezaca = new Droga(idSeg);
+//
+//                // tagi
+//                NodeList tagi = elemWay.getElementsByTagName("tag");
+//                for (int k = 0; k < tagi.getLength(); k++) {
+//                    Element tag = (Element) tagi.item(k);
+//                    biezaca.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
+//                    if ("oneway".equals(tag.getAttribute("k")) && "true".equalsIgnoreCase(tag.getAttribute("v"))) {
+//                        System.out.println("Znaleziono oneway=true!");
+//                        biezaca.jednokierunkowa = true; // jeśli masz takie pole
+//                    }
+//                    if ("name".equals(tag.getAttribute("k"))) {
+//                        biezaca.nazwa = tag.getAttribute("v");
+//                    }
+//                    if ("maxspeed".equals(tag.getAttribute("k"))) {
+//                        biezaca.maxspeed = Integer.parseInt(tag.getAttribute("v"));
+//                    }
+//                }
+//
+//                // punkty
+//                NodeList nds = elemWay.getElementsByTagName("nd");
+//                for (int j = 0; j < nds.getLength(); j++) {
+//                    Element nd = (Element) nds.item(j);
+//                    long ref = Long.parseLong(nd.getAttribute("ref"));
+//                    Punkt wezel = allNodes.get(ref);
+//                    if (wezel == null) {
+//                        continue;
+//                    }
+//
+//                    wezel.ustawXY();
+//
+//                    if (wezel.ilosc_uzyc >= 1 && j != 0) {
+//                        if (!biezaca.punkty.isEmpty()) {
+//                            biezaca.punkty.add(wezel);
+//                            wezel.ilosc_uzyc++;
+//                            
+//                            DANE.drogi.put(biezaca.ID, biezaca);
+//                            ilosc++;
+//                            publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
+//                        }
+//
+//                        // nowy segment z NOWYM ID
+//                        licznikSegmentow++;
+//                        long idSegNowy = idOSM * 100L + licznikSegmentow;
+//                        Droga nowa = new Droga(idSegNowy);
+//                        nowa.tags.putAll(biezaca.tags);
+//
+//                        biezaca = nowa;
+//                        biezaca.punkty.add(wezel);
+//                        wezel.ilosc_uzyc++;
+//                    } else {
+//                        biezaca.punkty.add(wezel);
+//                        wezel.ilosc_uzyc++;
+//                    }
+//                }
+//
+//                if (!biezaca.punkty.isEmpty()) {
+//                    DANE.drogi.put(biezaca.ID, biezaca);
+//                    ilosc++;
+//                    publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
+//                }
+//            }
             System.out.println("============");
         } catch (Exception e) {
             e.printStackTrace();
