@@ -6,7 +6,6 @@ package mgr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +23,8 @@ public class DANE {
     public static Punkt punkStartowyAlgorytmu = new Punkt();
     public static Punkt punkKoncowyAlgorytmu = new Punkt();
 
+    public static List<Droga> ALG_GEN_SCIEZKA = new ArrayList<>();
+
     public static void ustawPolaczenia() {
 //
 //        System.out.println("WSZYSTKIE: " + drogi.size());
@@ -35,7 +36,7 @@ public class DANE {
 //                if (drogi.get(i).pkt_start.ID == drogi.get(pozostale).pkt_start.ID || drogi.get(i).pkt_start.ID == drogi.get(pozostale).pkt_koniec.ID) {
 //                    drogi.get(i).polaczenia_ID.add(drogi.get(pozostale).ID);
 //                    drogi.get(pozostale).polaczenia_ID.add(drogi.get(i).ID);
-////                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
+        ////                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
 //
 //                    //jesli ID punktu KONCOWEGO bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
 //                } else if (drogi.get(i).pkt_koniec.ID == drogi.get(pozostale).pkt_start.ID || drogi.get(i).pkt_koniec.ID == drogi.get(pozostale).pkt_koniec.ID) {
@@ -47,25 +48,49 @@ public class DANE {
 //        }
         System.out.println("WSZYSTKIE: " + drogi.size());
         List<Long> ListaKluczy = new ArrayList<>(drogi.keySet());
+        Long pierwsza_pocz, pierwsza_kon, druga_pocz, druga_kon;
+
         // iteruje po kluczach od poczatku
         for (int i = 0; i < ListaKluczy.size(); i++) {
-            
-            // iteruje po reszcie kluczy
-            for (int pozostale=i+1; pozostale<=drogi.size() - 1; pozostale++){
-                                //jesli ID punktu startowego bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
-                if (drogi.get(ListaKluczy.get(i)).pkt_start.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID || drogi.get(ListaKluczy.get(i)).pkt_start.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID) {
-                    drogi.get(ListaKluczy.get(i)).polaczenia_ID.add(drogi.get(ListaKluczy.get(pozostale)).ID);
-                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_ID.add(drogi.get(ListaKluczy.get(i)).ID);
-//                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
 
-                    //jesli ID punktu KONCOWEGO bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
-                } else if (drogi.get(ListaKluczy.get(i)).pkt_koniec.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID || drogi.get(ListaKluczy.get(i)).pkt_koniec.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID) {
-                    drogi.get(ListaKluczy.get(i)).polaczenia_ID.add(drogi.get(ListaKluczy.get(pozostale)).ID);
-                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_ID.add(drogi.get(ListaKluczy.get(i)).ID);
-//                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
+            // iteruje po reszcie kluczy
+//            for (int pozostale=i+1; pozostale<=drogi.size() - 1; pozostale++){
+//                    //jesli ID punktu startowego bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
+//                if (drogi.get(ListaKluczy.get(i)).pkt_start.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID || drogi.get(ListaKluczy.get(i)).pkt_start.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID) {
+//                    drogi.get(ListaKluczy.get(i)).polaczenia_ID.add(drogi.get(ListaKluczy.get(pozostale)).ID);
+//                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_ID.add(drogi.get(ListaKluczy.get(i)).ID);
+            ////                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
+//
+//                    //jesli ID punktu KONCOWEGO bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
+//                } else if (drogi.get(ListaKluczy.get(i)).pkt_koniec.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID || drogi.get(ListaKluczy.get(i)).pkt_koniec.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID) {
+//                    drogi.get(ListaKluczy.get(i)).polaczenia_ID.add(drogi.get(ListaKluczy.get(pozostale)).ID);
+//                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_ID.add(drogi.get(ListaKluczy.get(i)).ID);
+////                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
+//                }
+//            }
+                pierwsza_pocz = drogi.get(ListaKluczy.get(i)).pkt_start.ID;
+            pierwsza_kon = drogi.get(ListaKluczy.get(i)).pkt_koniec.ID;
+            for (int pozostale = i + 1; pozostale <= drogi.size() - 1; pozostale++) {
+                druga_pocz = drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID;
+                druga_kon = drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID;
+                if (pierwsza_pocz.equals(druga_pocz)) {
+                    drogi.get(ListaKluczy.get(i)).polaczenia_poczatek_ID.add(ListaKluczy.get(pozostale));
+                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_poczatek_ID.add(ListaKluczy.get(i));
+                } else if (pierwsza_pocz.equals(druga_kon)) {
+                    drogi.get(ListaKluczy.get(i)).polaczenia_poczatek_ID.add(ListaKluczy.get(pozostale));
+                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_koniec_ID.add(ListaKluczy.get(i));
+
+                } else if (pierwsza_kon.equals(druga_pocz)) {
+                    drogi.get(ListaKluczy.get(i)).polaczenia_koniec_ID.add(ListaKluczy.get(pozostale));
+                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_poczatek_ID.add(ListaKluczy.get(i));
+
+                } else if (pierwsza_kon.equals(druga_kon)) {
+                    drogi.get(ListaKluczy.get(i)).polaczenia_koniec_ID.add(ListaKluczy.get(pozostale));
+                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_koniec_ID.add(ListaKluczy.get(i));
                 }
             }
-        } 
+
+        }
     }
 
     public static void ustawOdleglosci() {
@@ -119,5 +144,4 @@ public class DANE {
         System.out.println("stop debug");
     }
 
-    
 }

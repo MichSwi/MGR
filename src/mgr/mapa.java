@@ -17,6 +17,7 @@ public class mapa extends javax.swing.JPanel {
     public Punkt ZaznaczonyPunkt;
     public int clickX;
     public int clickY;
+    public Droga ZaznaczonaDroga;
 
     private int skalaProc = 100;
     private double widok_x = 30;
@@ -24,7 +25,7 @@ public class mapa extends javax.swing.JPanel {
     private int prevMouseX, prevMouseY;
     private Map<Long, Droga> drogi = DANE.drogi;
 
-    Color czerw_przezr = new Color(255, 0, 0, 44); // czerwony, 25% widoczności
+    Color czerw_przezr = new Color(255, 0, 0, 44); // czerwony, 17% widoczności
 
     public mapa() {
         initComponents();
@@ -105,9 +106,6 @@ public class mapa extends javax.swing.JPanel {
 
         try {
             rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
-            if (ZaznaczonyPunkt != null) {
-                zaznaczPunkt(g2d_zawartosc, ZaznaczonyPunkt);
-            }
 
 //            for (Droga d : drogi) {
             for (Long ID : drogi.keySet()) {
@@ -119,13 +117,27 @@ public class mapa extends javax.swing.JPanel {
                 if (drogi.get(ID).ruchUliczny != null) {
                     rysujDroge(drogi.get(ID), Color.GREEN, g2d_zawartosc);
                 } else {
-                    rysujDroge(drogi.get(ID), Color.RED, g2d_zawartosc);
+                    rysujDroge(drogi.get(ID), Color.ORANGE, g2d_zawartosc);
                 }
 
                 for (Punkt p : drogi.get(ID).punkty) {
                     if (p.tags.get("crossing") != null) {
-                        rysujPunkt(p.X, p.Y, czerw_przezr, g2d_zawartosc);
+                        rysujPunkt(p.X, p.Y, 10, czerw_przezr, g2d_zawartosc);
                     }
+                }
+
+                for (Punkt p : drogi.get(ID).punkty) {
+                    rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
+                }
+
+                if (!DANE.ALG_GEN_SCIEZKA.isEmpty()) {
+                    for (Droga dr : DANE.ALG_GEN_SCIEZKA) {
+                        rysujDroge(dr, czerw_przezr, g2d_zawartosc);
+                    }
+                }
+                rysuj_start_poczatek_drogi(g2d_zawartosc, drogi.get(ID));
+                if (ZaznaczonyPunkt != null) {
+                    zaznaczPunkt_I_DROGE(g2d_zawartosc, ZaznaczonyPunkt);
                 }
             }
 
@@ -143,8 +155,14 @@ public class mapa extends javax.swing.JPanel {
         }
     }
 
-    private void zaznaczPunkt(Graphics2D g2d_zawartosc, Punkt pkt) {
-        rysujPunkt(pkt.X, pkt.Y, losowyKolor(), g2d_zawartosc);
+    private void rysuj_start_poczatek_drogi(Graphics2D g2d_zawartosc, Droga droga) {
+        rysujPunkt(droga.pkt_koniec.X, droga.pkt_koniec.Y, 8, new Color(182, 5, 252, 25), g2d_zawartosc);
+        rysujPunkt(droga.pkt_start.X, droga.pkt_start.Y, 6, new Color(5, 174, 252, 25), g2d_zawartosc);
+    }
+
+    private void zaznaczPunkt_I_DROGE(Graphics2D g2d_zawartosc, Punkt pkt) {
+        rysujPunkt(pkt.X, pkt.Y, 20, losowyKolor(), g2d_zawartosc);
+        rysujDroge(this.ZaznaczonaDroga, losowyKolor(), g2d_zawartosc);
     }
 
     private void rysujPodzialke(Graphics2D g2d_podzialka_poz, Graphics2D g2d_podzialka_pion) {
@@ -206,15 +224,14 @@ public class mapa extends javax.swing.JPanel {
     }
 
     private void rysujDroge(Droga droga, Color kolor, Graphics2D g2d) {
-        g2d.setColor(losowyKolor());
+        g2d.setColor(kolor);
         int il_pkt = droga.punkty.size();
         for (int i = 1; i < il_pkt; i++) {
             g2d.drawLine((int) droga.punkty.get(i - 1).X, (int) droga.punkty.get(i - 1).Y, (int) droga.punkty.get(i).X, (int) droga.punkty.get(i).Y);
         }
     }
 
-    private void rysujPunkt(double x, double y, Color kolor, Graphics2D g2d) {
-        int r = 40;
+    private void rysujPunkt(double x, double y, int r, Color kolor, Graphics2D g2d) {
         g2d.setColor(kolor);
         x = x - r / 2;
         y = y - r / 2;
@@ -454,22 +471,23 @@ public class mapa extends javax.swing.JPanel {
         infoX.setText("X: " + clickX);
         infoY.setText("Y: " + clickY);
 
+        int promien_lapania_zaznaczenia = 3;
+
         for (Long ID : drogi.keySet()) {
-//        for (Droga dr : DANE.drogi) {
             Droga dr = drogi.get(ID);
-            if (abs(dr.pkt_start.X - clickX) < 20 && abs(dr.pkt_start.Y - clickY) < 20) {
+            if (abs(dr.pkt_start.X - clickX) < promien_lapania_zaznaczenia && abs(dr.pkt_start.Y - clickY) < promien_lapania_zaznaczenia) {
 
                 this.ZaznaczonyPunkt = dr.pkt_start;
-
+                this.ZaznaczonaDroga = dr;
                 infoUlica.setText("Ulica: " + dr.nazwa);
                 infoID.setText("ID: " + dr.ID);
                 infoNetBeansID.setText("NetBeansID: " + dr);
                 repaint();
                 return;
 
-            } else if (abs(dr.pkt_koniec.X - clickX) < 20 && abs(dr.pkt_koniec.Y - clickY) < 20) {
+            } else if (abs(dr.pkt_koniec.X - clickX) < promien_lapania_zaznaczenia && abs(dr.pkt_koniec.Y - clickY) < promien_lapania_zaznaczenia) {
                 this.ZaznaczonyPunkt = dr.pkt_koniec;
-
+                this.ZaznaczonaDroga = dr;
                 infoUlica.setText("Ulica: " + dr.nazwa);
                 infoID.setText("ID: " + dr.ID);
                 infoNetBeansID.setText("NetBeansID: " + dr);
@@ -479,6 +497,7 @@ public class mapa extends javax.swing.JPanel {
         }
 
         this.ZaznaczonyPunkt = null;
+        this.ZaznaczonaDroga = null;
         infoUlica.setText("Ulica: " + "-");
         infoID.setText("ID: ");
         infoNetBeansID.setText("NetBeansID: ");
