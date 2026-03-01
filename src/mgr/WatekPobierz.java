@@ -158,6 +158,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         DANE.ustawStartKoniec();
         DANE.ustawPolaczenia();
         DANE.ustawRuchUliczny();
+        DANE.budujWezlyZDrog();
 
         System.out.println("DONE");
     }
@@ -391,82 +392,10 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
                 }
             }
-
-            ////          ===== WAYS =====
-//            for (int i = 0; i < wList.getLength(); i++) {
-//                int licznikSegmentow = 0;
-//                Element elemWay = (Element) wList.item(i);
-//                long idOSM = Long.parseLong(elemWay.getAttribute("id"));
-//
-//                // pierwszy segment
-//                long idSeg = idOSM * 100L + licznikSegmentow;
-//                Droga biezaca = new Droga(idSeg);
-//
-//                // tagi
-//                NodeList tagi = elemWay.getElementsByTagName("tag");
-//                for (int k = 0; k < tagi.getLength(); k++) {
-//                    Element tag = (Element) tagi.item(k);
-//                    biezaca.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
-//                    if ("oneway".equals(tag.getAttribute("k")) && "true".equalsIgnoreCase(tag.getAttribute("v"))) {
-//                        System.out.println("Znaleziono oneway=true!");
-//                        biezaca.jednokierunkowa = true; // jeśli masz takie pole
-//                    }
-//                    if ("name".equals(tag.getAttribute("k"))) {
-//                        biezaca.nazwa = tag.getAttribute("v");
-//                    }
-//                    if ("maxspeed".equals(tag.getAttribute("k"))) {
-//                        biezaca.maxspeed = Integer.parseInt(tag.getAttribute("v"));
-//                    }
-//                }
-//
-//                // punkty
-//                NodeList nds = elemWay.getElementsByTagName("nd");
-//                for (int j = 0; j < nds.getLength(); j++) {
-//                    Element nd = (Element) nds.item(j);
-//                    long ref = Long.parseLong(nd.getAttribute("ref"));
-//                    Punkt wezel = allNodes.get(ref);
-//                    if (wezel == null) {
-//                        continue;
-//                    }
-//
-//                    wezel.ustawXY();
-//
-//                    if (wezel.ilosc_uzyc >= 1 && j != 0) {
-//                        if (!biezaca.punkty.isEmpty()) {
-//                            biezaca.punkty.add(wezel);
-//                            wezel.ilosc_uzyc++;
-//                            
-//                            DANE.drogi.put(biezaca.ID, biezaca);
-//                            ilosc++;
-//                            publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
-//                        }
-//
-//                        // nowy segment z NOWYM ID
-//                        licznikSegmentow++;
-//                        long idSegNowy = idOSM * 100L + licznikSegmentow;
-//                        Droga nowa = new Droga(idSegNowy);
-//                        nowa.tags.putAll(biezaca.tags);
-//
-//                        biezaca = nowa;
-//                        biezaca.punkty.add(wezel);
-//                        wezel.ilosc_uzyc++;
-//                    } else {
-//                        biezaca.punkty.add(wezel);
-//                        wezel.ilosc_uzyc++;
-//                    }
-//                }
-//
-//                if (!biezaca.punkty.isEmpty()) {
-//                    DANE.drogi.put(biezaca.ID, biezaca);
-//                    ilosc++;
-//                    publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
-//                }
-//            }
             System.out.println("============");
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     private void pobierzTF() {

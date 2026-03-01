@@ -2,106 +2,162 @@ package mgr;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ALGGEN {
 
+    private int max_dlugosc_sciezki = 20;
+    private int max_iteracji = 1000;
+
     private Map<Long, Droga> drogi = DANE.drogi;
 
-    private Punkt pktStart;
-    private Punkt pktKoniec;
-    private Droga drogaStart;
-    private Droga drogaKoniec;
+    private Wezel pktStart;
+    private Wezel pktKoniec;
+    private Map<Long, Wezel> wezly = new HashMap<>();
+    private List<Droga> SCIEZKA_DROG = new ArrayList<>();
 
-    private List<Droga> SCIEZKA = new ArrayList<>();
-    private Droga AKTUALNY_ETAP;
-    private List<Long> UZYTE_DROGI = new ArrayList<>();
-
+    ;
     public ALGGEN() {
         this.drogi = DANE.drogi;
-        this.pktStart = DANE.punkStartowyAlgorytmu;
-        this.pktKoniec = DANE.punkKoncowyAlgorytmu;
-
-        znajdzDrogiPoczatkowe();
+        this.pktStart = DANE.wezelStartowyAlgorytmu;
+        this.pktKoniec = DANE.wezelKoncowyAlgorytmu;
+        this.wezly = DANE.wezly;
     }
 
-    private void znajdzDrogiPoczatkowe() {
-        for (Long ID : drogi.keySet()) {
-            Droga dr = drogi.get(ID);
-//        for (Droga dr : drogi) {
-            if (pktStart.equals(dr.pkt_start) || pktStart.equals(dr.pkt_koniec)) {
-                drogaStart = dr;
-            }
-            if (pktKoniec.equals(dr.pkt_start) || pktKoniec.equals(dr.pkt_koniec)) {
-                drogaKoniec = dr;
-            }
+    private int randomInt(int min, int max) {
+        if (max < min) {
+            throw new IllegalArgumentException("max < min");
         }
+        int zakres = max - min + 1;
+        return (int) (Math.random() * zakres) + min;
     }
 
-    private void restart() {
-        AKTUALNY_ETAP = this.drogaStart;
-        SCIEZKA.clear();
-        UZYTE_DROGI.clear();
+    public void startAlg() {
+        this.SCIEZKA_DROG = znajdz_losowa_sciezke();
+        DANE.ALG_GEN_SCIEZKA = this.SCIEZKA_DROG;
     }
 
-    private void dodaj_kolejna_sciezke() {
-        List<Long> mozliwe_kierunki = AKTUALNY_ETAP.polaczenia_ID;
-        while (true) {
-            int random = new java.util.Random().nextInt(mozliwe_kierunki.size());
-            Long wylosowane_id = AKTUALNY_ETAP.polaczenia_ID.get(random);
-            if (!UZYTE_DROGI.contains(wylosowane_id)) {
-                // wylosowany nowy
-                System.out.println("========WYLOSOWANY NOWY=====");
-
-                for (Long id : drogi.keySet()) {
-                    Droga dr = drogi.get(id);
-                    if (dr.ID == wylosowane_id) {
-                        SCIEZKA.add(dr);
-                        AKTUALNY_ETAP = dr;
-                        break;
-                    }
-                }
-                break;
-            } else if (UZYTE_DROGI.containsAll(mozliwe_kierunki)) {
-                // wszystkie byly juz wylosowane
-                System.out.println("wszystkie byly juz wylosowane, restart");
-                restart();
-                break;
-            }
-
-            // jesli zawiera wylosowana -> losuj dalej
+    private List<Droga> znajdz_losowa_sciezke() {
+        if (this.pktStart == null || this.pktKoniec == null) {
+            throw new IllegalArgumentException("brak pkt_start lub pkt_koniec dla znajdz_losowa_sciezke");
         }
-    }
 
-    public void start() {
-        UZYTE_DROGI.clear();
-        SCIEZKA.clear();
-        AKTUALNY_ETAP = this.drogaStart;
-
+        // ta funkcja szuka losowej drogi
+        List<Droga> sciezka = new ArrayList<>();
+        Set<Long> uzyte_wezly = new HashSet<>();
+        List<Long> mozliwe_kolejne_wezly;
+        Long wylosowany_wezel_id;
         int iter = 0;
+
+        Wezel aktualny_wezel = this.pktStart;
         while (true) {
-
-            dodaj_kolejna_sciezke();
-
-            System.out.println("Dlugosc sciezki: " + SCIEZKA.size() + " Aktualny etap: " + AKTUALNY_ETAP.nazwa + " Szukany: " + this.drogaKoniec.nazwa);
-            if (AKTUALNY_ETAP.equals(this.drogaKoniec)) {
-                System.out.println("WYZNACZONA SCIEZKA:");
-                for (int i = 0; i < SCIEZKA.size(); i++) {
-                    System.out.println(SCIEZKA.get(i).nazwa+" "+SCIEZKA.get(i).ID);
-                }
-                break;
+            // znalezc mozliwe kolejne wezly
+            mozliwe_kolejne_wezly = mozliwe_kolejne_wezly(aktualny_wezel, uzyte_wezly);
+            if (mozliwe_kolejne_wezly.isEmpty()) {
+                // jesli brak mozliwych kierunkow -> restart
+                aktualny_wezel = this.pktStart;
+                uzyte_wezly.clear();
+                sciezka.clear();
+                continue;
             }
 
-            if (SCIEZKA.size() > 10) {
-                System.out.println("restart bo za dluga");
-                restart();
+            // losowanie drogi z mozliwych
+            wylosowany_wezel_id = wylosuj_wezel_id(mozliwe_kolejne_wezly);
+
+            // dodaj droge do sciezki
+            dodaj_droge_do_sciezki(aktualny_wezel, wezly.get(wylosowany_wezel_id), sciezka);
+            if (sciezka.size() > max_dlugosc_sciezki) {
+                aktualny_wezel = this.pktStart;
+                uzyte_wezly.clear();
+                sciezka.clear();
+                continue;
+            }
+
+            // dodaj wezel do uzytych
+            dodaj_wezel_do_uzytych(uzyte_wezly, aktualny_wezel);
+
+            // aktualizuj aktualny wezel
+            aktualny_wezel = aktualizuj_wezel(aktualny_wezel, sciezka);
+
+            // sprawdz czy koniec algorytmu
+            if (aktualny_wezel.ID == pktKoniec.ID) {
+                System.out.println("Znalezniono sciezke!");
+                System.out.println("sciezka drog: " + sciezka);
+                return sciezka;
             }
 
             iter++;
-            System.out.println("iteracja glownej petli: " + iter);
+            if (iter > max_iteracji) {
+                aktualny_wezel = this.pktStart;
+                uzyte_wezly.clear();
+                sciezka.clear();
+                System.out.println("petla WHILE przekroczyl 1000 iteracji");
+                return null;
+            }
         }
-        DANE.ALG_GEN_SCIEZKA = this.SCIEZKA;
-        System.out.println("Zakonczono");
-        
+    }
+
+    private void dodaj_droge_do_sciezki(Wezel akt_wez, Wezel new_wez, List<Droga> sciezka) {
+        for (Long idDrogi : akt_wez.drogiIDs) {
+            if (drogi.get(idDrogi).pkt_start.ID == akt_wez.ID && drogi.get(idDrogi).pkt_koniec.ID == new_wez.ID
+                    || drogi.get(idDrogi).pkt_koniec.ID == akt_wez.ID && drogi.get(idDrogi).pkt_start.ID == new_wez.ID) {
+                sciezka.add(drogi.get(idDrogi));
+                return;
+            }
+        }
+        throw new IllegalArgumentException("nie znaleziono drogi w funkcji dodaj_droge_do_sciezki, nie znalezniono zadnej drogi pomiedzy dwoma wezlami");
+    }
+
+//    private void restart() {
+//        // restart, szukam nowej
+//        this.AKTUALNY_WEZEL = this.pktStart;
+//        this.UZYTE_WEZLY.clear();
+//        this.SCIEZKA_DROG.clear();
+//    }
+    private List<Long> mozliwe_kolejne_wezly(Wezel wezel, Set<Long> uzyte_wez) {
+        List<Long> mozliwe_kierunki = new ArrayList<>();
+
+        // algorytm skacze od wezla do welza
+        // mam pierwszy, losuje polaczenie, do kolekcji dodaje wezel z wylosowanej drogi, ale inny niz aktualny
+        for (Long idDrogi : wezel.drogiIDs) {
+            Droga droga = drogi.get(idDrogi);
+            if (droga.pkt_start.ID == wezel.ID) {
+                mozliwe_kierunki.add(droga.pkt_koniec.ID);
+            } else if (droga.pkt_koniec.ID == wezel.ID) {
+                mozliwe_kierunki.add(droga.pkt_start.ID);
+            }
+        }
+
+        // usuwanie uzytych wezlow aby nie zawracac
+        mozliwe_kierunki.removeAll(uzyte_wez);
+
+        return mozliwe_kierunki;
+    }
+
+    private Long wylosuj_wezel_id(List<Long> mozliwe_kolejne_wezly) {
+        if (mozliwe_kolejne_wezly.isEmpty()) {
+            throw new IllegalArgumentException("mozliwe_kolejne_wezly puste a funkcja 'wylosuj_wezel' chce wylosowac cos");
+        }
+        return mozliwe_kolejne_wezly.get(randomInt(0, mozliwe_kolejne_wezly.size() - 1));
+    }
+
+    private void dodaj_wezel_do_uzytych(Set<Long> uzyte, Wezel akt_wez) {
+        uzyte.add(akt_wez.ID);
+    }
+
+    private Wezel aktualizuj_wezel(Wezel akt_wez, List<Droga> sciezka) {
+        Droga ostatnia_droga = sciezka.getLast();
+        Wezel new_wez = new Wezel();
+        if (akt_wez.ID == ostatnia_droga.pkt_start.ID) {
+            new_wez = wezly.get(ostatnia_droga.pkt_koniec.ID);
+        } else if (akt_wez.ID == ostatnia_droga.pkt_koniec.ID) {
+            new_wez = wezly.get(ostatnia_droga.pkt_start.ID);
+        } else {
+            throw new IllegalArgumentException("Funkcja 'aktualizuj_wezel()' nie znalazla przeciwnego konca ostatnio dodanej sciezki");
+        }
+        return new_wez;
     }
 }

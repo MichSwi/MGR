@@ -132,13 +132,13 @@ public class oknoMapy extends javax.swing.JFrame {
     private void wybierzPktKoniecActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wybierzPktKoniecActionPerformed
         // TODO add your handling code here:
         
-        Punkt zaznaczony=mapa1.ZaznaczonyPunkt;
-        DANE.punkKoncowyAlgorytmu=zaznaczony;
+        Wezel zaznaczony=mapa1.ZaznaczonyWezel;
+        DANE.wezelKoncowyAlgorytmu=zaznaczony;
         
-        this.LabelPktEnd.setText(zaznaczony.getNazwa());
+        this.LabelPktEnd.setText(""+zaznaczony.ID);
         
-        if (DANE.punkKoncowyAlgorytmu.equals(DANE.punkStartowyAlgorytmu)){
-            DANE.punkStartowyAlgorytmu=new Punkt();
+        if (DANE.wezelKoncowyAlgorytmu.ID == DANE.wezelStartowyAlgorytmu.ID){
+            DANE.wezelStartowyAlgorytmu=new Wezel();
             this.LabelPktStart.setText("");
         }
     }//GEN-LAST:event_wybierzPktKoniecActionPerformed
@@ -146,13 +146,13 @@ public class oknoMapy extends javax.swing.JFrame {
     private void wybierzPktStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wybierzPktStartActionPerformed
         // TODO add your handling code here:
         
-        Punkt zaznaczony=mapa1.ZaznaczonyPunkt;
-        DANE.punkStartowyAlgorytmu=zaznaczony;
+        Wezel zaznaczony=mapa1.ZaznaczonyWezel;
+        DANE.wezelStartowyAlgorytmu=zaznaczony;
         
-        this.LabelPktStart.setText(zaznaczony.getNazwa());
+        this.LabelPktStart.setText(zaznaczony.ID+"");
         
-        if (DANE.punkStartowyAlgorytmu.equals(DANE.punkKoncowyAlgorytmu)){
-            DANE.punkKoncowyAlgorytmu=new Punkt();
+        if (DANE.wezelKoncowyAlgorytmu.ID == DANE.wezelStartowyAlgorytmu.ID){
+            DANE.wezelKoncowyAlgorytmu=new Wezel();
             this.LabelPktEnd.setText("");
         }
     }//GEN-LAST:event_wybierzPktStartActionPerformed
@@ -160,7 +160,10 @@ public class oknoMapy extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
          ALGGEN alg = new ALGGEN();
-         alg.start();
+         alg.startAlg();
+         
+         mapa1.repaint();
+         
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

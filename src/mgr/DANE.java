@@ -20,54 +20,20 @@ public class DANE {
     public static String nazwaPliku;
     public static Map<Long, Droga> drogi = new HashMap<>();
     public static List<TrafficSegment> ruchUliczny = new ArrayList<>();
-    public static Punkt punkStartowyAlgorytmu = new Punkt();
-    public static Punkt punkKoncowyAlgorytmu = new Punkt();
+    public static Wezel wezelStartowyAlgorytmu = new Wezel();
+    public static Wezel wezelKoncowyAlgorytmu = new Wezel();
+    public static Map<Long, Wezel> wezly = new HashMap<>();
 
     public static List<Droga> ALG_GEN_SCIEZKA = new ArrayList<>();
 
     public static void ustawPolaczenia() {
-//
-//        System.out.println("WSZYSTKIE: " + drogi.size());
-//        // biore droge
-//        for (int i = 0; i <= drogi.size(); i++) {
-//            // iteruje po reszcie drog
-//            for (int pozostale = i + 1; pozostale <= drogi.size() - 1; pozostale++) {
-//                //jesli ID punktu startowego bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
-//                if (drogi.get(i).pkt_start.ID == drogi.get(pozostale).pkt_start.ID || drogi.get(i).pkt_start.ID == drogi.get(pozostale).pkt_koniec.ID) {
-//                    drogi.get(i).polaczenia_ID.add(drogi.get(pozostale).ID);
-//                    drogi.get(pozostale).polaczenia_ID.add(drogi.get(i).ID);
-        ////                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
-//
-//                    //jesli ID punktu KONCOWEGO bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
-//                } else if (drogi.get(i).pkt_koniec.ID == drogi.get(pozostale).pkt_start.ID || drogi.get(i).pkt_koniec.ID == drogi.get(pozostale).pkt_koniec.ID) {
-//                    drogi.get(i).polaczenia_ID.add(drogi.get(pozostale).ID);
-//                    drogi.get(pozostale).polaczenia_ID.add(drogi.get(i).ID);
-////                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
-//                }
-//            }
-//        }
+
         System.out.println("WSZYSTKIE: " + drogi.size());
         List<Long> ListaKluczy = new ArrayList<>(drogi.keySet());
         Long pierwsza_pocz, pierwsza_kon, druga_pocz, druga_kon;
 
         // iteruje po kluczach od poczatku
         for (int i = 0; i < ListaKluczy.size(); i++) {
-
-            // iteruje po reszcie kluczy
-//            for (int pozostale=i+1; pozostale<=drogi.size() - 1; pozostale++){
-//                    //jesli ID punktu startowego bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
-//                if (drogi.get(ListaKluczy.get(i)).pkt_start.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID || drogi.get(ListaKluczy.get(i)).pkt_start.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID) {
-//                    drogi.get(ListaKluczy.get(i)).polaczenia_ID.add(drogi.get(ListaKluczy.get(pozostale)).ID);
-//                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_ID.add(drogi.get(ListaKluczy.get(i)).ID);
-            ////                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
-//
-//                    //jesli ID punktu KONCOWEGO bazowej drogi == ID punktu startowego lub kocowego jakiejs kolejnej drogi -> polaczenie
-//                } else if (drogi.get(ListaKluczy.get(i)).pkt_koniec.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID || drogi.get(ListaKluczy.get(i)).pkt_koniec.ID == drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID) {
-//                    drogi.get(ListaKluczy.get(i)).polaczenia_ID.add(drogi.get(ListaKluczy.get(pozostale)).ID);
-//                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_ID.add(drogi.get(ListaKluczy.get(i)).ID);
-////                    System.out.println(" DODAŁEM droga bazowa:" + i + " sprawdzam: " + pozostale);
-//                }
-//            }
                 pierwsza_pocz = drogi.get(ListaKluczy.get(i)).pkt_start.ID;
             pierwsza_kon = drogi.get(ListaKluczy.get(i)).pkt_koniec.ID;
             for (int pozostale = i + 1; pozostale <= drogi.size() - 1; pozostale++) {
@@ -89,44 +55,57 @@ public class DANE {
                     drogi.get(ListaKluczy.get(pozostale)).polaczenia_koniec_ID.add(ListaKluczy.get(i));
                 }
             }
-
         }
     }
 
     public static void ustawOdleglosci() {
-//        for (Droga droga : drogi) {
-//            droga.ustawOdleglosc();
-//        }
-
         for (Long klucz : drogi.keySet()) {
             drogi.get(klucz).ustawOdleglosc();
         }
     }
 
     public static void ustawStartKoniec() {
-//        for (Droga droga : drogi) {
-//            droga.pkt_start = droga.punkty.getFirst();
-//            droga.pkt_koniec = droga.punkty.getLast();
-//        }
-
         for (Long klucz : drogi.keySet()) {
             Droga dr = drogi.get(klucz);
             dr.pkt_start = dr.punkty.getFirst();
             dr.pkt_koniec = dr.punkty.getLast();
         }
     }
+    
+    public static void budujWezlyZDrog() {
+    wezly.clear();
+
+    for (Droga d : drogi.values()) {
+        if (d == null || d.pkt_start == null || d.pkt_koniec == null) continue;
+
+        Punkt s = d.pkt_start;
+        Punkt k = d.pkt_koniec;
+
+        s.ustawXY();
+        k.ustawXY();
+
+        // START
+        Wezel ws = wezly.get(s.ID);
+        if (ws == null) {
+            ws = new Wezel(s.ID, s.X, s.Y);
+            wezly.put(s.ID, ws);
+        }
+        ws.dodajDroge(d.ID);
+
+        // KONIEC
+        Wezel wk = wezly.get(k.ID);
+        if (wk == null) {
+            wk = new Wezel(k.ID, k.X, k.Y);
+            wezly.put(k.ID, wk);
+        }
+        wk.dodajDroge(d.ID);
+    }
+    System.out.print("Dodano wezly");
+}
 
     public static void ustawRuchUliczny() {
         int ilosc_dodanego_ruchu = 0;
-
-//        for (TrafficSegment TF : ruchUliczny) {
-//            for (Droga dr : drogi){
-//                if (TF.street.equals(dr.nazwa)){
-//                    dr.ruchUliczny = TF;
-//                    ilosc_dodanego_ruchu++;
-//                }
-//            }
-//        }        
+      
         for (TrafficSegment TF : ruchUliczny) {
             for (Long klucz : drogi.keySet()) {
                 Droga dr = drogi.get(klucz);

@@ -1,6 +1,5 @@
 package mgr;
 
-import static com.sun.java.accessibility.util.AWTEventMonitor.addMouseListener;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -8,22 +7,19 @@ import java.awt.geom.AffineTransform;
 import static java.lang.Math.abs;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import mgr.DANE;
-import mgr.Droga;
-import mgr.Punkt;
 
 public class mapa extends javax.swing.JPanel {
 
-    public Punkt ZaznaczonyPunkt;
+    public Wezel ZaznaczonyWezel;
     public int clickX;
     public int clickY;
-    public Droga ZaznaczonaDroga;
 
     private int skalaProc = 100;
     private double widok_x = 30;
     private double widok_y = 30;
     private int prevMouseX, prevMouseY;
     private Map<Long, Droga> drogi = DANE.drogi;
+    private Map<Long, Wezel> wezly = DANE.wezly;
 
     Color czerw_przezr = new Color(255, 0, 0, 44); // czerwony, 17% widoczności
 
@@ -130,23 +126,20 @@ public class mapa extends javax.swing.JPanel {
                     rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
                 }
 
-                if (!DANE.ALG_GEN_SCIEZKA.isEmpty()) {
-                    for (Droga dr : DANE.ALG_GEN_SCIEZKA) {
-                        rysujDroge(dr, czerw_przezr, g2d_zawartosc);
-                    }
+                if (ZaznaczonyWezel != null) {
+                    zaznaczWezel(g2d_zawartosc, ZaznaczonyWezel);
                 }
-                rysuj_start_poczatek_drogi(g2d_zawartosc, drogi.get(ID));
-                if (ZaznaczonyPunkt != null) {
-                    zaznaczPunkt_I_DROGE(g2d_zawartosc, ZaznaczonyPunkt);
+            }
+            
+            if (!DANE.ALG_GEN_SCIEZKA.isEmpty()) {
+                System.out.println("dane maja sciezke");
+                for (Droga dr : DANE.ALG_GEN_SCIEZKA) {
+                    rysujDroge(dr, Color.magenta, g2d_zawartosc);
+                    System.out.println("rysuje jedna droge");
                 }
             }
 
-//            for (TrafficSegment TF : DANE.ruchUliczny) {
-//                for (Punkt pkt : TF.points) {
-//                    pkt.ustawXY();
-//                    rysujPunkt(pkt.X, pkt.Y, czerw_przezr, g2d_zawartosc);
-//                }
-//            }
+            rysuj_wezly(g2d_zawartosc);
         } finally {
             // wyrzucamy kopię, przywracamy oryginalny kontekst dla Swinga
             g2d_zawartosc.dispose();
@@ -155,14 +148,15 @@ public class mapa extends javax.swing.JPanel {
         }
     }
 
-    private void rysuj_start_poczatek_drogi(Graphics2D g2d_zawartosc, Droga droga) {
-        rysujPunkt(droga.pkt_koniec.X, droga.pkt_koniec.Y, 8, new Color(182, 5, 252, 25), g2d_zawartosc);
-        rysujPunkt(droga.pkt_start.X, droga.pkt_start.Y, 6, new Color(5, 174, 252, 25), g2d_zawartosc);
+    private void rysuj_wezly(Graphics2D g2d_zawartosc) {
+        for (Wezel w : DANE.wezly.values()) {
+            rysujPunkt(w.X, w.Y, 8, new Color(182, 5, 252, 25), g2d_zawartosc);
+        }
+        //new Color(5, 174, 252, 25)
     }
 
-    private void zaznaczPunkt_I_DROGE(Graphics2D g2d_zawartosc, Punkt pkt) {
-        rysujPunkt(pkt.X, pkt.Y, 20, losowyKolor(), g2d_zawartosc);
-        rysujDroge(this.ZaznaczonaDroga, losowyKolor(), g2d_zawartosc);
+    private void zaznaczWezel(Graphics2D g2d_zawartosc, Wezel wez) {
+        rysujPunkt(wez.X, wez.Y, 20, losowyKolor(), g2d_zawartosc);
     }
 
     private void rysujPodzialke(Graphics2D g2d_podzialka_poz, Graphics2D g2d_podzialka_pion) {
@@ -325,7 +319,6 @@ public class mapa extends javax.swing.JPanel {
 
         skala_label.setBackground(new java.awt.Color(0, 0, 0));
         skala_label.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        skala_label.setForeground(new java.awt.Color(0, 0, 0));
         skala_label.setText("jLabel1");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -473,32 +466,27 @@ public class mapa extends javax.swing.JPanel {
 
         int promien_lapania_zaznaczenia = 3;
 
-        for (Long ID : drogi.keySet()) {
-            Droga dr = drogi.get(ID);
-            if (abs(dr.pkt_start.X - clickX) < promien_lapania_zaznaczenia && abs(dr.pkt_start.Y - clickY) < promien_lapania_zaznaczenia) {
+        for (Wezel wez : wezly.values()) {
+            if (abs(wez.X - clickX) < promien_lapania_zaznaczenia && abs(wez.Y - clickY) < promien_lapania_zaznaczenia) {
+                // wybrano ten wezel
+                this.ZaznaczonyWezel = wez;
 
-                this.ZaznaczonyPunkt = dr.pkt_start;
-                this.ZaznaczonaDroga = dr;
-                infoUlica.setText("Ulica: " + dr.nazwa);
-                infoID.setText("ID: " + dr.ID);
-                infoNetBeansID.setText("NetBeansID: " + dr);
-                repaint();
-                return;
+                StringBuilder string = new StringBuilder("<html>Przynależne ulice:<br>");
+                for (Long id : wez.drogiIDs) {
+                    string.append(id).append(" ").append(drogi.get(id).nazwa).append("<br>");
+                }
+                string.append("</html>");
+                infoUlica.setText(string.toString());
 
-            } else if (abs(dr.pkt_koniec.X - clickX) < promien_lapania_zaznaczenia && abs(dr.pkt_koniec.Y - clickY) < promien_lapania_zaznaczenia) {
-                this.ZaznaczonyPunkt = dr.pkt_koniec;
-                this.ZaznaczonaDroga = dr;
-                infoUlica.setText("Ulica: " + dr.nazwa);
-                infoID.setText("ID: " + dr.ID);
-                infoNetBeansID.setText("NetBeansID: " + dr);
+                infoID.setText("ID: " + wez.ID);
+                infoNetBeansID.setText("NetBeansID: " + wez);
                 repaint();
                 return;
             }
         }
 
-        this.ZaznaczonyPunkt = null;
-        this.ZaznaczonaDroga = null;
-        infoUlica.setText("Ulica: " + "-");
+        this.ZaznaczonyWezel = null;
+        infoUlica.setText("Ulica: -");
         infoID.setText("ID: ");
         infoNetBeansID.setText("NetBeansID: ");
         CZYHERE.setText("ma");
