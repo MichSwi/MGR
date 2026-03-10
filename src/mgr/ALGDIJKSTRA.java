@@ -1,0 +1,110 @@
+package mgr;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+
+public class ALGDIJKSTRA {
+
+    private Long pktStart, pktKoniec;
+
+    private List<Long> nieodwiedzone = new ArrayList<>();
+    private Map<Long, Double> wartosc_wezlow = new HashMap<>();
+    private Map<Long, Long> poprzedni_wezel = new HashMap<>();
+
+    private PriorityQueue<Map.Entry<Long, Double>> kolejka =
+            new PriorityQueue<>(Comparator.comparingDouble(Map.Entry::getValue));
+
+    private Map<Long, Wezel> wezly = new HashMap<>();
+    private Map<Long, Droga> drogi = new HashMap<>();
+
+    public ALGDIJKSTRA() {
+        pktStart = DANE.wezelStartowyAlgorytmu.ID;
+        pktKoniec = DANE.wezelKoncowyAlgorytmu.ID;
+        wezly = DANE.wezly;
+        drogi = DANE.drogi;
+
+        for (Long wezel_id : wezly.keySet()) {
+            nieodwiedzone.add(wezel_id);
+            wartosc_wezlow.put(wezel_id, Double.POSITIVE_INFINITY);
+            poprzedni_wezel.put(wezel_id, null);
+        }
+
+        wartosc_wezlow.put(pktStart, 0.0);
+        kolejka.add(Map.entry(pktStart, 0.0));
+
+        while (!kolejka.isEmpty()) {
+            Map.Entry<Long, Double> wpis = kolejka.poll();
+            Long akt_wez = wpis.getKey();
+            Double koszt_z_kolejki = wpis.getValue();
+
+            // pomijamy nieaktualny wpis z kolejki
+            if (koszt_z_kolejki > wartosc_wezlow.get(akt_wez)) {
+                continue;
+            }
+
+            // jeśli już odwiedzony, pomijamy
+            if (!nieodwiedzone.contains(akt_wez)) {
+                continue;
+            }
+
+            // oznacz jako odwiedzony
+            nieodwiedzone.remove(akt_wez);
+
+            // jeśli doszliśmy do celu, można zakończyć
+            if (akt_wez.equals(pktKoniec)) {
+                break;
+            }
+
+            for (Long polaczenie_id : wezly.get(akt_wez).drogiIDs) {
+                Long przeciwny_wezel = getPrzeciwnyWezelId(akt_wez, polaczenie_id);
+
+                // sąsiad już odwiedzony
+                if (!nieodwiedzone.contains(przeciwny_wezel)) {
+                    continue;
+                }
+
+                Double new_koszt = wartosc_wezlow.get(akt_wez) + drogi.get(polaczenie_id).dlugosc;
+
+                if (new_koszt < wartosc_wezlow.get(przeciwny_wezel)) {
+                    wartosc_wezlow.put(przeciwny_wezel, new_koszt);
+                    poprzedni_wezel.put(przeciwny_wezel, akt_wez);
+                    kolejka.add(Map.entry(przeciwny_wezel, new_koszt));
+                }
+            }
+        }
+    }
+
+    private Long getPrzeciwnyWezelId(Long akt_wez, Long droga) {
+        if (drogi.get(droga).pkt_start.ID == akt_wez) {
+            return drogi.get(droga).pkt_koniec.ID;
+        } else if (drogi.get(droga).pkt_koniec.ID == akt_wez) {
+            return drogi.get(droga).pkt_start.ID;
+        } else {
+            throw new IllegalArgumentException("brak aktualnego wezla w polaczeniu");
+        }
+    }
+
+    public Double getKosztDoKonca() {
+        return wartosc_wezlow.get(pktKoniec);
+    }
+
+    public List<Long> getSciezka() {
+        List<Long> sciezka = new ArrayList<>();
+
+        if (wartosc_wezlow.get(pktKoniec).equals(Double.POSITIVE_INFINITY)) {
+            return sciezka;
+        }
+
+        Long akt = pktKoniec;
+        while (akt != null) {
+            sciezka.add(0, akt);
+            akt = poprzedni_wezel.get(akt);
+        }
+
+        return sciezka;
+    }
+}

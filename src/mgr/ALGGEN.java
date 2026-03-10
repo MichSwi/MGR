@@ -9,17 +9,21 @@ import java.util.Set;
 
 public class ALGGEN {
 
-    private int max_dlugosc_sciezki = 20;
-    private int max_iteracji = 1000;
+    private int max_dlugosc_sciezki = 3000;
+    private int max_iteracji = 40000;
 
-    private Map<Long, Droga> drogi = DANE.drogi;
-
+    public Map<Long, Droga> drogi = new HashMap<>();
+ 
     private Wezel pktStart;
     private Wezel pktKoniec;
     private Map<Long, Wezel> wezly = new HashMap<>();
     private List<Droga> SCIEZKA_DROG = new ArrayList<>();
-
-    ;
+    
+    // ALG GEN
+//    private List<List<Droga>> OSOBNIki = new ArrayList<>();
+//    private int ilosc_osobnikow=10;
+//    
+    
     public ALGGEN() {
         this.drogi = DANE.drogi;
         this.pktStart = DANE.wezelStartowyAlgorytmu;
@@ -36,12 +40,18 @@ public class ALGGEN {
     }
 
     public void startAlg() {
-        this.SCIEZKA_DROG = znajdz_losowa_sciezke();
+        this.SCIEZKA_DROG = znajdz_losowa_sciezke(this.pktStart, this.pktKoniec);
         DANE.ALG_GEN_SCIEZKA = this.SCIEZKA_DROG;
+//        while(true){
+//            inicjjalizacja();   
+//            
+//        }
+        
+        
     }
 
-    private List<Droga> znajdz_losowa_sciezke() {
-        if (this.pktStart == null || this.pktKoniec == null) {
+    private List<Droga> znajdz_losowa_sciezke(Wezel pkt_startowy, Wezel pkt_koncowy) {
+        if (pkt_startowy == null || pkt_koncowy == null) {
             throw new IllegalArgumentException("brak pkt_start lub pkt_koniec dla znajdz_losowa_sciezke");
         }
 
@@ -52,13 +62,13 @@ public class ALGGEN {
         Long wylosowany_wezel_id;
         int iter = 0;
 
-        Wezel aktualny_wezel = this.pktStart;
+        Wezel aktualny_wezel = pkt_startowy;
         while (true) {
             // znalezc mozliwe kolejne wezly
             mozliwe_kolejne_wezly = mozliwe_kolejne_wezly(aktualny_wezel, uzyte_wezly);
             if (mozliwe_kolejne_wezly.isEmpty()) {
                 // jesli brak mozliwych kierunkow -> restart
-                aktualny_wezel = this.pktStart;
+                aktualny_wezel = pkt_startowy;
                 uzyte_wezly.clear();
                 sciezka.clear();
                 continue;
@@ -70,7 +80,7 @@ public class ALGGEN {
             // dodaj droge do sciezki
             dodaj_droge_do_sciezki(aktualny_wezel, wezly.get(wylosowany_wezel_id), sciezka);
             if (sciezka.size() > max_dlugosc_sciezki) {
-                aktualny_wezel = this.pktStart;
+                aktualny_wezel = pkt_startowy;
                 uzyte_wezly.clear();
                 sciezka.clear();
                 continue;
@@ -83,7 +93,7 @@ public class ALGGEN {
             aktualny_wezel = aktualizuj_wezel(aktualny_wezel, sciezka);
 
             // sprawdz czy koniec algorytmu
-            if (aktualny_wezel.ID == pktKoniec.ID) {
+            if (aktualny_wezel.ID == pkt_koncowy.ID) {
                 System.out.println("Znalezniono sciezke!");
                 System.out.println("sciezka drog: " + sciezka);
                 return sciezka;
@@ -91,11 +101,11 @@ public class ALGGEN {
 
             iter++;
             if (iter > max_iteracji) {
-                aktualny_wezel = this.pktStart;
+                aktualny_wezel = pkt_startowy;
                 uzyte_wezly.clear();
                 sciezka.clear();
-                System.out.println("petla WHILE przekroczyl 1000 iteracji");
-                return null;
+                System.out.println("petla WHILE przekroczyl " + this.max_iteracji + " iteracji");
+                return new ArrayList<>();
             }
         }
     }
@@ -160,4 +170,10 @@ public class ALGGEN {
         }
         return new_wez;
     }
+//
+//    private void inicjjalizacja() {
+//        for(int i=1; i<=this.ilosc_osobnikow; i++){
+//            this.OSOBNIki.add(this.znajdz_losowa_sciezke(pktStart, pktKoniec));
+//        }
+//    }
 }

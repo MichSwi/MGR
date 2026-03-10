@@ -110,17 +110,11 @@
       <SubComponents>
         <Component class="javax.swing.JLabel" name="LabelPktStart">
           <Properties>
-            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="0" green="0" red="0" type="rgb"/>
-            </Property>
             <Property name="text" type="java.lang.String" value="start"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="LabelPktEnd">
           <Properties>
-            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="0" green="0" red="0" type="rgb"/>
-            </Property>
             <Property name="text" type="java.lang.String" value="end"/>
           </Properties>
         </Component>

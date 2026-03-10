@@ -19,7 +19,7 @@ public class Droga {
 
     public long ID;
     public String nazwa;
-    private double dlugosc;
+    public double dlugosc;
     public List<Punkt> punkty;
     public LinkedList<Long> polaczenia_poczatek_ID = new LinkedList<>();
     public LinkedList<Long> polaczenia_koniec_ID = new LinkedList<>();

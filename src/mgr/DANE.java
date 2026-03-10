@@ -34,7 +34,7 @@ public class DANE {
 
         // iteruje po kluczach od poczatku
         for (int i = 0; i < ListaKluczy.size(); i++) {
-                pierwsza_pocz = drogi.get(ListaKluczy.get(i)).pkt_start.ID;
+            pierwsza_pocz = drogi.get(ListaKluczy.get(i)).pkt_start.ID;
             pierwsza_kon = drogi.get(ListaKluczy.get(i)).pkt_koniec.ID;
             for (int pozostale = i + 1; pozostale <= drogi.size() - 1; pozostale++) {
                 druga_pocz = drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID;
@@ -71,41 +71,43 @@ public class DANE {
             dr.pkt_koniec = dr.punkty.getLast();
         }
     }
-    
+
     public static void budujWezlyZDrog() {
-    wezly.clear();
+        wezly.clear();
 
-    for (Droga d : drogi.values()) {
-        if (d == null || d.pkt_start == null || d.pkt_koniec == null) continue;
+        for (Droga d : drogi.values()) {
+            if (d == null || d.pkt_start == null || d.pkt_koniec == null) {
+                continue;
+            }
 
-        Punkt s = d.pkt_start;
-        Punkt k = d.pkt_koniec;
+            Punkt s = d.pkt_start;
+            Punkt k = d.pkt_koniec;
 
-        s.ustawXY();
-        k.ustawXY();
+            s.ustawXY();
+            k.ustawXY();
 
-        // START
-        Wezel ws = wezly.get(s.ID);
-        if (ws == null) {
-            ws = new Wezel(s.ID, s.X, s.Y);
-            wezly.put(s.ID, ws);
+            // START
+            Wezel ws = wezly.get(s.ID);
+            if (ws == null) {
+                ws = new Wezel(s.ID, s.X, s.Y);
+                wezly.put(s.ID, ws);
+            }
+            ws.dodajDroge(d.ID);
+
+            // KONIEC
+            Wezel wk = wezly.get(k.ID);
+            if (wk == null) {
+                wk = new Wezel(k.ID, k.X, k.Y);
+                wezly.put(k.ID, wk);
+            }
+            wk.dodajDroge(d.ID);
         }
-        ws.dodajDroge(d.ID);
-
-        // KONIEC
-        Wezel wk = wezly.get(k.ID);
-        if (wk == null) {
-            wk = new Wezel(k.ID, k.X, k.Y);
-            wezly.put(k.ID, wk);
-        }
-        wk.dodajDroge(d.ID);
+        System.out.print("Dodano wezly");
     }
-    System.out.print("Dodano wezly");
-}
 
     public static void ustawRuchUliczny() {
         int ilosc_dodanego_ruchu = 0;
-      
+
         for (TrafficSegment TF : ruchUliczny) {
             for (Long klucz : drogi.keySet()) {
                 Droga dr = drogi.get(klucz);

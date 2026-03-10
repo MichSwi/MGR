@@ -130,12 +130,11 @@ public class mapa extends javax.swing.JPanel {
                     zaznaczWezel(g2d_zawartosc, ZaznaczonyWezel);
                 }
             }
-            
             if (!DANE.ALG_GEN_SCIEZKA.isEmpty()) {
-                System.out.println("dane maja sciezke");
+                //System.out.println("dane maja sciezke");
                 for (Droga dr : DANE.ALG_GEN_SCIEZKA) {
                     rysujDroge(dr, Color.magenta, g2d_zawartosc);
-                    System.out.println("rysuje jedna droge");
+                    //System.out.println("rysuje jedna droge");
                 }
             }
 
