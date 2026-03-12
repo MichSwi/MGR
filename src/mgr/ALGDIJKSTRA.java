@@ -14,9 +14,10 @@ public class ALGDIJKSTRA {
     private List<Long> nieodwiedzone = new ArrayList<>();
     private Map<Long, Double> wartosc_wezlow = new HashMap<>();
     private Map<Long, Long> poprzedni_wezel = new HashMap<>();
+    private Map<Long, Long> poprzednia_droga = new HashMap<>();
 
-    private PriorityQueue<Map.Entry<Long, Double>> kolejka =
-            new PriorityQueue<>(Comparator.comparingDouble(Map.Entry::getValue));
+    private PriorityQueue<Map.Entry<Long, Double>> kolejka
+            = new PriorityQueue<>(Comparator.comparingDouble(Map.Entry::getValue));
 
     private Map<Long, Wezel> wezly = new HashMap<>();
     private Map<Long, Droga> drogi = new HashMap<>();
@@ -31,6 +32,7 @@ public class ALGDIJKSTRA {
             nieodwiedzone.add(wezel_id);
             wartosc_wezlow.put(wezel_id, Double.POSITIVE_INFINITY);
             poprzedni_wezel.put(wezel_id, null);
+            poprzednia_droga.put(wezel_id, null);
         }
 
         wartosc_wezlow.put(pktStart, 0.0);
@@ -59,8 +61,13 @@ public class ALGDIJKSTRA {
                 break;
             }
 
+            // sprawdzanie sasiadow
             for (Long polaczenie_id : wezly.get(akt_wez).drogiIDs) {
                 Long przeciwny_wezel = getPrzeciwnyWezelId(akt_wez, polaczenie_id);
+
+//                if (!czyDozwolona(akt_wez, polaczenie_id)){
+//                    continue;
+//                }
 
                 // sąsiad już odwiedzony
                 if (!nieodwiedzone.contains(przeciwny_wezel)) {
@@ -72,6 +79,7 @@ public class ALGDIJKSTRA {
                 if (new_koszt < wartosc_wezlow.get(przeciwny_wezel)) {
                     wartosc_wezlow.put(przeciwny_wezel, new_koszt);
                     poprzedni_wezel.put(przeciwny_wezel, akt_wez);
+                    poprzednia_droga.put(przeciwny_wezel, polaczenie_id);
                     kolejka.add(Map.entry(przeciwny_wezel, new_koszt));
                 }
             }
@@ -107,4 +115,34 @@ public class ALGDIJKSTRA {
 
         return sciezka;
     }
+
+    public List<Droga> getSciezkaDrog() {
+        List<Droga> sciezkaDrog = new ArrayList<>();
+
+        if (wartosc_wezlow.get(pktKoniec).equals(Double.POSITIVE_INFINITY)) {
+            return sciezkaDrog;
+        }
+
+        Long akt = pktKoniec;
+
+        while (akt != null && poprzednia_droga.get(akt) != null) {
+            Long drogaId = poprzednia_droga.get(akt);
+            sciezkaDrog.add(0, drogi.get(drogaId));
+            akt = poprzedni_wezel.get(akt);
+        }
+
+        return sciezkaDrog;
+    }
+
+//    private boolean czyDozwolona(long poczatek_id, long droga_id) {
+//        Droga droga = drogi.get(droga_id);
+//        if (droga.jednokierunkowa == true) {
+//            if (droga.pkt_start.ID == poczatek_id) {
+//                return true;
+//            } else {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 }

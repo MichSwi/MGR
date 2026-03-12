@@ -45,9 +45,7 @@ public class ALGGEN {
 //        while(true){
 //            inicjjalizacja();   
 //            
-//        }
-        
-        
+//        } 
     }
 
     private List<Droga> znajdz_losowa_sciezke(Wezel pkt_startowy, Wezel pkt_koncowy) {

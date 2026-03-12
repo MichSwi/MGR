@@ -327,21 +327,49 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 // pierwszy segment
                 long idSeg = idOSM * 100L + licznikSegmentow;
                 Droga biezaca = new Droga(idSeg);
-
+                
+                // jednokierunkowosc: wstepnie false
+                biezaca.jednokierunkowa = "false";
+                
                 // tagi
                 NodeList tagi = elemWay.getElementsByTagName("tag");
                 for (int k = 0; k < tagi.getLength(); k++) {
                     Element tag = (Element) tagi.item(k);
-                    biezaca.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
 
-                    if ("oneway".equals(tag.getAttribute("k")) && "true".equalsIgnoreCase(tag.getAttribute("v"))) {
-                        biezaca.jednokierunkowa = true;
+                    String key = tag.getAttribute("k");
+                    String value = tag.getAttribute("v");
+
+                    biezaca.tags.put(key, value);
+                    
+                    if ("oneway".equals(key)) {
+                        if ("yes".equalsIgnoreCase(value) || "1".equals(value) || "true".equalsIgnoreCase(value)) {
+                            biezaca.jednokierunkowa = "true";
+                        }
+                        else if ("-1".equalsIgnoreCase(value)){
+                            biezaca.jednokierunkowa = "-1";
+                        }
+                        else if ("no".equalsIgnoreCase(value) || "0".equals(value) || "false".equalsIgnoreCase(value)){
+                            biezaca.jednokierunkowa = "false";
+                        }else{
+                            throw new IllegalArgumentException(biezaca+" ma cos dziwnego w tags oneway");
+                        }
                     }
-                    if ("name".equals(tag.getAttribute("k"))) {
-                        biezaca.nazwa = tag.getAttribute("v");
+                    
+                    // jesli rondo -> dorga jest jednokierunkowa
+                    if ("junction".equals(key) && "roundabout".equalsIgnoreCase(value)){
+                        biezaca.jednokierunkowa = "true";
                     }
-                    if ("maxspeed".equals(tag.getAttribute("k"))) {
-                        biezaca.maxspeed = Integer.parseInt(tag.getAttribute("v"));
+
+                    if ("name".equals(key)) {
+                        biezaca.nazwa = value;
+                    }
+
+                    if ("maxspeed".equals(key)) {
+                        try {
+                            biezaca.maxspeed = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            biezaca.maxspeed = -1;
+                        }
                     }
                 }
 
@@ -376,6 +404,9 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                         long idSegNowy = idOSM * 100L + licznikSegmentow;
                         Droga nowa = new Droga(idSegNowy);
                         nowa.tags.putAll(biezaca.tags);
+                        nowa.jednokierunkowa = biezaca.jednokierunkowa;
+                        nowa.nazwa = biezaca.nazwa;
+                        nowa.maxspeed = biezaca.maxspeed;
 
                         biezaca = nowa;
                         biezaca.punkty.add(wezel);

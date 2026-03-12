@@ -23,13 +23,13 @@ public class Droga {
     public List<Punkt> punkty;
     public LinkedList<Long> polaczenia_poczatek_ID = new LinkedList<>();
     public LinkedList<Long> polaczenia_koniec_ID = new LinkedList<>();
-    public boolean jednokierunkowa=false;
+    public String jednokierunkowa = "";
     Map<String, String> tags;
     public Punkt pkt_start, pkt_koniec;
     public TrafficSegment ruchUliczny;
-    public int maxspeed=-1;
+    public int maxspeed = -1;
 
-    public Droga(long ID, String nazwa, double dlugosc, LinkedList<Punkt> punkty, LinkedList<Long> polaczenia_poczatek_ID, LinkedList<Long> polaczenia_koniec_ID, boolean jednokierunkowa, Punkt start, Punkt koniec) {
+    public Droga(long ID, String nazwa, double dlugosc, LinkedList<Punkt> punkty, LinkedList<Long> polaczenia_poczatek_ID, LinkedList<Long> polaczenia_koniec_ID, String jednokierunkowa) {
         this.ID = ID;
         this.nazwa = nazwa;
         this.dlugosc = dlugosc;
@@ -49,12 +49,22 @@ public class Droga {
 
     public Droga() {
     }
-    
-    public void ustawOdleglosc(){
-        for (int i=0;i<=punkty.size()-2; i++){
-            double a = punkty.get(i).LAT-punkty.get(i+1).LAT;
-            double b = punkty.get(i).LON-punkty.get(i+1).LON;
-            this.dlugosc = sqrt(a*a+b*b);
+
+    public void ustawOdleglosc() {
+        // WZOREM HAVERSINE
+        
+        this.dlugosc = 0.0;
+
+        for (int i = 0; i < punkty.size() - 1; i++) {
+            Punkt p1 = punkty.get(i);
+            Punkt p2 = punkty.get(i + 1);
+
+            double sredniaLat = Math.toRadians((p1.LAT + p2.LAT) / 2.0);
+
+            double dx = (p2.LON - p1.LON) * 111320.0 * Math.cos(sredniaLat);
+            double dy = (p2.LAT - p1.LAT) * 111320.0;
+
+            this.dlugosc += Math.sqrt(dx * dx + dy * dy);
         }
     }
 }

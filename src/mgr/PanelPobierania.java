@@ -9,12 +9,10 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +21,10 @@ import java.util.Map;
 import javax.swing.JTextField;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
 
 /**
  *
@@ -661,46 +663,91 @@ public class PanelPobierania extends javax.swing.JPanel {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
+    String miasto = miasto_input.getText().trim();
 
-        String miasto = miasto_input.getText();
-        String url = "https://nominatim.openstreetmap.org/search?format=json&q=" + URLEncoder.encode(miasto, java.nio.charset.StandardCharsets.UTF_8);
+    if (miasto.isEmpty()) {
+        miasto_info.setVisible(true);
+        miasto_info.setText("Podaj nazwę miasta");
+        miasto_info.setForeground(Color.RED);
+        wys_input.setEnabled(false);
+        szer_input.setEnabled(false);
+        wys_input.setText("");
+        szer_input.setText("");
+        return;
+    }
 
-        try (InputStream in = new URL(url).openStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+    String url = "https://nominatim.openstreetmap.org/search"
+            + "?format=jsonv2"
+            + "&limit=10"
+            + "&q=" + URLEncoder.encode(miasto, StandardCharsets.UTF_8);
 
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
+    try {
+        HttpClient client = HttpClient.newHttpClient();
 
-            JSONArray arr = new JSONArray(sb.toString());
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject o = arr.getJSONObject(i);
-                if ("city".equals(o.optString("addresstype"))
-                        || "town".equals(o.optString("addresstype"))
-                        || "village".equals(o.optString("addresstype"))) {
-                    this.temp_LAT = Double.parseDouble(o.getString("lat"));
-                    this.temp_LON = Double.parseDouble(o.getString("lon"));
-                    miasto_info.setVisible(true);
-                    miasto_info.setText("Znaleziono: " + o.getString("display_name"));
-                    miasto_info.setForeground(Color.green);
-                    wys_input.setEnabled(true);
-                    szer_input.setEnabled(true);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("User-Agent", "MojaAplikacjaMagisterska/1.0 kontakt: mojmail@domena.pl")
+                .header("Accept", "application/json")
+                .header("Accept-Language", "pl")
+                .GET()
+                .build();
 
-                    break;
-                } else {
-                    miasto_info.setText("Nie udało się znaleźć \"" + miasto + "\"");
-                    miasto_info.setForeground(Color.RED);
-                    wys_input.setEnabled(false);
-                    szer_input.setEnabled(false);
-                    wys_input.setText("");
-                    szer_input.setText("");
-                }
-            }
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (response.statusCode() != 200) {
+            miasto_info.setVisible(true);
+            miasto_info.setText("Błąd HTTP: " + response.statusCode());
+            miasto_info.setForeground(Color.RED);
+            wys_input.setEnabled(false);
+            szer_input.setEnabled(false);
+            wys_input.setText("");
+            szer_input.setText("");
+            System.out.println(response.body());
+            return;
         }
+
+        JSONArray arr = new JSONArray(response.body());
+        boolean znaleziono = false;
+
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject o = arr.getJSONObject(i);
+            String addresstype = o.optString("addresstype");
+
+            if ("city".equals(addresstype) || "town".equals(addresstype) || "village".equals(addresstype)) {
+                this.temp_LAT = Double.parseDouble(o.getString("lat"));
+                this.temp_LON = Double.parseDouble(o.getString("lon"));
+
+                miasto_info.setVisible(true);
+                miasto_info.setText("Znaleziono: " + o.getString("display_name"));
+                miasto_info.setForeground(Color.GREEN);
+                wys_input.setEnabled(true);
+                szer_input.setEnabled(true);
+
+                znaleziono = true;
+                break;
+            }
+        }
+
+        if (!znaleziono) {
+            miasto_info.setVisible(true);
+            miasto_info.setText("Nie udało się znaleźć \"" + miasto + "\"");
+            miasto_info.setForeground(Color.RED);
+            wys_input.setEnabled(false);
+            szer_input.setEnabled(false);
+            wys_input.setText("");
+            szer_input.setText("");
+        }
+
+    } catch (IOException | InterruptedException e) {
+        miasto_info.setVisible(true);
+        miasto_info.setText("Błąd połączenia: " + e.getMessage());
+        miasto_info.setForeground(Color.RED);
+        wys_input.setEnabled(false);
+        szer_input.setEnabled(false);
+        wys_input.setText("");
+        szer_input.setText("");
+        e.printStackTrace();
+    }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed

@@ -92,7 +92,7 @@ public class DANE {
                 ws = new Wezel(s.ID, s.X, s.Y);
                 wezly.put(s.ID, ws);
             }
-            ws.dodajDroge(d.ID);
+            //ws.dodajDroge(d.ID);
 
             // KONIEC
             Wezel wk = wezly.get(k.ID);
@@ -100,7 +100,16 @@ public class DANE {
                 wk = new Wezel(k.ID, k.X, k.Y);
                 wezly.put(k.ID, wk);
             }
-            wk.dodajDroge(d.ID);
+
+            if (d.jednokierunkowa.equals("true")) {
+                ws.dodajDroge(d.ID);
+            } else if (d.jednokierunkowa.equals("false")) {
+                ws.dodajDroge(d.ID);
+                wk.dodajDroge(d.ID);
+            } else if (d.jednokierunkowa.equals("-1")){
+                // jednokierunkowa ale w druga strone (od pkt_koniec do pkt_pocz)
+                wk.dodajDroge(d.ID);
+            }
         }
         System.out.print("Dodano wezly");
     }

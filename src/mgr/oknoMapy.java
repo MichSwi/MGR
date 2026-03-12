@@ -4,20 +4,22 @@
  */
 package mgr;
 
+import java.util.List;
+
 /**
  *
  * @author Michal
  */
 public class oknoMapy extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(oknoMapy.class.getName());
-    
+
     public oknoMapy() {
         initComponents();
         System.out.println("otwarto okno mapy");
+        setExtendedState(Main.MAXIMIZED_BOTH);
+
     }
-    
-    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -35,17 +37,18 @@ public class oknoMapy extends javax.swing.JFrame {
         wybierzPktStart = new javax.swing.JButton();
         wybierzPktKoniec = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         mapa1.setPreferredSize(new java.awt.Dimension(1000, 675));
 
-        jPanel1.setBackground(new java.awt.Color(204, 255, 255));
+        jPanel1.setBackground(new java.awt.Color(204, 204, 204));
 
-        LabelPktStart.setForeground(new java.awt.Color(0, 0, 0));
+        LabelPktStart.setBackground(new java.awt.Color(0, 0, 0));
         LabelPktStart.setText("start");
 
-        LabelPktEnd.setForeground(new java.awt.Color(0, 0, 0));
+        LabelPktEnd.setBackground(new java.awt.Color(0, 0, 0));
         LabelPktEnd.setText("end");
 
         wybierzPktStart.setText("Wybierz punkt początkowy:");
@@ -98,32 +101,41 @@ public class oknoMapy extends javax.swing.JFrame {
             }
         });
 
+        jButton2.setText("start DIJKSTRA");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mapa1, javax.swing.GroupLayout.PREFERRED_SIZE, 795, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(26, 26, 26)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(89, 89, 89)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(279, Short.MAX_VALUE))
+                .addGap(21, 21, 21)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(67, 67, 67)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(mapa1, javax.swing.GroupLayout.DEFAULT_SIZE, 1721, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(mapa1, javax.swing.GroupLayout.PREFERRED_SIZE, 616, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(mapa1, javax.swing.GroupLayout.DEFAULT_SIZE, 712, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(62, 62, 62))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(78, Short.MAX_VALUE))
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(46, 46, 46))))
         );
 
         pack();
@@ -131,40 +143,54 @@ public class oknoMapy extends javax.swing.JFrame {
 
     private void wybierzPktKoniecActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wybierzPktKoniecActionPerformed
         // TODO add your handling code here:
-        
-        Wezel zaznaczony=mapa1.ZaznaczonyWezel;
-        DANE.wezelKoncowyAlgorytmu=zaznaczony;
-        
-        this.LabelPktEnd.setText(""+zaznaczony.ID);
-        
-        if (DANE.wezelKoncowyAlgorytmu.ID == DANE.wezelStartowyAlgorytmu.ID){
-            DANE.wezelStartowyAlgorytmu=new Wezel();
+
+        Wezel zaznaczony = mapa1.ZaznaczonyWezel;
+        DANE.wezelKoncowyAlgorytmu = zaznaczony;
+
+        this.LabelPktEnd.setText("" + zaznaczony.ID);
+
+        if (DANE.wezelKoncowyAlgorytmu.ID == DANE.wezelStartowyAlgorytmu.ID) {
+            DANE.wezelStartowyAlgorytmu = new Wezel();
             this.LabelPktStart.setText("");
         }
     }//GEN-LAST:event_wybierzPktKoniecActionPerformed
 
     private void wybierzPktStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wybierzPktStartActionPerformed
         // TODO add your handling code here:
-        
-        Wezel zaznaczony=mapa1.ZaznaczonyWezel;
-        DANE.wezelStartowyAlgorytmu=zaznaczony;
-        
-        this.LabelPktStart.setText(zaznaczony.ID+"");
-        
-        if (DANE.wezelKoncowyAlgorytmu.ID == DANE.wezelStartowyAlgorytmu.ID){
-            DANE.wezelKoncowyAlgorytmu=new Wezel();
+
+        Wezel zaznaczony = mapa1.ZaznaczonyWezel;
+        DANE.wezelStartowyAlgorytmu = zaznaczony;
+
+        this.LabelPktStart.setText(zaznaczony.ID + "");
+
+        if (DANE.wezelKoncowyAlgorytmu.ID == DANE.wezelStartowyAlgorytmu.ID) {
+            DANE.wezelKoncowyAlgorytmu = new Wezel();
             this.LabelPktEnd.setText("");
         }
     }//GEN-LAST:event_wybierzPktStartActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-         ALGGEN alg = new ALGGEN();
-         alg.startAlg();
-         
-         mapa1.repaint();
-         
+        ALGGEN alg = new ALGGEN();
+        alg.startAlg();
+
+        mapa1.repaint();
+
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+
+        ALGDIJKSTRA algdij = new ALGDIJKSTRA();
+
+        System.out.println("Koszt do konca: " + algdij.getKosztDoKonca());
+        DANE.ALG_GEN_SCIEZKA = algdij.getSciezkaDrog();
+        System.out.println();
+        for (Droga droga : DANE.ALG_GEN_SCIEZKA) {
+            System.out.println(droga.ID);
+        }
+        mapa1.repaint();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -195,6 +221,7 @@ public class oknoMapy extends javax.swing.JFrame {
     private javax.swing.JLabel LabelPktEnd;
     private javax.swing.JLabel LabelPktStart;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JPanel jPanel1;
     private mgr.mapa mapa1;
     private javax.swing.JButton wybierzPktKoniec;
