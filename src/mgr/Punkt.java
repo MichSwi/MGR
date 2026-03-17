@@ -40,15 +40,17 @@ public class Punkt {
     }
 
     public void ustawXY() {
-
         double szer_mapy = 1000;
         double wys_mapy = 1000;
 
-        // X
-        this.X = mapuj(LON, DANE._1_W_LAT, DANE._3_E_SZER_R, -1000, szer_mapy);
+//        System.out.println("PUNKT ID=" + ID);
+//        System.out.println("LON=" + LON + "  W=" + DANE._1_W_LAT + "  E=" + DANE._3_E_SZER_R);
+//        System.out.println("LAT=" + LAT + "  S=" + DANE._2_S_LON + "  N=" + DANE._4_N_WYS);
 
-        // Y
+        this.X = mapuj(LON, DANE._1_W_LAT, DANE._3_E_SZER_R, -1000, szer_mapy);
         this.Y = mapuj(LAT, DANE._4_N_WYS, DANE._2_S_LON, -1000, wys_mapy);
+
+//        System.out.println("X=" + X + " Y=" + Y);
     }
 
     private double mapuj(double x, double in_min, double in_max, double out_min, double out_max) {
@@ -56,9 +58,8 @@ public class Punkt {
     }
 
     public String getNazwa() {
-        
-        
-        for (Long id : DANE.drogi.keySet()){
+
+        for (Long id : DANE.drogi.keySet()) {
             Droga dr = DANE.drogi.get(id);
             if (this.equals(dr.pkt_start) || this.equals(dr.pkt_koniec)) {
                 return dr.nazwa;
@@ -66,21 +67,21 @@ public class Punkt {
         }
         return "blad";
     }
-    
-    public Droga getDroga(){
-        for (Long id : DANE.drogi.keySet()){
+
+    public Droga getDroga() {
+        for (Long id : DANE.drogi.keySet()) {
             Droga dr = DANE.drogi.get(id);
-            if (dr.punkty.contains(this)){
+            if (dr.punkty.contains(this)) {
                 return dr;
             }
         }
         return null;
     }
-    
-    public Long getDrogaID(){
-        for (Long id : DANE.drogi.keySet()){
+
+    public Long getDrogaID() {
+        for (Long id : DANE.drogi.keySet()) {
             Droga dr = DANE.drogi.get(id);
-            if (dr.punkty.contains(this)){
+            if (dr.punkty.contains(this)) {
                 return dr.ID;
             }
         }

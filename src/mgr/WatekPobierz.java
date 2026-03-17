@@ -58,7 +58,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     //czytanie TF
     private List<TrafficSegment> ruchUliczny = new ArrayList<>();
 
-    infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._2_S_LON, DANE._1_W_LAT, tryb);
+    infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._1_W_LAT, DANE._2_S_LON, tryb);
 
     public WatekPobierz(
             List<Droga> drogi,
@@ -86,6 +86,16 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         //czytanie OSM
         if (DANE.coZaznaczone.get(1)) {
             info.wczytajPlik(DANE.nazwaPliku + ".txt");
+            DANE._1_W_LAT = info.get1_W_LAT();
+            DANE._2_S_LON = info.get2_S_LON();
+            DANE._3_E_SZER_R = info.get3_E_SZER_R();
+            DANE._4_N_WYS = info.get4_N_WYS();
+            
+            System.out.println("W=" + DANE._1_W_LAT);
+System.out.println("S=" + DANE._2_S_LON);
+System.out.println("E=" + DANE._3_E_SZER_R);
+System.out.println("N=" + DANE._4_N_WYS);
+            
             czytajOSM();
         }
 
@@ -264,6 +274,10 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
     private void czytajOSM() {
         //setLabel "konwertowanie zmiennych"
+        allNodes.clear();
+        DANE.drogi.clear();
+        DANE.wezly.clear();
+        DANE.ALG_GEN_SCIEZKA.clear();
 
         try {
             int ilosc = 0;
@@ -327,10 +341,10 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 // pierwszy segment
                 long idSeg = idOSM * 100L + licznikSegmentow;
                 Droga biezaca = new Droga(idSeg);
-                
+
                 // jednokierunkowosc: wstepnie false
                 biezaca.jednokierunkowa = "false";
-                
+
                 // tagi
                 NodeList tagi = elemWay.getElementsByTagName("tag");
                 for (int k = 0; k < tagi.getLength(); k++) {
@@ -340,23 +354,21 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     String value = tag.getAttribute("v");
 
                     biezaca.tags.put(key, value);
-                    
+
                     if ("oneway".equals(key)) {
                         if ("yes".equalsIgnoreCase(value) || "1".equals(value) || "true".equalsIgnoreCase(value)) {
                             biezaca.jednokierunkowa = "true";
-                        }
-                        else if ("-1".equalsIgnoreCase(value)){
+                        } else if ("-1".equalsIgnoreCase(value)) {
                             biezaca.jednokierunkowa = "-1";
-                        }
-                        else if ("no".equalsIgnoreCase(value) || "0".equals(value) || "false".equalsIgnoreCase(value)){
+                        } else if ("no".equalsIgnoreCase(value) || "0".equals(value) || "false".equalsIgnoreCase(value)) {
                             biezaca.jednokierunkowa = "false";
-                        }else{
-                            throw new IllegalArgumentException(biezaca+" ma cos dziwnego w tags oneway");
+                        } else {
+                            throw new IllegalArgumentException(biezaca + " ma cos dziwnego w tags oneway");
                         }
                     }
-                    
+
                     // jesli rondo -> dorga jest jednokierunkowa
-                    if ("junction".equals(key) && "roundabout".equalsIgnoreCase(value)){
+                    if ("junction".equals(key) && "roundabout".equalsIgnoreCase(value)) {
                         biezaca.jednokierunkowa = "true";
                     }
 

@@ -117,13 +117,10 @@ public class mapa extends javax.swing.JPanel {
                 }
 
                 for (Punkt p : drogi.get(ID).punkty) {
+                    rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
                     if (p.tags.get("crossing") != null) {
                         rysujPunkt(p.X, p.Y, 10, czerw_przezr, g2d_zawartosc);
                     }
-                }
-
-                for (Punkt p : drogi.get(ID).punkty) {
-                    rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
                 }
 
                 if (ZaznaczonyWezel != null) {
@@ -279,8 +276,6 @@ public class mapa extends javax.swing.JPanel {
         jButton1 = new javax.swing.JButton();
         reset_widoku_button = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
-        skala_label = new javax.swing.JLabel();
         infoKlik = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         infoX = new javax.swing.JLabel();
@@ -290,6 +285,8 @@ public class mapa extends javax.swing.JPanel {
         infoID = new javax.swing.JLabel();
         infoNetBeansID = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
+        roundedJPanel1 = new mgr.RoundedJPanel();
+        skala_label = new javax.swing.JLabel();
 
         jButton1.setText("jButton1");
         jButton1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -313,29 +310,6 @@ public class mapa extends javax.swing.JPanel {
                 jButton3ActionPerformed(evt);
             }
         });
-
-        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
-
-        skala_label.setBackground(new java.awt.Color(0, 0, 0));
-        skala_label.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        skala_label.setText("jLabel1");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addComponent(skala_label, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(22, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(skala_label, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(8, Short.MAX_VALUE))
-        );
 
         jLabel1.setText("Info o kliku");
 
@@ -401,27 +375,52 @@ public class mapa extends javax.swing.JPanel {
             }
         });
 
+        roundedJPanel1.setBackground(new java.awt.Color(255, 255, 255));
+
+        skala_label.setBackground(new java.awt.Color(0, 0, 0));
+        skala_label.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        skala_label.setText("jLabel1");
+
+        javax.swing.GroupLayout roundedJPanel1Layout = new javax.swing.GroupLayout(roundedJPanel1);
+        roundedJPanel1.setLayout(roundedJPanel1Layout);
+        roundedJPanel1Layout.setHorizontalGroup(
+            roundedJPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, roundedJPanel1Layout.createSequentialGroup()
+                .addContainerGap(20, Short.MAX_VALUE)
+                .addComponent(skala_label, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18))
+        );
+        roundedJPanel1Layout.setVerticalGroup(
+            roundedJPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, roundedJPanel1Layout.createSequentialGroup()
+                .addContainerGap(8, Short.MAX_VALUE)
+                .addComponent(skala_label, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap(551, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(557, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButton3)
-                        .addGap(36, 36, 36))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(infoKlik, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(15, 15, 15))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jButton2)
-                        .addGap(118, 118, 118))))
+                        .addGap(118, 118, 118))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(roundedJPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jButton3)
+                                .addGap(36, 36, 36))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -430,12 +429,12 @@ public class mapa extends javax.swing.JPanel {
                 .addComponent(jButton2)
                 .addGap(12, 12, 12)
                 .addComponent(infoKlik, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 521, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 469, Short.MAX_VALUE)
                 .addComponent(jButton3)
-                .addGap(18, 18, 18)
+                .addGap(70, 70, 70)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(roundedJPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -519,8 +518,8 @@ public class mapa extends javax.swing.JPanel {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JButton reset_widoku_button;
+    private mgr.RoundedJPanel roundedJPanel1;
     private javax.swing.JLabel skala_label;
     // End of variables declaration//GEN-END:variables
 }

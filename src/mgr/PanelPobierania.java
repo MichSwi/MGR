@@ -25,7 +25,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-
 /**
  *
  * @author Micha
@@ -396,15 +395,14 @@ public class PanelPobierania extends javax.swing.JPanel {
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(miasto_info, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                            .addComponent(jLabel9)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(wys_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                            .addComponent(jLabel10)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(szer_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel9)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(wys_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel10)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(szer_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(19, 19, 19))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(90, 90, 90)
@@ -442,15 +440,6 @@ public class PanelPobierania extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(264, 264, 264)
-                        .addComponent(jLabel6))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(308, 308, 308)
-                        .addComponent(jButtonPobierz)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(22, 22, 22)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -511,7 +500,13 @@ public class PanelPobierania extends javax.swing.JPanel {
                 .addComponent(jRadioButtonpProst)
                 .addGap(28, 28, 28)
                 .addComponent(jRadioButtonOkrag)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(264, 264, 264)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonPobierz, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -577,7 +572,7 @@ public class PanelPobierania extends javax.swing.JPanel {
                         .addGap(124, 124, 124)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButtonPobierz)
+                .addComponent(jButtonPobierz, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel6)
                 .addGap(69, 69, 69)
@@ -663,91 +658,91 @@ public class PanelPobierania extends javax.swing.JPanel {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-    String miasto = miasto_input.getText().trim();
+        String miasto = miasto_input.getText().trim();
 
-    if (miasto.isEmpty()) {
-        miasto_info.setVisible(true);
-        miasto_info.setText("Podaj nazwę miasta");
-        miasto_info.setForeground(Color.RED);
-        wys_input.setEnabled(false);
-        szer_input.setEnabled(false);
-        wys_input.setText("");
-        szer_input.setText("");
-        return;
-    }
-
-    String url = "https://nominatim.openstreetmap.org/search"
-            + "?format=jsonv2"
-            + "&limit=10"
-            + "&q=" + URLEncoder.encode(miasto, StandardCharsets.UTF_8);
-
-    try {
-        HttpClient client = HttpClient.newHttpClient();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("User-Agent", "MojaAplikacjaMagisterska/1.0 kontakt: mojmail@domena.pl")
-                .header("Accept", "application/json")
-                .header("Accept-Language", "pl")
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-
-        if (response.statusCode() != 200) {
+        if (miasto.isEmpty()) {
             miasto_info.setVisible(true);
-            miasto_info.setText("Błąd HTTP: " + response.statusCode());
+            miasto_info.setText("Podaj nazwę miasta");
             miasto_info.setForeground(Color.RED);
             wys_input.setEnabled(false);
             szer_input.setEnabled(false);
             wys_input.setText("");
             szer_input.setText("");
-            System.out.println(response.body());
             return;
         }
 
-        JSONArray arr = new JSONArray(response.body());
-        boolean znaleziono = false;
+        String url = "https://nominatim.openstreetmap.org/search"
+                + "?format=jsonv2"
+                + "&limit=10"
+                + "&q=" + URLEncoder.encode(miasto, StandardCharsets.UTF_8);
 
-        for (int i = 0; i < arr.length(); i++) {
-            JSONObject o = arr.getJSONObject(i);
-            String addresstype = o.optString("addresstype");
+        try {
+            HttpClient client = HttpClient.newHttpClient();
 
-            if ("city".equals(addresstype) || "town".equals(addresstype) || "village".equals(addresstype)) {
-                this.temp_LAT = Double.parseDouble(o.getString("lat"));
-                this.temp_LON = Double.parseDouble(o.getString("lon"));
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("User-Agent", "MojaAplikacjaMagisterska/1.0 kontakt: mojmail@domena.pl")
+                    .header("Accept", "application/json")
+                    .header("Accept-Language", "pl")
+                    .GET()
+                    .build();
 
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+            if (response.statusCode() != 200) {
                 miasto_info.setVisible(true);
-                miasto_info.setText("Znaleziono: " + o.getString("display_name"));
-                miasto_info.setForeground(Color.GREEN);
-                wys_input.setEnabled(true);
-                szer_input.setEnabled(true);
-
-                znaleziono = true;
-                break;
+                miasto_info.setText("Błąd HTTP: " + response.statusCode());
+                miasto_info.setForeground(Color.RED);
+                wys_input.setEnabled(false);
+                szer_input.setEnabled(false);
+                wys_input.setText("");
+                szer_input.setText("");
+                System.out.println(response.body());
+                return;
             }
-        }
 
-        if (!znaleziono) {
+            JSONArray arr = new JSONArray(response.body());
+            boolean znaleziono = false;
+
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject o = arr.getJSONObject(i);
+                String addresstype = o.optString("addresstype");
+
+                if ("city".equals(addresstype) || "town".equals(addresstype) || "village".equals(addresstype)) {
+                    this.temp_LAT = Double.parseDouble(o.getString("lat"));
+                    this.temp_LON = Double.parseDouble(o.getString("lon"));
+
+                    miasto_info.setVisible(true);
+                    miasto_info.setText("Znaleziono: " + o.getString("display_name"));
+                    miasto_info.setForeground(Color.GREEN);
+                    wys_input.setEnabled(true);
+                    szer_input.setEnabled(true);
+
+                    znaleziono = true;
+                    break;
+                }
+            }
+
+            if (!znaleziono) {
+                miasto_info.setVisible(true);
+                miasto_info.setText("Nie udało się znaleźć \"" + miasto + "\"");
+                miasto_info.setForeground(Color.RED);
+                wys_input.setEnabled(false);
+                szer_input.setEnabled(false);
+                wys_input.setText("");
+                szer_input.setText("");
+            }
+
+        } catch (IOException | InterruptedException e) {
             miasto_info.setVisible(true);
-            miasto_info.setText("Nie udało się znaleźć \"" + miasto + "\"");
+            miasto_info.setText("Błąd połączenia: " + e.getMessage());
             miasto_info.setForeground(Color.RED);
             wys_input.setEnabled(false);
             szer_input.setEnabled(false);
             wys_input.setText("");
             szer_input.setText("");
+            e.printStackTrace();
         }
-
-    } catch (IOException | InterruptedException e) {
-        miasto_info.setVisible(true);
-        miasto_info.setText("Błąd połączenia: " + e.getMessage());
-        miasto_info.setForeground(Color.RED);
-        wys_input.setEnabled(false);
-        szer_input.setEnabled(false);
-        wys_input.setText("");
-        szer_input.setText("");
-        e.printStackTrace();
-    }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -764,6 +759,7 @@ public class PanelPobierania extends javax.swing.JPanel {
         jTextField2.setText(Double.toString(temp_LAT - wys / 2));
         jTextField3.setText(Double.toString(temp_LON + szer / 2));
         jTextField4.setText(Double.toString(temp_LAT + wys / 2));
+
 
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -897,7 +893,6 @@ public class PanelPobierania extends javax.swing.JPanel {
 //                }
 //            }
 //        });
-
         szer_input.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -924,8 +919,7 @@ public class PanelPobierania extends javax.swing.JPanel {
                 }
             }
         });
-        
-        
+
         miasto_input.addActionListener(e -> jButton1.doClick());
         wys_input.addActionListener(e -> jButton2.doClick());
         szer_input.addActionListener(e -> jButton2.doClick());

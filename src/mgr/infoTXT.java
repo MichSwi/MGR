@@ -54,6 +54,7 @@ public class infoTXT {
 
     public boolean wczytajPlik(String nazwaPliku) {
         try (BufferedReader br = new BufferedReader(new FileReader("POBRANE_PLIKI\\" + nazwaPliku))) {
+            nazwaPliku = br.readLine();
             data = br.readLine();    // pierwsza linia
             godzina = br.readLine();
             _1_W_LAT = Double.parseDouble(br.readLine());
@@ -135,7 +136,6 @@ public class infoTXT {
     public double getPole() {
         return pole;
     }
-    
     
     
 }
