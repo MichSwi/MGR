@@ -41,7 +41,7 @@ public class ALGGEN {
 
     public void startAlg() {
         this.SCIEZKA_DROG = znajdz_losowa_sciezke(this.pktStart, this.pktKoniec);
-        DANE.ALG_GEN_SCIEZKA = this.SCIEZKA_DROG;
+        DANE.ALG_SCIEZKA = this.SCIEZKA_DROG;
 //        while(true){
 //            inicjjalizacja();   
 //            

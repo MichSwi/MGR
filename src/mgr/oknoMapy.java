@@ -38,6 +38,7 @@ public class oknoMapy extends javax.swing.JFrame {
         wybierzPktKoniec = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -108,6 +109,13 @@ public class oknoMapy extends javax.swing.JFrame {
             }
         });
 
+        jButton3.setText("start AntColony");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -119,6 +127,8 @@ public class oknoMapy extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addComponent(mapa1, javax.swing.GroupLayout.DEFAULT_SIZE, 1721, Short.MAX_VALUE)
         );
@@ -132,7 +142,9 @@ public class oknoMapy extends javax.swing.JFrame {
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(62, 62, 62))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(46, 46, 46))))
@@ -184,13 +196,22 @@ public class oknoMapy extends javax.swing.JFrame {
         ALGDIJKSTRA algdij = new ALGDIJKSTRA();
 
         System.out.println("Koszt do konca: " + algdij.getKosztDoKonca());
-        DANE.ALG_GEN_SCIEZKA = algdij.getSciezkaDrog();
+        DANE.ALG_SCIEZKA = algdij.getSciezkaDrog();
         System.out.println();
-        for (Droga droga : DANE.ALG_GEN_SCIEZKA) {
+        for (Droga droga : DANE.ALG_SCIEZKA) {
             System.out.println(droga.ID);
         }
         mapa1.repaint();
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        AntColonyAlg AntAlg = new AntColonyAlg();
+        DANE.ALG_SCIEZKA = AntAlg.startAlg();
+         
+        mapa1.repaint();
+        
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -222,6 +243,7 @@ public class oknoMapy extends javax.swing.JFrame {
     private javax.swing.JLabel LabelPktStart;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JPanel jPanel1;
     private mgr.mapa mapa1;
     private javax.swing.JButton wybierzPktKoniec;

@@ -67,4 +67,15 @@ public class Droga {
             this.dlugosc += Math.sqrt(dx * dx + dy * dy);
         }
     }
+    
+    public Long getPrzeciwnyWezelId(Long wez) {
+        
+        if (this.pkt_start.ID == wez){
+            return this.pkt_koniec.ID;
+        } else if(this.pkt_koniec.ID == wez){
+            return this.pkt_start.ID;
+        } else {
+            throw new IllegalArgumentException("brak przeciwnego wezla w polaczeniu");
+        }
+    }
 }

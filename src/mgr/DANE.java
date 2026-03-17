@@ -24,7 +24,7 @@ public class DANE {
     public static Wezel wezelKoncowyAlgorytmu = new Wezel();
     public static Map<Long, Wezel> wezly = new HashMap<>();
 
-    public static List<Droga> ALG_GEN_SCIEZKA = new ArrayList<>();
+    public static List<Droga> ALG_SCIEZKA = new ArrayList<>();
 
     public static void ustawPolaczenia() {
 

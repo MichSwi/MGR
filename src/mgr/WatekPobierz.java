@@ -277,7 +277,7 @@ System.out.println("N=" + DANE._4_N_WYS);
         allNodes.clear();
         DANE.drogi.clear();
         DANE.wezly.clear();
-        DANE.ALG_GEN_SCIEZKA.clear();
+        DANE.ALG_SCIEZKA.clear();
 
         try {
             int ilosc = 0;

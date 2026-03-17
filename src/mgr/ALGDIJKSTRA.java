@@ -63,7 +63,8 @@ public class ALGDIJKSTRA {
 
             // sprawdzanie sasiadow
             for (Long polaczenie_id : wezly.get(akt_wez).drogiIDs) {
-                Long przeciwny_wezel = getPrzeciwnyWezelId(akt_wez, polaczenie_id);
+                //Long przeciwny_wezel = getPrzeciwnyWezelId(akt_wez, polaczenie_id);
+                Long przeciwny_wezel = drogi.get(polaczenie_id).getPrzeciwnyWezelId(akt_wez);
 
 //                if (!czyDozwolona(akt_wez, polaczenie_id)){
 //                    continue;
@@ -86,15 +87,15 @@ public class ALGDIJKSTRA {
         }
     }
 
-    private Long getPrzeciwnyWezelId(Long akt_wez, Long droga) {
-        if (drogi.get(droga).pkt_start.ID == akt_wez) {
-            return drogi.get(droga).pkt_koniec.ID;
-        } else if (drogi.get(droga).pkt_koniec.ID == akt_wez) {
-            return drogi.get(droga).pkt_start.ID;
-        } else {
-            throw new IllegalArgumentException("brak aktualnego wezla w polaczeniu");
-        }
-    }
+//    private Long getPrzeciwnyWezelId(Long akt_wez, Long droga) {
+//        if (drogi.get(droga).pkt_start.ID == akt_wez) {
+//            return drogi.get(droga).pkt_koniec.ID;
+//        } else if (drogi.get(droga).pkt_koniec.ID == akt_wez) {
+//            return drogi.get(droga).pkt_start.ID;
+//        } else {
+//            throw new IllegalArgumentException("brak aktualnego wezla w polaczeniu");
+//        }
+//    }
 
     public Double getKosztDoKonca() {
         return wartosc_wezlow.get(pktKoniec);

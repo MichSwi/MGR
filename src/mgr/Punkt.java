@@ -4,7 +4,6 @@
  */
 package mgr;
 
-import static java.lang.Math.abs;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +45,6 @@ public class Punkt {
 //        System.out.println("PUNKT ID=" + ID);
 //        System.out.println("LON=" + LON + "  W=" + DANE._1_W_LAT + "  E=" + DANE._3_E_SZER_R);
 //        System.out.println("LAT=" + LAT + "  S=" + DANE._2_S_LON + "  N=" + DANE._4_N_WYS);
-
         this.X = mapuj(LON, DANE._1_W_LAT, DANE._3_E_SZER_R, -1000, szer_mapy);
         this.Y = mapuj(LAT, DANE._4_N_WYS, DANE._2_S_LON, -1000, wys_mapy);
 

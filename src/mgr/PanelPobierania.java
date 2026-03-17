@@ -273,7 +273,11 @@ public class PanelPobierania extends javax.swing.JPanel {
         jLabel6.setText("Plik pomyślnie zapisano w: ////");
 
         jTextFieldNazwaPliku.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jTextFieldNazwaPliku.setText("el");
+        jTextFieldNazwaPliku.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldNazwaPlikuActionPerformed(evt);
+            }
+        });
 
         jButtonPobierz.setText("Pobierz");
         jButtonPobierz.addActionListener(new java.awt.event.ActionListener() {
@@ -494,18 +498,19 @@ public class PanelPobierania extends javax.swing.JPanel {
                 .addComponent(jButton4)
                 .addGap(76, 76, 76))
             .addGroup(layout.createSequentialGroup()
-                .addGap(107, 107, 107)
-                .addComponent(jRadioButtonGran)
-                .addGap(38, 38, 38)
-                .addComponent(jRadioButtonpProst)
-                .addGap(28, 28, 28)
-                .addComponent(jRadioButtonOkrag)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(264, 264, 264)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButtonPobierz, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(107, 107, 107)
+                        .addComponent(jRadioButtonGran)
+                        .addGap(38, 38, 38)
+                        .addComponent(jRadioButtonpProst)
+                        .addGap(28, 28, 28)
+                        .addComponent(jRadioButtonOkrag))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(264, 264, 264)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButtonPobierz, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -621,6 +626,7 @@ public class PanelPobierania extends javax.swing.JPanel {
 
     private void jButtonPobierzActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPobierzActionPerformed
         // TODO add your handling code here:
+        DANE.nazwaPliku = jTextFieldNazwaPliku.getText();
         if (!jTextField1.getText().isEmpty()
                 && !jTextField2.getText().isEmpty()
                 && !jTextField3.getText().isEmpty()
@@ -818,6 +824,10 @@ public class PanelPobierania extends javax.swing.JPanel {
 
 
     }//GEN-LAST:event_szer_inputKeyReleased
+
+    private void jTextFieldNazwaPlikuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldNazwaPlikuActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldNazwaPlikuActionPerformed
 
     private void wywolajListenery() {
         jTextField1.addFocusListener(new FocusAdapter() {
