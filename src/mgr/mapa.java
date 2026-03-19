@@ -2,6 +2,7 @@ package mgr;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import static java.lang.Math.abs;
@@ -103,7 +104,6 @@ public class mapa extends javax.swing.JPanel {
         try {
             rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
 
-//            for (Droga d : drogi) {
             for (Long ID : drogi.keySet()) {
 //                if (d.maxspeed != -1) {
 //                    rysujDroge(d, Color.GREEN, g2d_zawartosc);
@@ -136,6 +136,10 @@ public class mapa extends javax.swing.JPanel {
             }
 
             rysuj_wezly(g2d_zawartosc);
+            if (WYNIKI.czyWynikiDijkstra) {
+                rysujWartosciDijkstra(g2d_zawartosc, WYNIKI.wartosc_wezlow_dijkstra);
+            }
+
         } finally {
             // wyrzucamy kopię, przywracamy oryginalny kontekst dla Swinga
             g2d_zawartosc.dispose();
@@ -522,4 +526,19 @@ public class mapa extends javax.swing.JPanel {
     private mgr.RoundedJPanel roundedJPanel1;
     private javax.swing.JLabel skala_label;
     // End of variables declaration//GEN-END:variables
+
+    private void rysujWartosciDijkstra(Graphics2D g2d, Map<Long, Double> wartoscWezlow) {
+
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 5));
+
+        for (Long wez_id : wartoscWezlow.keySet()) {
+            float x = (float) DANE.wezly.get(wez_id).X;
+            float y = (float) DANE.wezly.get(wez_id).Y;
+            String wartosc = String.format("%.1f", wartoscWezlow.get(wez_id));
+            if (!wartosc.equalsIgnoreCase("infinity")) {
+                g2d.drawString(wartosc, x + 5, y);
+            }
+        }
+    }
 }

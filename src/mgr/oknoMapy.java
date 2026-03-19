@@ -4,6 +4,9 @@
  */
 package mgr;
 
+import mgr.ALGORYTMY.ALGDIJKSTRA;
+import mgr.ALGORYTMY.ALGGEN;
+import mgr.ALGORYTMY.AntColonyAlg;
 import java.util.List;
 
 /**
@@ -201,6 +204,7 @@ public class oknoMapy extends javax.swing.JFrame {
         for (Droga droga : DANE.ALG_SCIEZKA) {
             System.out.println(droga.ID);
         }
+        WYNIKI.wartosc_wezlow_dijkstra = algdij.getWartosc_wezlow();
         mapa1.repaint();
     }//GEN-LAST:event_jButton2ActionPerformed
 

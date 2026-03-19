@@ -22,7 +22,6 @@ import java.time.Instant;
 public class Main extends javax.swing.JFrame {
 
     private double N, E, W, S;
-    private List<TrafficSegment> segments; // pole klasy, żeby trzymać dane
     private LinkedList<String> daneTXT;
 
     public Main() {

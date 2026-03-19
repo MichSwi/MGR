@@ -1,4 +1,4 @@
-package mgr;
+package mgr.ALGORYTMY;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import mgr.DANE;
+import mgr.Droga;
+import mgr.WYNIKI;
+import mgr.Wezel;
 
 public class ALGDIJKSTRA {
 
@@ -58,6 +62,7 @@ public class ALGDIJKSTRA {
 
             // jeśli doszliśmy do celu, można zakończyć
             if (akt_wez.equals(pktKoniec)) {
+                WYNIKI.czyWynikiDijkstra=true;
                 break;
             }
 
@@ -69,7 +74,6 @@ public class ALGDIJKSTRA {
 //                if (!czyDozwolona(akt_wez, polaczenie_id)){
 //                    continue;
 //                }
-
                 // sąsiad już odwiedzony
                 if (!nieodwiedzone.contains(przeciwny_wezel)) {
                     continue;
@@ -86,16 +90,6 @@ public class ALGDIJKSTRA {
             }
         }
     }
-
-//    private Long getPrzeciwnyWezelId(Long akt_wez, Long droga) {
-//        if (drogi.get(droga).pkt_start.ID == akt_wez) {
-//            return drogi.get(droga).pkt_koniec.ID;
-//        } else if (drogi.get(droga).pkt_koniec.ID == akt_wez) {
-//            return drogi.get(droga).pkt_start.ID;
-//        } else {
-//            throw new IllegalArgumentException("brak aktualnego wezla w polaczeniu");
-//        }
-//    }
 
     public Double getKosztDoKonca() {
         return wartosc_wezlow.get(pktKoniec);
@@ -135,15 +129,8 @@ public class ALGDIJKSTRA {
         return sciezkaDrog;
     }
 
-//    private boolean czyDozwolona(long poczatek_id, long droga_id) {
-//        Droga droga = drogi.get(droga_id);
-//        if (droga.jednokierunkowa == true) {
-//            if (droga.pkt_start.ID == poczatek_id) {
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
+    public Map<Long, Double> getWartosc_wezlow() {
+        return wartosc_wezlow;
+    }
+
 }

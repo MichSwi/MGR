@@ -1,4 +1,4 @@
-package mgr;
+package mgr.ALGORYTMY;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -6,11 +6,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import mgr.DANE;
+import mgr.Droga;
+import mgr.Wezel;
 
 public class ALGGEN {
 
     private int max_dlugosc_sciezki = 3000;
     private int max_iteracji = 40000;
+    private int ilosc_osobnikow = 10;
+    private List<OSOBNIK> populacja = new ArrayList<>(); 
 
     public Map<Long, Droga> drogi = new HashMap<>();
  
@@ -18,11 +23,6 @@ public class ALGGEN {
     private Wezel pktKoniec;
     private Map<Long, Wezel> wezly = new HashMap<>();
     private List<Droga> SCIEZKA_DROG = new ArrayList<>();
-    
-    // ALG GEN
-//    private List<List<Droga>> OSOBNIki = new ArrayList<>();
-//    private int ilosc_osobnikow=10;
-//    
     
     public ALGGEN() {
         this.drogi = DANE.drogi;
@@ -40,12 +40,9 @@ public class ALGGEN {
     }
 
     public void startAlg() {
-        this.SCIEZKA_DROG = znajdz_losowa_sciezke(this.pktStart, this.pktKoniec);
-        DANE.ALG_SCIEZKA = this.SCIEZKA_DROG;
-//        while(true){
-//            inicjjalizacja();   
-//            
-//        } 
+
+        init_pop();   
+        
     }
 
     private List<Droga> znajdz_losowa_sciezke(Wezel pkt_startowy, Wezel pkt_koncowy) {
@@ -168,10 +165,11 @@ public class ALGGEN {
         }
         return new_wez;
     }
-//
-//    private void inicjjalizacja() {
-//        for(int i=1; i<=this.ilosc_osobnikow; i++){
-//            this.OSOBNIki.add(this.znajdz_losowa_sciezke(pktStart, pktKoniec));
-//        }
-//    }
+
+    private void init_pop() {
+        for(int i=1; i<=this.ilosc_osobnikow; i++){
+            this.populacja.add(new OSOBNIK(this.znajdz_losowa_sciezke(pktStart, pktKoniec)));
+        }
+    }
+
 }

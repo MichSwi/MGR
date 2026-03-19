@@ -90,12 +90,12 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             DANE._2_S_LON = info.get2_S_LON();
             DANE._3_E_SZER_R = info.get3_E_SZER_R();
             DANE._4_N_WYS = info.get4_N_WYS();
-            
+
             System.out.println("W=" + DANE._1_W_LAT);
-System.out.println("S=" + DANE._2_S_LON);
-System.out.println("E=" + DANE._3_E_SZER_R);
-System.out.println("N=" + DANE._4_N_WYS);
-            
+            System.out.println("S=" + DANE._2_S_LON);
+            System.out.println("E=" + DANE._3_E_SZER_R);
+            System.out.println("N=" + DANE._4_N_WYS);
+
             czytajOSM();
         }
 
@@ -229,6 +229,7 @@ System.out.println("N=" + DANE._4_N_WYS);
         for (String endpoint : endpoints) {
             String urlStr = endpoint + "?data=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
             System.out.println("➡ Pobieram z: " + endpoint);
+            System.out.println(urlStr);
             try {
                 HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
                 conn.setRequestMethod("GET");
