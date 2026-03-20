@@ -164,6 +164,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         DANE.ruchUliczny.clear();
         DANE.ruchUliczny.addAll(this.ruchUliczny);
 
+        DANE.ustawToryWode();
         DANE.ustawOdleglosci();
         DANE.ustawStartKoniec();
         DANE.ustawPolaczenia();
@@ -180,15 +181,41 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         String query = "";
         // 1 - granice  2 - obszar  3 - kolo
         if (tryb == 1) {
+//            query = String.format(Locale.US,
+//                    "[out:xml][timeout:60];"
+//                    + "("
+//                    + "way[\"highway\"]"
+//                    + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|service|driveway)$\"]"
+//                    + "(%.6f,%.6f,%.6f,%.6f);"
+//                    + ");"
+//                    + "(._;>;);"
+//                    + "out body;",
+//                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R
+//            );
             query = String.format(Locale.US,
                     "[out:xml][timeout:60];"
                     + "("
                     + "way[\"highway\"]"
                     + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|service|driveway)$\"]"
                     + "(%.6f,%.6f,%.6f,%.6f);"
+                    + "way[\"railway\"~\"^(rail|tram|light_rail|subway)$\"]"
+                    + "(%.6f,%.6f,%.6f,%.6f);"
+                    + "way[\"natural\"=\"water\"]"
+                    + "(%.6f,%.6f,%.6f,%.6f);"
+                    + "relation[\"natural\"=\"water\"]"
+                    + "(%.6f,%.6f,%.6f,%.6f);"
+                    + "way[\"waterway\"]"
+                    + "(%.6f,%.6f,%.6f,%.6f);"
+                    + "relation[\"waterway\"]"
+                    + "(%.6f,%.6f,%.6f,%.6f);"
                     + ");"
                     + "(._;>;);"
                     + "out body;",
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R
             );
 
@@ -385,7 +412,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                         }
                     }
                 }
-
+boolean czyDrogaSamochodowa = biezaca.tags.containsKey("highway");
                 // punkty
                 NodeList nds = elemWay.getElementsByTagName("nd");
                 for (int j = 0; j < nds.getLength(); j++) {
@@ -402,7 +429,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     boolean czyPoczatekLubKoniec = (j != 0 && j != nds.getLength() - 1);
 
                     // ciecie na wezle wspolnym jesli to punk nie koniec i nie poczatek
-                    if (czyWspolnyNode && czyPoczatekLubKoniec) {
+                    if (czyWspolnyNode && czyPoczatekLubKoniec && czyDrogaSamochodowa) {
 
                         // zamkniecie starego segmentu
                         if (!biezaca.punkty.isEmpty()) {

@@ -4,7 +4,6 @@
  */
 package mgr.ALGORYTMY;
 
-import mgr.*;
 import java.util.HashMap;
 import java.util.Map;
 

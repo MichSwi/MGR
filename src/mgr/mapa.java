@@ -23,7 +23,8 @@ public class mapa extends javax.swing.JPanel {
     private Map<Long, Wezel> wezly = DANE.wezly;
 
     Color czerw_przezr = new Color(255, 0, 0, 44); // czerwony, 17% widoczności
-
+    Color kolor_wody = new Color(39, 106, 245, 100);
+    
     public mapa() {
         initComponents();
 
@@ -134,7 +135,7 @@ public class mapa extends javax.swing.JPanel {
                     //System.out.println("rysuje jedna droge");
                 }
             }
-
+            rysuj_wode_tory(g2d_zawartosc);
             rysuj_wezly(g2d_zawartosc);
             if (WYNIKI.czyWynikiDijkstra) {
                 rysujWartosciDijkstra(g2d_zawartosc, WYNIKI.wartosc_wezlow_dijkstra);
@@ -539,6 +540,50 @@ public class mapa extends javax.swing.JPanel {
             if (!wartosc.equalsIgnoreCase("infinity")) {
                 g2d.drawString(wartosc, x + 5, y);
             }
+        }
+    }
+
+    private void rysuj_wode_tory(Graphics2D g2d) {
+        // tory
+        for (Long kolej_id : DANE.kolej.keySet()) {
+            Droga kolej = DANE.kolej.get(kolej_id);
+            rysujDroge(kolej, Color.DARK_GRAY, g2d);
+        }
+
+        // rzeki
+        for (Long rzeka_id : DANE.rzeki.keySet()) {
+            Droga rzeka = DANE.rzeki.get(rzeka_id);
+            rysujDroge(rzeka, this.kolor_wody, g2d);
+        }
+
+        // zbiorniki wodne
+        for (Long zbiornik_id : DANE.woda.keySet()) {
+            Droga zbiornik = DANE.woda.get(zbiornik_id);
+
+            if (zbiornik == null || zbiornik.punkty == null || zbiornik.punkty.size() < 3) {
+                continue;
+            }
+
+            Punkt pierwszy = zbiornik.punkty.get(0);
+            Punkt ostatni = zbiornik.punkty.get(zbiornik.punkty.size() - 1);
+
+            // rysuj tylko zamkniete obrysy
+            if (pierwszy.ID != ostatni.ID) {
+                continue;
+            }
+
+            int nPoints = zbiornik.punkty.size();
+            int[] xPoints = new int[nPoints];
+            int[] yPoints = new int[nPoints];
+
+            for (int i = 0; i < nPoints; i++) {
+                Punkt p = zbiornik.punkty.get(i);
+                xPoints[i] = (int) p.X;
+                yPoints[i] = (int) p.Y;
+            }
+            g2d.setColor(kolor_wody);
+            g2d.drawPolygon(xPoints, yPoints, nPoints);
+            g2d.fillPolygon(xPoints, yPoints, nPoints);
         }
     }
 }

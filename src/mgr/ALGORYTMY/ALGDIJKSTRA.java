@@ -68,12 +68,8 @@ public class ALGDIJKSTRA {
 
             // sprawdzanie sasiadow
             for (Long polaczenie_id : wezly.get(akt_wez).drogiIDs) {
-                //Long przeciwny_wezel = getPrzeciwnyWezelId(akt_wez, polaczenie_id);
                 Long przeciwny_wezel = drogi.get(polaczenie_id).getPrzeciwnyWezelId(akt_wez);
 
-//                if (!czyDozwolona(akt_wez, polaczenie_id)){
-//                    continue;
-//                }
                 // sąsiad już odwiedzony
                 if (!nieodwiedzone.contains(przeciwny_wezel)) {
                     continue;

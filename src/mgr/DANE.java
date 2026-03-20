@@ -26,6 +26,10 @@ public class DANE {
 
     public static List<Droga> ALG_SCIEZKA = new ArrayList<>();
 
+    public static Map<Long, Droga> rzeki = new HashMap<>();
+    public static Map<Long, Droga> woda = new HashMap<>();
+    public static Map<Long, Droga> kolej = new HashMap<>();
+
     public static void ustawPolaczenia() {
 
         System.out.println("WSZYSTKIE: " + drogi.size());
@@ -106,7 +110,7 @@ public class DANE {
             } else if (d.jednokierunkowa.equals("false")) {
                 ws.dodajDroge(d.ID);
                 wk.dodajDroge(d.ID);
-            } else if (d.jednokierunkowa.equals("-1")){
+            } else if (d.jednokierunkowa.equals("-1")) {
                 // jednokierunkowa ale w druga strone (od pkt_koniec do pkt_pocz)
                 wk.dodajDroge(d.ID);
             }
@@ -134,4 +138,54 @@ public class DANE {
         System.out.println("stop debug");
     }
 
+    public static void ustawToryWode() {
+        kolej.clear();
+        rzeki.clear();
+        woda.clear();
+
+        List<Long> doUsuniecia = new ArrayList<>();
+
+        for (Map.Entry<Long, Droga> entry : drogi.entrySet()) {
+            Long id = entry.getKey();
+            Droga d = entry.getValue();
+
+            if (d == null || d.tags == null) {
+                continue;
+            }
+
+            String railway = d.tags.get("railway");
+            String waterway = d.tags.get("waterway");
+            String natural = d.tags.get("natural");
+            String water = d.tags.get("water");
+
+            // KOLEJ
+            if (railway != null) {
+                kolej.put(id, d);
+                doUsuniecia.add(id);
+                continue;
+            }
+
+            // WODY OBSZAROWE: jeziora, stawy, zbiorniki itd.
+            if ("water".equals(natural) || water != null) {
+                woda.put(id, d);
+                doUsuniecia.add(id);
+                continue;
+            }
+
+            // WODY LINIOWE: rzeki, strumienie, kanały itd.
+            if (waterway != null) {
+                rzeki.put(id, d);
+                doUsuniecia.add(id);
+            }
+        }
+
+        for (Long id : doUsuniecia) {
+            drogi.remove(id);
+        }
+
+        System.out.println("Przeniesiono kolej: " + kolej.size());
+        System.out.println("Przeniesiono rzeki: " + rzeki.size());
+        System.out.println("Przeniesiono zbiorniki wodne: " + woda.size());
+        System.out.println("Pozostalo drog: " + drogi.size());
+    }
 }

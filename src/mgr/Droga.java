@@ -4,7 +4,6 @@
  */
 package mgr;
 
-import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -52,7 +51,7 @@ public class Droga {
 
     public void ustawOdleglosc() {
         // WZOREM HAVERSINE
-        
+
         this.dlugosc = 0.0;
 
         for (int i = 0; i < punkty.size() - 1; i++) {
@@ -67,12 +66,12 @@ public class Droga {
             this.dlugosc += Math.sqrt(dx * dx + dy * dy);
         }
     }
-    
+
     public Long getPrzeciwnyWezelId(Long wez) {
-        
-        if (this.pkt_start.ID == wez){
+
+        if (this.pkt_start.ID == wez) {
             return this.pkt_koniec.ID;
-        } else if(this.pkt_koniec.ID == wez){
+        } else if (this.pkt_koniec.ID == wez) {
             return this.pkt_start.ID;
         } else {
             throw new IllegalArgumentException("brak przeciwnego wezla w polaczeniu");

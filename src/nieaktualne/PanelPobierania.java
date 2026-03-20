@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package mgr;
+package nieaktualne;
 
 import java.awt.Color;
 import java.awt.event.FocusAdapter;
@@ -24,6 +24,11 @@ import org.json.JSONObject;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import mgr.DANE;
+import mgr.Droga;
+import mgr.Punkt;
+import mgr.TrafficSegment;
+import mgr.WatekPobierz;
 
 /**
  *

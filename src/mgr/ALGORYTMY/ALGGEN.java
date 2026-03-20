@@ -13,7 +13,8 @@ import mgr.Wezel;
 public class ALGGEN {
 
     private int max_dlugosc_sciezki = 3000;
-    private int max_iteracji = 40000;
+    private int max_iter_alg = 100;
+    private int max_iteracji_los_sciezki = 40000;
     private int ilosc_osobnikow = 10;
     private List<OSOBNIK> populacja = new ArrayList<>(); 
 
@@ -41,7 +42,20 @@ public class ALGGEN {
 
     public void startAlg() {
 
-        init_pop();   
+        init_pop();
+        
+        int iter=0;
+        OSOBNIK najlepszy = new OSOBNIK();
+        while(iter>this.max_iter_alg){
+            ocen_osobnikow();
+            zapisz_najlepszego(najlepszy);
+            selekcja();
+            // wybierz najlepszych do krzyzowania
+            // krzyzuj
+            
+            
+            iter++;
+        }
         
     }
 
@@ -95,11 +109,11 @@ public class ALGGEN {
             }
 
             iter++;
-            if (iter > max_iteracji) {
+            if (iter > max_iteracji_los_sciezki) {
                 aktualny_wezel = pkt_startowy;
                 uzyte_wezly.clear();
                 sciezka.clear();
-                System.out.println("petla WHILE przekroczyl " + this.max_iteracji + " iteracji");
+                System.out.println("petla WHILE przekroczyl " + this.max_iteracji_los_sciezki + " iteracji");
                 return new ArrayList<>();
             }
         }
@@ -172,4 +186,33 @@ public class ALGGEN {
         }
     }
 
+    private void ocen_osobnikow() {
+        for (OSOBNIK osob : this.populacja){
+            osob.ocenOsobnika();
+        }
+    }
+
+    private void zapisz_najlepszego(OSOBNIK najlepszy) {
+        for (OSOBNIK os : populacja){
+            if( najlepszy.ocena > os.ocena){
+                najlepszy = os;
+            }
+        }
+    }
+
+    private List<OSOBNIK> selekcja() {
+        List<OSOBNIK> wybrani = null;
+//        
+//        Double suma_ocen = 0.0;
+//        for (OSOBNIK os : populacja){
+//            suma_ocen += os.ocena;
+//        }
+
+    // najlepszych polowa
+    for (OSOBNIK os : populacja){
+        
+    }
+        
+        return wybrani;
+    }
 }
