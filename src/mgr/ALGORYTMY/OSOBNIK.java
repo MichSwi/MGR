@@ -7,6 +7,7 @@ package mgr.ALGORYTMY;
 import java.util.ArrayList;
 import java.util.List;
 import mgr.Droga;
+import mgr.Wezel;
 
 /**
  *
@@ -14,21 +15,23 @@ import mgr.Droga;
  */
 public class OSOBNIK {
 
-    public List<Droga> trasa = new ArrayList<>();
+    public List<Droga> trasa_drogi = new ArrayList<>();
+    public List<Wezel> trasa_wezly = new ArrayList<>();
     public Double ocena = 0.0;
 
-    public OSOBNIK(List<Droga> trasa) {
-        this.trasa = trasa;
-        for (Droga dr : trasa) {
+    public OSOBNIK(List<Droga> trasa_drog, List<Wezel> trasa_wez) {
+        this.trasa_drogi = trasa_drog;
+        for (Droga dr : trasa_drog) {
             this.ocena += dr.dlugosc;
         }
+        this.trasa_wezly=trasa_wez;
     }
 
     public OSOBNIK() {
     }
 
     public void ocenOsobnika() {
-        for (Droga dr : this.trasa) {
+        for (Droga dr : this.trasa_drogi) {
             this.ocena += dr.dlugosc;
         }
     }

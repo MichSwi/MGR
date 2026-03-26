@@ -39,8 +39,8 @@ public class Punkt {
     }
 
     public void ustawXY() {
-        double szer_mapy = 1000;
-        double wys_mapy = 1000;
+        double szer_mapy = 1023;
+        double wys_mapy = 886;
 
 //        System.out.println("PUNKT ID=" + ID);
 //        System.out.println("LON=" + LON + "  W=" + DANE._1_W_LAT + "  E=" + DANE._3_E_SZER_R);

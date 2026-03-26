@@ -23,7 +23,7 @@ public class mapa extends javax.swing.JPanel {
     private Map<Long, Wezel> wezly = DANE.wezly;
 
     Color czerw_przezr = new Color(255, 0, 0, 44); // czerwony, 17% widoczności
-    Color kolor_wody = new Color(39, 106, 245, 100);
+    Color kolor_wody = new Color(139, 188, 255);
     
     public mapa() {
         initComponents();
@@ -161,6 +161,10 @@ public class mapa extends javax.swing.JPanel {
     }
 
     private void rysujPodzialke(Graphics2D g2d_podzialka_poz, Graphics2D g2d_podzialka_pion) {
+        // sztywna skala dla kresek
+        g2d_podzialka_poz.setStroke(new BasicStroke((float)(1.0 / scale())));
+        g2d_podzialka_pion.setStroke(new BasicStroke((float)(1.0 / scale())));
+        
         int ilosc_podzialek_poz = 8;
         int ilosc_podzialek_pion = (int) (ilosc_podzialek_poz * this.getHeight() / this.getWidth()) + 1;
 
@@ -189,7 +193,7 @@ public class mapa extends javax.swing.JPanel {
             }
             // rysuj kreskę w przeskalowanym układzie
             g2d_podzialka_poz.drawLine(x_world, -10, x_world, 10);
-
+            
             // --- kontr-skalowanie dla tekstu ---
             AffineTransform old = g2d_podzialka_poz.getTransform();
             g2d_podzialka_poz.translate(x_world, 0);           // ustaw świat na xw
@@ -231,14 +235,6 @@ public class mapa extends javax.swing.JPanel {
         x = x - r / 2;
         y = y - r / 2;
         g2d.fillOval((int) x, (int) y, (int) r, (int) r);
-    }
-
-    private void rysujLinijke(Graphics2D g2d) {
-        g2d.setColor(Color.BLACK);
-        g2d.setStroke(new BasicStroke(3));
-        int odstep = 15;
-        g2d.drawLine(odstep, odstep, this.getWidth() - 2 * odstep, odstep);
-        g2d.drawLine(odstep, odstep, odstep, this.getHeight() - 2 * odstep);
     }
 
     private double scale() {

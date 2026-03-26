@@ -2,6 +2,7 @@ package mgr.ALGORYTMY;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,15 +17,16 @@ public class ALGGEN {
     private int max_iter_alg = 100;
     private int max_iteracji_los_sciezki = 40000;
     private int ilosc_osobnikow = 10;
-    private List<OSOBNIK> populacja = new ArrayList<>(); 
+    private List<OSOBNIK> populacja = new ArrayList<>();
 
     public Map<Long, Droga> drogi = new HashMap<>();
- 
+
     private Wezel pktStart;
     private Wezel pktKoniec;
     private Map<Long, Wezel> wezly = new HashMap<>();
     private List<Droga> SCIEZKA_DROG = new ArrayList<>();
-    
+    private List<Wezel> SCIEZKA_WEZLOW = new ArrayList<>();
+
     public ALGGEN() {
         this.drogi = DANE.drogi;
         this.pktStart = DANE.wezelStartowyAlgorytmu;
@@ -43,34 +45,34 @@ public class ALGGEN {
     public void startAlg() {
 
         init_pop();
-        
-        int iter=0;
+
+        int iter = 0;
         OSOBNIK najlepszy = new OSOBNIK();
-        while(iter>this.max_iter_alg){
+        while (iter > this.max_iter_alg) {
             ocen_osobnikow();
             zapisz_najlepszego(najlepszy);
-            selekcja();
-            // wybierz najlepszych do krzyzowania
+            populacja = selekcja_PolowaNajlepszych();
+            krzyzuj();
             // krzyzuj
-            
-            
+
             iter++;
         }
-        
+
     }
 
-    private List<Droga> znajdz_losowa_sciezke(Wezel pkt_startowy, Wezel pkt_koncowy) {
+    private OSOBNIK znajdz_losowa_sciezke(Wezel pkt_startowy, Wezel pkt_koncowy) {
         if (pkt_startowy == null || pkt_koncowy == null) {
             throw new IllegalArgumentException("brak pkt_start lub pkt_koniec dla znajdz_losowa_sciezke");
         }
 
         // ta funkcja szuka losowej drogi
+        List<Wezel> sciezka_wezly = new ArrayList<>();
         List<Droga> sciezka = new ArrayList<>();
         Set<Long> uzyte_wezly = new HashSet<>();
         List<Long> mozliwe_kolejne_wezly;
         Long wylosowany_wezel_id;
         int iter = 0;
-
+        sciezka_wezly.add(pktStart);
         Wezel aktualny_wezel = pkt_startowy;
         while (true) {
             // znalezc mozliwe kolejne wezly
@@ -80,6 +82,7 @@ public class ALGGEN {
                 aktualny_wezel = pkt_startowy;
                 uzyte_wezly.clear();
                 sciezka.clear();
+                sciezka_wezly.clear();
                 continue;
             }
 
@@ -88,10 +91,13 @@ public class ALGGEN {
 
             // dodaj droge do sciezki
             dodaj_droge_do_sciezki(aktualny_wezel, wezly.get(wylosowany_wezel_id), sciezka);
+            sciezka_wezly.add(wezly.get(wylosowany_wezel_id));
+
             if (sciezka.size() > max_dlugosc_sciezki) {
                 aktualny_wezel = pkt_startowy;
                 uzyte_wezly.clear();
                 sciezka.clear();
+                sciezka_wezly.clear();
                 continue;
             }
 
@@ -105,7 +111,8 @@ public class ALGGEN {
             if (aktualny_wezel.ID == pkt_koncowy.ID) {
                 System.out.println("Znalezniono sciezke!");
                 System.out.println("sciezka drog: " + sciezka);
-                return sciezka;
+
+                return new OSOBNIK(sciezka, sciezka_wezly);
             }
 
             iter++;
@@ -113,8 +120,9 @@ public class ALGGEN {
                 aktualny_wezel = pkt_startowy;
                 uzyte_wezly.clear();
                 sciezka.clear();
+                sciezka_wezly.clear();
                 System.out.println("petla WHILE przekroczyl " + this.max_iteracji_los_sciezki + " iteracji");
-                return new ArrayList<>();
+                return null;
             }
         }
     }
@@ -181,38 +189,63 @@ public class ALGGEN {
     }
 
     private void init_pop() {
-        for(int i=1; i<=this.ilosc_osobnikow; i++){
-            this.populacja.add(new OSOBNIK(this.znajdz_losowa_sciezke(pktStart, pktKoniec)));
+        for (int i = 1; i <= this.ilosc_osobnikow; i++) {
+            this.populacja.add(this.znajdz_losowa_sciezke(pktStart, pktKoniec));
         }
     }
 
     private void ocen_osobnikow() {
-        for (OSOBNIK osob : this.populacja){
+        for (OSOBNIK osob : this.populacja) {
             osob.ocenOsobnika();
         }
     }
 
     private void zapisz_najlepszego(OSOBNIK najlepszy) {
-        for (OSOBNIK os : populacja){
-            if( najlepszy.ocena > os.ocena){
+        for (OSOBNIK os : populacja) {
+            if (najlepszy.ocena > os.ocena) {
                 najlepszy = os;
             }
         }
     }
 
-    private List<OSOBNIK> selekcja() {
-        List<OSOBNIK> wybrani = null;
-//        
-//        Double suma_ocen = 0.0;
-//        for (OSOBNIK os : populacja){
-//            suma_ocen += os.ocena;
-//        }
-
-    // najlepszych polowa
-    for (OSOBNIK os : populacja){
-        
+    private List<OSOBNIK> selekcja_PolowaNajlepszych() {
+        populacja.sort(Comparator.comparingDouble(osobnik -> osobnik.ocena));
+        List<OSOBNIK> polowaZNajnizszaOcena = populacja.subList(0, populacja.size() / 2);
+        return polowaZNajnizszaOcena;
     }
+
+    private List<OSOBNIK> operacja_krzyzowanie(List<OSOBNIK> pop) {
+        List<OSOBNIK> skrzyzowane = new ArrayList<>();
+
+        for (int i = 0; i < pop.size(); i++) {
+            if (i == pop.size() - 1) {
+                skrzyzowane.add(krzyzuj(pop.getFirst(), pop.getLast()));
+                break;
+            }
+            skrzyzowane.add(krzyzuj(pop.get(i), pop.get(i + 1)));
+        }
+
+        return skrzyzowane;
+    }
+
+    private OSOBNIK krzyzuj(OSOBNIK os1, OSOBNIK os2) {
+        // dwoch osobnikow ma trasy       
+
+        int size1 = os1.trasa_wezly.size();
+        int size2 = os2.trasa_wezly.size();
+
+        List<Wezel> czesc11w, czesc22w;
+        List<Droga> czesc11d, czesc22d;
+
+        int random = randomInt(1, size1 - 2);
+        czesc11w = new ArrayList<>(os1.trasa_wezly.subList(0, random));
+        czesc11d = new ArrayList<>(os1.trasa_drogi.subList(0, random));
         
-        return wybrani;
+        random = randomInt(1, size2 - 2);
+        czesc22w = new ArrayList<>(os2.trasa_wezly.subList(random, size2-1));
+        czesc22d = new ArrayList<>(os2.trasa_drogi.subList(random, size2-1));
+        
+        OSOBNIK losowa_droga = new OSOBNIK(czesc11w.getLast().ID, czesc22w.getFirst().ID);
+        
     }
 }

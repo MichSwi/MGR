@@ -14,6 +14,8 @@ import java.util.Map;
 public class WYNIKI {
     
     public static boolean czyWynikiDijkstra = false;
+    public static boolean czyWynikiAlgGen = false;
+    public static boolean czyWynikiAntColony = false;
     public static Map<Long, Double> wartosc_wezlow_dijkstra = new HashMap<>();
     
 }
