@@ -27,6 +27,9 @@ public class ALGGEN {
     private List<Droga> SCIEZKA_DROG = new ArrayList<>();
     private List<Wezel> SCIEZKA_WEZLOW = new ArrayList<>();
 
+    private final double szansaKrzyzowanie = 0.8;
+    private final double szansaMutacja = 0.1;
+
     public ALGGEN() {
         this.drogi = DANE.drogi;
         this.pktStart = DANE.wezelStartowyAlgorytmu;
@@ -48,12 +51,14 @@ public class ALGGEN {
 
         int iter = 0;
         OSOBNIK najlepszy = new OSOBNIK();
-        while (iter > this.max_iter_alg) {
+        while (iter < this.max_iter_alg) {
             ocen_osobnikow();
-            zapisz_najlepszego(najlepszy);
+            najlepszy = znajdz_najlepszego();
+
             populacja = selekcja_PolowaNajlepszych();
-            krzyzuj();
-            // krzyzuj
+            List<OSOBNIK> dzieci = operacja_krzyzowanie(populacja);
+            populacja.addAll(dzieci);
+            operacja_mutacja(populacja);
 
             iter++;
         }
@@ -72,7 +77,7 @@ public class ALGGEN {
         List<Long> mozliwe_kolejne_wezly;
         Long wylosowany_wezel_id;
         int iter = 0;
-        sciezka_wezly.add(pktStart);
+        sciezka_wezly.add(pkt_startowy);
         Wezel aktualny_wezel = pkt_startowy;
         while (true) {
             // znalezc mozliwe kolejne wezly
@@ -83,6 +88,7 @@ public class ALGGEN {
                 uzyte_wezly.clear();
                 sciezka.clear();
                 sciezka_wezly.clear();
+                sciezka_wezly.add(pkt_startowy);
                 continue;
             }
 
@@ -98,6 +104,7 @@ public class ALGGEN {
                 uzyte_wezly.clear();
                 sciezka.clear();
                 sciezka_wezly.clear();
+                sciezka_wezly.add(pkt_startowy);
                 continue;
             }
 
@@ -121,8 +128,9 @@ public class ALGGEN {
                 uzyte_wezly.clear();
                 sciezka.clear();
                 sciezka_wezly.clear();
+                sciezka_wezly.add(pkt_startowy);
                 System.out.println("petla WHILE przekroczyl " + this.max_iteracji_los_sciezki + " iteracji");
-                return null;
+                //return null;
             }
         }
     }
@@ -200,18 +208,25 @@ public class ALGGEN {
         }
     }
 
-    private void zapisz_najlepszego(OSOBNIK najlepszy) {
+    private OSOBNIK znajdz_najlepszego() {
+        if (populacja == null || populacja.isEmpty()) {
+            return null;
+        }
+
+        OSOBNIK najlepszy = populacja.get(0);
+
         for (OSOBNIK os : populacja) {
-            if (najlepszy.ocena > os.ocena) {
+            if (os != null && os.ocena < najlepszy.ocena) {
                 najlepszy = os;
             }
         }
+
+        return najlepszy;
     }
 
     private List<OSOBNIK> selekcja_PolowaNajlepszych() {
         populacja.sort(Comparator.comparingDouble(osobnik -> osobnik.ocena));
-        List<OSOBNIK> polowaZNajnizszaOcena = populacja.subList(0, populacja.size() / 2);
-        return polowaZNajnizszaOcena;
+        return new ArrayList<>(populacja.subList(0, populacja.size() / 2));
     }
 
     private List<OSOBNIK> operacja_krzyzowanie(List<OSOBNIK> pop) {
@@ -219,10 +234,14 @@ public class ALGGEN {
 
         for (int i = 0; i < pop.size(); i++) {
             if (i == pop.size() - 1) {
-                skrzyzowane.add(krzyzuj(pop.getFirst(), pop.getLast()));
+                if (Math.random() < this.szansaKrzyzowanie) {
+                    skrzyzowane.add(krzyzuj(pop.getFirst(), pop.getLast()));
+                }
                 break;
             }
-            skrzyzowane.add(krzyzuj(pop.get(i), pop.get(i + 1)));
+            if (Math.random() < this.szansaKrzyzowanie) {
+                skrzyzowane.add(krzyzuj(pop.get(i), pop.get(i + 1)));
+            }
         }
 
         return skrzyzowane;
@@ -240,12 +259,58 @@ public class ALGGEN {
         int random = randomInt(1, size1 - 2);
         czesc11w = new ArrayList<>(os1.trasa_wezly.subList(0, random));
         czesc11d = new ArrayList<>(os1.trasa_drogi.subList(0, random));
-        
+
         random = randomInt(1, size2 - 2);
-        czesc22w = new ArrayList<>(os2.trasa_wezly.subList(random, size2-1));
-        czesc22d = new ArrayList<>(os2.trasa_drogi.subList(random, size2-1));
-        
-        OSOBNIK losowa_droga = new OSOBNIK(czesc11w.getLast().ID, czesc22w.getFirst().ID);
-        
+        czesc22w = new ArrayList<>(os2.trasa_wezly.subList(random, size2 - 1));
+        czesc22d = new ArrayList<>(os2.trasa_drogi.subList(random, size2 - 1));
+
+        OSOBNIK osobnik_skrzyzowany = znajdz_losowa_sciezke(czesc11w.getLast(), czesc22w.getFirst());
+        osobnik_skrzyzowany.trasa_drogi.addAll(0, czesc11d);
+        osobnik_skrzyzowany.trasa_drogi.addAll(czesc22d);
+        osobnik_skrzyzowany.trasa_wezly.addAll(0, czesc11w);
+        osobnik_skrzyzowany.trasa_wezly.addAll(czesc22w);
+        return osobnik_skrzyzowany;
+    }
+
+    private void operacja_mutacja(List<OSOBNIK> pop) {
+        for (int i = 0; i < pop.size(); i++) {
+            OSOBNIK osob = pop.get(i);
+
+            if (osob == null) {
+                continue;
+            }
+
+            if (Math.random() < this.szansaMutacja) {
+                if (osob.trasa_drogi == null || osob.trasa_wezly == null) {
+                    continue;
+                }
+
+                if (osob.trasa_drogi.size() < 2 || osob.trasa_wezly.size() < 3) {
+                    continue;
+                }
+
+                int punkt_ciecia = randomInt(1, osob.trasa_drogi.size() - 1);
+
+                osob.trasa_drogi.subList(punkt_ciecia, osob.trasa_drogi.size()).clear();
+                osob.trasa_wezly.subList(punkt_ciecia + 1, osob.trasa_wezly.size()).clear();
+
+                Wezel ostatni_wezel = osob.trasa_wezly.get(osob.trasa_wezly.size() - 1);
+
+                OSOBNIK osobnik_zmutowany = znajdz_losowa_sciezke(ostatni_wezel, this.pktKoniec);
+
+                if (osobnik_zmutowany == null) {
+                    continue;
+                }
+
+                osobnik_zmutowany.trasa_drogi.addAll(0, osob.trasa_drogi);
+
+                if (!osobnik_zmutowany.trasa_wezly.isEmpty()) {
+                    osobnik_zmutowany.trasa_wezly.remove(0);
+                }
+                osobnik_zmutowany.trasa_wezly.addAll(0, osob.trasa_wezly);
+
+                pop.set(i, osobnik_zmutowany);
+            }
+        }
     }
 }

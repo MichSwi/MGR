@@ -181,17 +181,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         String query = "";
         // 1 - granice  2 - obszar  3 - kolo
         if (tryb == 1) {
-//            query = String.format(Locale.US,
-//                    "[out:xml][timeout:60];"
-//                    + "("
-//                    + "way[\"highway\"]"
-//                    + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|service|driveway)$\"]"
-//                    + "(%.6f,%.6f,%.6f,%.6f);"
-//                    + ");"
-//                    + "(._;>;);"
-//                    + "out body;",
-//                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R
-//            );
             query = String.format(Locale.US,
                     "[out:xml][timeout:60];"
                     + "("
@@ -209,8 +198,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     + "relation[\"waterway\"]"
                     + "(%.6f,%.6f,%.6f,%.6f);"
                     + ");"
-                    + "(._;>;);"
-                    + "out body;",
+                    + "out geom(%.6f,%.6f,%.6f,%.6f);",
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
@@ -412,26 +401,39 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                         }
                     }
                 }
-boolean czyDrogaSamochodowa = biezaca.tags.containsKey("highway");
+                boolean czyDrogaSamochodowa = biezaca.tags.containsKey("highway");
                 // punkty
                 NodeList nds = elemWay.getElementsByTagName("nd");
                 for (int j = 0; j < nds.getLength(); j++) {
                     Element nd = (Element) nds.item(j);
-                    long ref = Long.parseLong(nd.getAttribute("ref"));
-                    Punkt wezel = allNodes.get(ref);
+
+                    long ref = -1;
+                    if (nd.hasAttribute("ref") && !nd.getAttribute("ref").isBlank()) {
+                        ref = Long.parseLong(nd.getAttribute("ref"));
+                    }
+
+                    Punkt wezel = null;
+
+                    // 1. najpierw próbuj geometrię bezpośrednio z nd (out geom)
+                    if (nd.hasAttribute("lat") && nd.hasAttribute("lon")) {
+                        double lat = Double.parseDouble(nd.getAttribute("lat"));
+                        double lon = Double.parseDouble(nd.getAttribute("lon"));
+                        wezel = new Punkt(lat, lon, TypPunkt.DROGA_PKT, ref);
+                    } // 2. fallback do klasycznego sposobu (out body + >;)
+                    else if (ref != -1) {
+                        wezel = allNodes.get(ref);
+                    }
+
                     if (wezel == null) {
                         continue;
                     }
 
                     wezel.ustawXY();
 
-                    boolean czyWspolnyNode = nodeWayLicznik.getOrDefault(ref, 0) >= 2;
-                    boolean czyPoczatekLubKoniec = (j != 0 && j != nds.getLength() - 1);
+                    boolean czyWspolnyNode = (ref != -1) && nodeWayLicznik.getOrDefault(ref, 0) >= 2;
+                    boolean czySrodek = (j != 0 && j != nds.getLength() - 1);
 
-                    // ciecie na wezle wspolnym jesli to punk nie koniec i nie poczatek
-                    if (czyWspolnyNode && czyPoczatekLubKoniec && czyDrogaSamochodowa) {
-
-                        // zamkniecie starego segmentu
+                    if (czyWspolnyNode && czySrodek && czyDrogaSamochodowa) {
                         if (!biezaca.punkty.isEmpty()) {
                             biezaca.punkty.add(wezel);
                             DANE.drogi.put(biezaca.ID, biezaca);
@@ -439,7 +441,6 @@ boolean czyDrogaSamochodowa = biezaca.tags.containsKey("highway");
                             publish(new stanRealTime(ilosc, (int) (100.0 * ilosc / ilosc_wszystkich), 2));
                         }
 
-                        // nowy segment (węzeł jako POCZĄTEK)
                         licznikSegmentow++;
                         long idSegNowy = idOSM * 100L + licznikSegmentow;
                         Droga nowa = new Droga(idSegNowy);
@@ -450,7 +451,6 @@ boolean czyDrogaSamochodowa = biezaca.tags.containsKey("highway");
 
                         biezaca = nowa;
                         biezaca.punkty.add(wezel);
-
                     } else {
                         biezaca.punkty.add(wezel);
                     }

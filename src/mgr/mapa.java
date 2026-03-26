@@ -24,7 +24,7 @@ public class mapa extends javax.swing.JPanel {
 
     Color czerw_przezr = new Color(255, 0, 0, 44); // czerwony, 17% widoczności
     Color kolor_wody = new Color(139, 188, 255);
-    
+
     public mapa() {
         initComponents();
 
@@ -103,8 +103,7 @@ public class mapa extends javax.swing.JPanel {
         g2d_podzialka_pion.setStroke(new BasicStroke(1));
 
         try {
-            rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
-
+            rysuj_wode_tory(g2d_zawartosc);
             for (Long ID : drogi.keySet()) {
 //                if (d.maxspeed != -1) {
 //                    rysujDroge(d, Color.GREEN, g2d_zawartosc);
@@ -135,11 +134,12 @@ public class mapa extends javax.swing.JPanel {
                     //System.out.println("rysuje jedna droge");
                 }
             }
-            rysuj_wode_tory(g2d_zawartosc);
             rysuj_wezly(g2d_zawartosc);
             if (WYNIKI.czyWynikiDijkstra) {
                 rysujWartosciDijkstra(g2d_zawartosc, WYNIKI.wartosc_wezlow_dijkstra);
             }
+
+            rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
 
         } finally {
             // wyrzucamy kopię, przywracamy oryginalny kontekst dla Swinga
@@ -162,9 +162,9 @@ public class mapa extends javax.swing.JPanel {
 
     private void rysujPodzialke(Graphics2D g2d_podzialka_poz, Graphics2D g2d_podzialka_pion) {
         // sztywna skala dla kresek
-        g2d_podzialka_poz.setStroke(new BasicStroke((float)(1.0 / scale())));
-        g2d_podzialka_pion.setStroke(new BasicStroke((float)(1.0 / scale())));
-        
+        g2d_podzialka_poz.setStroke(new BasicStroke((float) (1.0 / scale())));
+        g2d_podzialka_pion.setStroke(new BasicStroke((float) (1.0 / scale())));
+
         int ilosc_podzialek_poz = 8;
         int ilosc_podzialek_pion = (int) (ilosc_podzialek_poz * this.getHeight() / this.getWidth()) + 1;
 
@@ -193,7 +193,7 @@ public class mapa extends javax.swing.JPanel {
             }
             // rysuj kreskę w przeskalowanym układzie
             g2d_podzialka_poz.drawLine(x_world, -10, x_world, 10);
-            
+
             // --- kontr-skalowanie dla tekstu ---
             AffineTransform old = g2d_podzialka_poz.getTransform();
             g2d_podzialka_poz.translate(x_world, 0);           // ustaw świat na xw
