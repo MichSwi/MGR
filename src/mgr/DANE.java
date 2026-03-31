@@ -76,7 +76,7 @@ public class DANE {
         }
     }
 
-    public static void budujWezlyZDrog() {
+    public static final void budujWezlyZDrog() {
         wezly.clear();
 
         for (Droga d : drogi.values()) {
@@ -118,7 +118,7 @@ public class DANE {
         System.out.print("Dodano wezly");
     }
 
-    public static void ustawRuchUliczny() {
+    public static final void ustawRuchUliczny() {
         int ilosc_dodanego_ruchu = 0;
 
         for (TrafficSegment TF : ruchUliczny) {
@@ -138,7 +138,7 @@ public class DANE {
         System.out.println("stop debug");
     }
 
-    public static void ustawToryWode() {
+    public static final void ustawToryWode() {
         kolej.clear();
         rzeki.clear();
         woda.clear();

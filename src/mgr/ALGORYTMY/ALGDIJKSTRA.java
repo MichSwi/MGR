@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import mgr.DANE;
 import mgr.Droga;
-import mgr.WYNIKI;
 import mgr.Wezel;
 
 public class ALGDIJKSTRA {

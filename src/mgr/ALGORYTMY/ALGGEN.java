@@ -13,9 +13,9 @@ import mgr.Wezel;
 
 public class ALGGEN {
 
-    private int max_dlugosc_sciezki = 3000;
-    private int max_iter_alg = 100;
-    private int max_iteracji_los_sciezki = 40000;
+    private int max_dlugosc_sciezki = 1000;
+    private int max_iter_alg = 1000;
+    private int max_iteracji_los_sciezki = 80000;
     private int ilosc_osobnikow = 10;
     private List<OSOBNIK> populacja = new ArrayList<>();
 
@@ -24,8 +24,6 @@ public class ALGGEN {
     private Wezel pktStart;
     private Wezel pktKoniec;
     private Map<Long, Wezel> wezly = new HashMap<>();
-    private List<Droga> SCIEZKA_DROG = new ArrayList<>();
-    private List<Wezel> SCIEZKA_WEZLOW = new ArrayList<>();
 
     private final double szansaKrzyzowanie = 0.8;
     private final double szansaMutacja = 0.1;
@@ -46,23 +44,43 @@ public class ALGGEN {
     }
 
     public void startAlg() {
-
         init_pop();
 
         int iter = 0;
-        OSOBNIK najlepszy = new OSOBNIK();
+        OSOBNIK najlepszyGlobalnie = null;
+
         while (iter < this.max_iter_alg) {
+            if (populacja == null || populacja.isEmpty()) {
+                break;
+            }
+
             ocen_osobnikow();
-            najlepszy = znajdz_najlepszego();
+
+            OSOBNIK najlepszyIteracji = znajdz_najlepszego();
+            if (najlepszyIteracji != null) {
+                if (najlepszyGlobalnie == null || najlepszyIteracji.ocena < najlepszyGlobalnie.ocena) {
+                    najlepszyGlobalnie = najlepszyIteracji;
+                }
+            }
 
             populacja = selekcja_PolowaNajlepszych();
+
             List<OSOBNIK> dzieci = operacja_krzyzowanie(populacja);
             populacja.addAll(dzieci);
+
             operacja_mutacja(populacja);
+
+            uzupelnij_populacje();
 
             iter++;
         }
 
+        if (najlepszyGlobalnie != null) {
+            System.out.println("Najlepszy osobnik ocena: " + najlepszyGlobalnie.ocena);
+            DANE.ALG_SCIEZKA = najlepszyGlobalnie.trasa_drogi;
+        } else {
+            System.out.println("Nie znaleziono najlepszego osobnika.");
+        }
     }
 
     private OSOBNIK znajdz_losowa_sciezke(Wezel pkt_startowy, Wezel pkt_koncowy) {
@@ -70,34 +88,45 @@ public class ALGGEN {
             throw new IllegalArgumentException("brak pkt_start lub pkt_koniec dla znajdz_losowa_sciezke");
         }
 
-        // ta funkcja szuka losowej drogi
         List<Wezel> sciezka_wezly = new ArrayList<>();
         List<Droga> sciezka = new ArrayList<>();
         Set<Long> uzyte_wezly = new HashSet<>();
-        List<Long> mozliwe_kolejne_wezly;
-        Long wylosowany_wezel_id;
         int iter = 0;
+
         sciezka_wezly.add(pkt_startowy);
         Wezel aktualny_wezel = pkt_startowy;
+
         while (true) {
-            // znalezc mozliwe kolejne wezly
-            mozliwe_kolejne_wezly = mozliwe_kolejne_wezly(aktualny_wezel, uzyte_wezly);
+            List<Long> mozliwe_kolejne_wezly = mozliwe_kolejne_wezly(aktualny_wezel, uzyte_wezly);
+
             if (mozliwe_kolejne_wezly.isEmpty()) {
-                // jesli brak mozliwych kierunkow -> restart
                 aktualny_wezel = pkt_startowy;
                 uzyte_wezly.clear();
                 sciezka.clear();
                 sciezka_wezly.clear();
                 sciezka_wezly.add(pkt_startowy);
+                iter++;
+                if (iter > max_iteracji_los_sciezki) {
+                    System.out.println("Przekroczono limit iteracji przy szukaniu losowej sciezki.");
+                    return null;
+                }
                 continue;
             }
 
-            // losowanie drogi z mozliwych
-            wylosowany_wezel_id = wylosuj_wezel_id(mozliwe_kolejne_wezly);
+            Long wylosowany_wezel_id = wylosuj_wezel_id(mozliwe_kolejne_wezly);
+            Wezel nowy_wezel = wezly.get(wylosowany_wezel_id);
 
-            // dodaj droge do sciezki
-            dodaj_droge_do_sciezki(aktualny_wezel, wezly.get(wylosowany_wezel_id), sciezka);
-            sciezka_wezly.add(wezly.get(wylosowany_wezel_id));
+            if (nowy_wezel == null) {
+                iter++;
+                if (iter > max_iteracji_los_sciezki) {
+                    System.out.println("Przekroczono limit iteracji przy szukaniu losowej sciezki.");
+                    return null;
+                }
+                continue;
+            }
+
+            dodaj_droge_do_sciezki(aktualny_wezel, nowy_wezel, sciezka);
+            sciezka_wezly.add(nowy_wezel);
 
             if (sciezka.size() > max_dlugosc_sciezki) {
                 aktualny_wezel = pkt_startowy;
@@ -105,60 +134,57 @@ public class ALGGEN {
                 sciezka.clear();
                 sciezka_wezly.clear();
                 sciezka_wezly.add(pkt_startowy);
+                iter++;
+                if (iter > max_iteracji_los_sciezki) {
+                    System.out.println("Przekroczono limit iteracji przy szukaniu losowej sciezki.");
+                    return null;
+                }
                 continue;
             }
 
-            // dodaj wezel do uzytych
             dodaj_wezel_do_uzytych(uzyte_wezly, aktualny_wezel);
-
-            // aktualizuj aktualny wezel
             aktualny_wezel = aktualizuj_wezel(aktualny_wezel, sciezka);
 
-            // sprawdz czy koniec algorytmu
             if (aktualny_wezel.ID == pkt_koncowy.ID) {
-                System.out.println("Znalezniono sciezke!");
-                System.out.println("sciezka drog: " + sciezka);
-
-                return new OSOBNIK(sciezka, sciezka_wezly);
+                return new OSOBNIK(new ArrayList<>(sciezka), new ArrayList<>(sciezka_wezly));
             }
 
             iter++;
             if (iter > max_iteracji_los_sciezki) {
-                aktualny_wezel = pkt_startowy;
-                uzyte_wezly.clear();
-                sciezka.clear();
-                sciezka_wezly.clear();
-                sciezka_wezly.add(pkt_startowy);
-                System.out.println("petla WHILE przekroczyl " + this.max_iteracji_los_sciezki + " iteracji");
-                //return null;
+                System.out.println("Przekroczono limit iteracji przy szukaniu losowej sciezki.");
+                return null;
             }
         }
     }
 
     private void dodaj_droge_do_sciezki(Wezel akt_wez, Wezel new_wez, List<Droga> sciezka) {
         for (Long idDrogi : akt_wez.drogiIDs) {
-            if (drogi.get(idDrogi).pkt_start.ID == akt_wez.ID && drogi.get(idDrogi).pkt_koniec.ID == new_wez.ID
-                    || drogi.get(idDrogi).pkt_koniec.ID == akt_wez.ID && drogi.get(idDrogi).pkt_start.ID == new_wez.ID) {
-                sciezka.add(drogi.get(idDrogi));
+            Droga droga = drogi.get(idDrogi);
+
+            if (droga == null) {
+                continue;
+            }
+
+            if ((droga.pkt_start.ID == akt_wez.ID && droga.pkt_koniec.ID == new_wez.ID)
+                    || (droga.pkt_koniec.ID == akt_wez.ID && droga.pkt_start.ID == new_wez.ID)) {
+                sciezka.add(droga);
                 return;
             }
         }
-        throw new IllegalArgumentException("nie znaleziono drogi w funkcji dodaj_droge_do_sciezki, nie znalezniono zadnej drogi pomiedzy dwoma wezlami");
+
+        throw new IllegalArgumentException("nie znaleziono drogi pomiedzy dwoma wezlami");
     }
 
-//    private void restart() {
-//        // restart, szukam nowej
-//        this.AKTUALNY_WEZEL = this.pktStart;
-//        this.UZYTE_WEZLY.clear();
-//        this.SCIEZKA_DROG.clear();
-//    }
     private List<Long> mozliwe_kolejne_wezly(Wezel wezel, Set<Long> uzyte_wez) {
         List<Long> mozliwe_kierunki = new ArrayList<>();
 
-        // algorytm skacze od wezla do welza
-        // mam pierwszy, losuje polaczenie, do kolekcji dodaje wezel z wylosowanej drogi, ale inny niz aktualny
         for (Long idDrogi : wezel.drogiIDs) {
             Droga droga = drogi.get(idDrogi);
+
+            if (droga == null) {
+                continue;
+            }
+
             if (droga.pkt_start.ID == wezel.ID) {
                 mozliwe_kierunki.add(droga.pkt_koniec.ID);
             } else if (droga.pkt_koniec.ID == wezel.ID) {
@@ -166,15 +192,13 @@ public class ALGGEN {
             }
         }
 
-        // usuwanie uzytych wezlow aby nie zawracac
         mozliwe_kierunki.removeAll(uzyte_wez);
-
         return mozliwe_kierunki;
     }
 
     private Long wylosuj_wezel_id(List<Long> mozliwe_kolejne_wezly) {
         if (mozliwe_kolejne_wezly.isEmpty()) {
-            throw new IllegalArgumentException("mozliwe_kolejne_wezly puste a funkcja 'wylosuj_wezel' chce wylosowac cos");
+            throw new IllegalArgumentException("mozliwe_kolejne_wezly puste");
         }
         return mozliwe_kolejne_wezly.get(randomInt(0, mozliwe_kolejne_wezly.size() - 1));
     }
@@ -184,27 +208,35 @@ public class ALGGEN {
     }
 
     private Wezel aktualizuj_wezel(Wezel akt_wez, List<Droga> sciezka) {
-        Droga ostatnia_droga = sciezka.getLast();
-        Wezel new_wez = new Wezel();
+        Droga ostatnia_droga = sciezka.get(sciezka.size() - 1);
+
         if (akt_wez.ID == ostatnia_droga.pkt_start.ID) {
-            new_wez = wezly.get(ostatnia_droga.pkt_koniec.ID);
+            return wezly.get(ostatnia_droga.pkt_koniec.ID);
         } else if (akt_wez.ID == ostatnia_droga.pkt_koniec.ID) {
-            new_wez = wezly.get(ostatnia_droga.pkt_start.ID);
+            return wezly.get(ostatnia_droga.pkt_start.ID);
         } else {
-            throw new IllegalArgumentException("Funkcja 'aktualizuj_wezel()' nie znalazla przeciwnego konca ostatnio dodanej sciezki");
+            throw new IllegalArgumentException("aktualizuj_wezel() nie znalazla przeciwnego konca drogi");
         }
-        return new_wez;
     }
 
     private void init_pop() {
-        for (int i = 1; i <= this.ilosc_osobnikow; i++) {
-            this.populacja.add(this.znajdz_losowa_sciezke(pktStart, pktKoniec));
+        this.populacja.clear();
+
+        while (this.populacja.size() < this.ilosc_osobnikow) {
+            OSOBNIK nowy = this.znajdz_losowa_sciezke(pktStart, pktKoniec);
+            if (nowy != null) {
+                this.populacja.add(nowy);
+            } else {
+                break;
+            }
         }
     }
 
     private void ocen_osobnikow() {
         for (OSOBNIK osob : this.populacja) {
-            osob.ocenOsobnika();
+            if (osob != null) {
+                osob.ocenOsobnika();
+            }
         }
     }
 
@@ -213,10 +245,14 @@ public class ALGGEN {
             return null;
         }
 
-        OSOBNIK najlepszy = populacja.get(0);
+        OSOBNIK najlepszy = null;
 
         for (OSOBNIK os : populacja) {
-            if (os != null && os.ocena < najlepszy.ocena) {
+            if (os == null) {
+                continue;
+            }
+
+            if (najlepszy == null || os.ocena < najlepszy.ocena) {
                 najlepszy = os;
             }
         }
@@ -225,22 +261,40 @@ public class ALGGEN {
     }
 
     private List<OSOBNIK> selekcja_PolowaNajlepszych() {
-        populacja.sort(Comparator.comparingDouble(osobnik -> osobnik.ocena));
-        return new ArrayList<>(populacja.subList(0, populacja.size() / 2));
+        List<OSOBNIK> kopia = new ArrayList<>();
+
+        for (OSOBNIK os : populacja) {
+            if (os != null) {
+                kopia.add(os);
+            }
+        }
+
+        kopia.sort(Comparator.comparingDouble(osobnik -> osobnik.ocena));
+
+        int ile = Math.max(1, kopia.size() / 2);
+        return new ArrayList<>(kopia.subList(0, ile));
     }
 
     private List<OSOBNIK> operacja_krzyzowanie(List<OSOBNIK> pop) {
         List<OSOBNIK> skrzyzowane = new ArrayList<>();
 
-        for (int i = 0; i < pop.size(); i++) {
-            if (i == pop.size() - 1) {
-                if (Math.random() < this.szansaKrzyzowanie) {
-                    skrzyzowane.add(krzyzuj(pop.getFirst(), pop.getLast()));
-                }
-                break;
-            }
+        if (pop == null || pop.size() < 2) {
+            return skrzyzowane;
+        }
+
+        for (int i = 0; i < pop.size() - 1; i++) {
             if (Math.random() < this.szansaKrzyzowanie) {
-                skrzyzowane.add(krzyzuj(pop.get(i), pop.get(i + 1)));
+                OSOBNIK dziecko = krzyzuj(pop.get(i), pop.get(i + 1));
+                if (dziecko != null) {
+                    skrzyzowane.add(dziecko);
+                }
+            }
+        }
+
+        if (pop.size() > 2 && Math.random() < this.szansaKrzyzowanie) {
+            OSOBNIK dziecko = krzyzuj(pop.get(0), pop.get(pop.size() - 1));
+            if (dziecko != null) {
+                skrzyzowane.add(dziecko);
             }
         }
 
@@ -248,28 +302,58 @@ public class ALGGEN {
     }
 
     private OSOBNIK krzyzuj(OSOBNIK os1, OSOBNIK os2) {
-        // dwoch osobnikow ma trasy       
+        if (os1 == null || os2 == null) {
+            return null;
+        }
 
-        int size1 = os1.trasa_wezly.size();
-        int size2 = os2.trasa_wezly.size();
+        if (os1.trasa_drogi == null || os1.trasa_wezly == null || os2.trasa_drogi == null || os2.trasa_wezly == null) {
+            return null;
+        }
 
-        List<Wezel> czesc11w, czesc22w;
-        List<Droga> czesc11d, czesc22d;
+        if (os1.trasa_drogi.size() < 2 || os1.trasa_wezly.size() < 3
+                || os2.trasa_drogi.size() < 2 || os2.trasa_wezly.size() < 3) {
+            return null;
+        }
 
-        int random = randomInt(1, size1 - 2);
-        czesc11w = new ArrayList<>(os1.trasa_wezly.subList(0, random));
-        czesc11d = new ArrayList<>(os1.trasa_drogi.subList(0, random));
+        int punkt1 = randomInt(1, os1.trasa_drogi.size() - 1);
+        int punkt2 = randomInt(1, os2.trasa_drogi.size() - 1);
 
-        random = randomInt(1, size2 - 2);
-        czesc22w = new ArrayList<>(os2.trasa_wezly.subList(random, size2 - 1));
-        czesc22d = new ArrayList<>(os2.trasa_drogi.subList(random, size2 - 1));
+        List<Droga> czesc1d = new ArrayList<>(os1.trasa_drogi.subList(0, punkt1));
+        List<Wezel> czesc1w = new ArrayList<>(os1.trasa_wezly.subList(0, punkt1 + 1));
 
-        OSOBNIK osobnik_skrzyzowany = znajdz_losowa_sciezke(czesc11w.getLast(), czesc22w.getFirst());
-        osobnik_skrzyzowany.trasa_drogi.addAll(0, czesc11d);
-        osobnik_skrzyzowany.trasa_drogi.addAll(czesc22d);
-        osobnik_skrzyzowany.trasa_wezly.addAll(0, czesc11w);
-        osobnik_skrzyzowany.trasa_wezly.addAll(czesc22w);
-        return osobnik_skrzyzowany;
+        List<Droga> czesc2d = new ArrayList<>(os2.trasa_drogi.subList(punkt2, os2.trasa_drogi.size()));
+        List<Wezel> czesc2w = new ArrayList<>(os2.trasa_wezly.subList(punkt2, os2.trasa_wezly.size()));
+
+        Wezel koniecCzesci1 = czesc1w.get(czesc1w.size() - 1);
+        Wezel startCzesci2 = czesc2w.get(0);
+
+        OSOBNIK lacznik = znajdz_losowa_sciezke(koniecCzesci1, startCzesci2);
+        if (lacznik == null) {
+            return null;
+        }
+
+        List<Droga> noweDrogi = new ArrayList<>();
+        List<Wezel> noweWezly = new ArrayList<>();
+
+        noweDrogi.addAll(czesc1d);
+        noweDrogi.addAll(lacznik.trasa_drogi);
+        noweDrogi.addAll(czesc2d);
+
+        noweWezly.addAll(czesc1w);
+
+        if (!lacznik.trasa_wezly.isEmpty()) {
+            List<Wezel> wezlyLacznika = new ArrayList<>(lacznik.trasa_wezly);
+            wezlyLacznika.remove(0);
+            noweWezly.addAll(wezlyLacznika);
+        }
+
+        if (!czesc2w.isEmpty()) {
+            List<Wezel> wezlyCzesci2 = new ArrayList<>(czesc2w);
+            wezlyCzesci2.remove(0);
+            noweWezly.addAll(wezlyCzesci2);
+        }
+
+        return new OSOBNIK(noweDrogi, noweWezly);
     }
 
     private void operacja_mutacja(List<OSOBNIK> pop) {
@@ -280,37 +364,56 @@ public class ALGGEN {
                 continue;
             }
 
-            if (Math.random() < this.szansaMutacja) {
-                if (osob.trasa_drogi == null || osob.trasa_wezly == null) {
-                    continue;
-                }
-
-                if (osob.trasa_drogi.size() < 2 || osob.trasa_wezly.size() < 3) {
-                    continue;
-                }
-
-                int punkt_ciecia = randomInt(1, osob.trasa_drogi.size() - 1);
-
-                osob.trasa_drogi.subList(punkt_ciecia, osob.trasa_drogi.size()).clear();
-                osob.trasa_wezly.subList(punkt_ciecia + 1, osob.trasa_wezly.size()).clear();
-
-                Wezel ostatni_wezel = osob.trasa_wezly.get(osob.trasa_wezly.size() - 1);
-
-                OSOBNIK osobnik_zmutowany = znajdz_losowa_sciezke(ostatni_wezel, this.pktKoniec);
-
-                if (osobnik_zmutowany == null) {
-                    continue;
-                }
-
-                osobnik_zmutowany.trasa_drogi.addAll(0, osob.trasa_drogi);
-
-                if (!osobnik_zmutowany.trasa_wezly.isEmpty()) {
-                    osobnik_zmutowany.trasa_wezly.remove(0);
-                }
-                osobnik_zmutowany.trasa_wezly.addAll(0, osob.trasa_wezly);
-
-                pop.set(i, osobnik_zmutowany);
+            if (Math.random() >= this.szansaMutacja) {
+                continue;
             }
+
+            if (osob.trasa_drogi == null || osob.trasa_wezly == null) {
+                continue;
+            }
+
+            if (osob.trasa_drogi.size() < 2 || osob.trasa_wezly.size() < 3) {
+                continue;
+            }
+
+            int punkt_ciecia = randomInt(1, osob.trasa_drogi.size() - 1);
+
+            List<Droga> prefixDrogi = new ArrayList<>(osob.trasa_drogi.subList(0, punkt_ciecia));
+            List<Wezel> prefixWezly = new ArrayList<>(osob.trasa_wezly.subList(0, punkt_ciecia + 1));
+
+            Wezel ostatni_wezel = prefixWezly.get(prefixWezly.size() - 1);
+            OSOBNIK nowyOgon = znajdz_losowa_sciezke(ostatni_wezel, this.pktKoniec);
+
+            if (nowyOgon == null) {
+                continue;
+            }
+
+            List<Droga> noweDrogi = new ArrayList<>(prefixDrogi);
+            noweDrogi.addAll(nowyOgon.trasa_drogi);
+
+            List<Wezel> noweWezly = new ArrayList<>(prefixWezly);
+            if (!nowyOgon.trasa_wezly.isEmpty()) {
+                List<Wezel> ogonWezly = new ArrayList<>(nowyOgon.trasa_wezly);
+                ogonWezly.remove(0);
+                noweWezly.addAll(ogonWezly);
+            }
+
+            pop.set(i, new OSOBNIK(noweDrogi, noweWezly));
+        }
+    }
+
+    private void uzupelnij_populacje() {
+        while (populacja.size() < ilosc_osobnikow) {
+            OSOBNIK nowy = znajdz_losowa_sciezke(pktStart, pktKoniec);
+            if (nowy != null) {
+                populacja.add(nowy);
+            } else {
+                break;
+            }
+        }
+
+        if (populacja.size() > ilosc_osobnikow) {
+            populacja = new ArrayList<>(populacja.subList(0, ilosc_osobnikow));
         }
     }
 }

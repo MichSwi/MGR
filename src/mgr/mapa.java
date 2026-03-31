@@ -8,6 +8,7 @@ import java.awt.geom.AffineTransform;
 import static java.lang.Math.abs;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import mgr.ALGORYTMY.WYNIKI;
 
 public class mapa extends javax.swing.JPanel {
 
@@ -136,7 +137,9 @@ public class mapa extends javax.swing.JPanel {
             }
             rysuj_wezly(g2d_zawartosc);
             if (WYNIKI.czyWynikiDijkstra) {
-                rysujWartosciDijkstra(g2d_zawartosc, WYNIKI.wartosc_wezlow_dijkstra);
+                rysujWartosci(g2d_zawartosc, WYNIKI.wartosc_wezlow_dijkstra);
+            } else if (WYNIKI.czyWynikiAStar){
+                rysujWartosci(g2d_zawartosc, WYNIKI.wartosc_wezlow_a_star);
             }
 
             rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
@@ -524,7 +527,7 @@ public class mapa extends javax.swing.JPanel {
     private javax.swing.JLabel skala_label;
     // End of variables declaration//GEN-END:variables
 
-    private void rysujWartosciDijkstra(Graphics2D g2d, Map<Long, Double> wartoscWezlow) {
+    private void rysujWartosci(Graphics2D g2d, Map<Long, Double> wartoscWezlow) {
 
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.PLAIN, 5));

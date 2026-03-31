@@ -29,7 +29,7 @@ public class Wezel {
         this.Y = y;
     }
 
-    public void dodajDroge(long drogaId) {
+    public final void dodajDroge(long drogaId) {
         drogiIDs.add(drogaId);
     }
 }

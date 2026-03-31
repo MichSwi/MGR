@@ -39,13 +39,13 @@ public class AntColonyAlg {
 
     public List<Droga> startAlg() {
         List<Droga> trasa_drog = new ArrayList<>();
-        List<Long> trasa = new ArrayList<>();
+        List<Long> trasa_wezlow_id = new ArrayList<>();
         Long aktualnyWezel = pkt_start;
 
-        trasa.add(aktualnyWezel);
+        trasa_wezlow_id.add(aktualnyWezel);
 
         while (!aktualnyWezel.equals(pkt_koniec)) {
-            Long kolejnyWezel = wybierzKolejnyWezel(aktualnyWezel, trasa);
+            Long kolejnyWezel = wybierzKolejnyWezel(aktualnyWezel, trasa_wezlow_id);
 
             if (kolejnyWezel == null) {
                 System.out.println("Brak dalszej drogi");
@@ -53,7 +53,7 @@ public class AntColonyAlg {
                 return trasa_drog;
             }
 
-            trasa.add(kolejnyWezel);
+            trasa_wezlow_id.add(kolejnyWezel);
             for (Long id_drogi : wezly.get(aktualnyWezel).drogiIDs){
                 if (DANE.drogi.get(id_drogi).pkt_start.ID == kolejnyWezel || DANE.drogi.get(id_drogi).pkt_koniec.ID == kolejnyWezel){
                     trasa_drog.add(DANE.drogi.get(id_drogi));
@@ -63,7 +63,7 @@ public class AntColonyAlg {
             aktualnyWezel = kolejnyWezel;
         }
 
-        System.out.println("Trasa: " + trasa);
+        System.out.println("Trasa: " + trasa_wezlow_id);
         return trasa_drog;
 
        
