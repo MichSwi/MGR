@@ -377,7 +377,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                             biezaca.jednokierunkowa = "true";
                         } else if ("-1".equalsIgnoreCase(value)) {
                             biezaca.jednokierunkowa = "-1";
-                        } else if ("no".equalsIgnoreCase(value) || "0".equals(value) || "false".equalsIgnoreCase(value)) {
+                        } else if ("no".equalsIgnoreCase(value) || "0".equals(value) || "false".equalsIgnoreCase(value) || "alternating".equalsIgnoreCase(value)) {
                             biezaca.jednokierunkowa = "false";
                         } else {
                             throw new IllegalArgumentException(biezaca + " ma cos dziwnego w tags oneway");
