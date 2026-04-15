@@ -379,8 +379,12 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                             biezaca.jednokierunkowa = "-1";
                         } else if ("no".equalsIgnoreCase(value) || "0".equals(value) || "false".equalsIgnoreCase(value)) {
                             biezaca.jednokierunkowa = "false";
-                        } else {
-                            throw new IllegalArgumentException(biezaca + " ma cos dziwnego w tags oneway");
+                        } else if ("alternating".equalsIgnoreCase(value)) {
+                            biezaca.jednokierunkowa = "false";
+                        }
+                        else{
+                            biezaca.jednokierunkowa="flase";
+                            System.out.println("Droga: "+biezaca+" ma w tagu czy jednokierunkowa: "+value+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         }
                     }
 
