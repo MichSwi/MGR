@@ -27,6 +27,7 @@ public class Droga {
     public Punkt pkt_start, pkt_koniec;
     public TrafficSegment ruchUliczny;
     public int maxspeed = -1;
+    public int czas_przejazdu = Integer.MIN_VALUE;
 
     public Droga(long ID, String nazwa, double dlugosc, LinkedList<Punkt> punkty, LinkedList<Long> polaczenia_poczatek_ID, LinkedList<Long> polaczenia_koniec_ID, String jednokierunkowa) {
         this.ID = ID;

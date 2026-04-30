@@ -185,7 +185,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     "[out:xml][timeout:60];"
                     + "("
                     + "way[\"highway\"]"
-                    + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|service|driveway)$\"]"
+                    + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|driveway)$\"]"
                     + "(%.6f,%.6f,%.6f,%.6f);"
                     + "way[\"railway\"~\"^(rail|tram|light_rail|subway)$\"]"
                     + "(%.6f,%.6f,%.6f,%.6f);"
@@ -198,8 +198,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     + "relation[\"waterway\"]"
                     + "(%.6f,%.6f,%.6f,%.6f);"
                     + ");"
-                    + "out geom(%.6f,%.6f,%.6f,%.6f);",
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
+                    + "(._;>;);"
+                    + "out body;",
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
@@ -381,10 +381,9 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                             biezaca.jednokierunkowa = "false";
                         } else if ("alternating".equalsIgnoreCase(value)) {
                             biezaca.jednokierunkowa = "false";
-                        }
-                        else{
-                            biezaca.jednokierunkowa="flase";
-                            System.out.println("Droga: "+biezaca+" ma w tagu czy jednokierunkowa: "+value+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        } else {
+                            biezaca.jednokierunkowa = "flase";
+                            System.out.println("Droga: " + biezaca + " ma w tagu czy jednokierunkowa: " + value + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         }
                     }
 

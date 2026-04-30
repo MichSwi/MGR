@@ -119,7 +119,7 @@ public class mapa extends javax.swing.JPanel {
 
                 for (Punkt p : drogi.get(ID).punkty) {
                     rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
-                    if (p.tags.get("crossing") != null) {
+                    if (p.tags.getOrDefault("highway", "brak").equalsIgnoreCase("crossing")) {
                         rysujPunkt(p.X, p.Y, 10, czerw_przezr, g2d_zawartosc);
                     }
                 }
@@ -138,7 +138,7 @@ public class mapa extends javax.swing.JPanel {
             rysuj_wezly(g2d_zawartosc);
             if (WYNIKI.czyWynikiDijkstra) {
                 rysujWartosci(g2d_zawartosc, WYNIKI.wartosc_wezlow_dijkstra);
-            } else if (WYNIKI.czyWynikiAStar){
+            } else if (WYNIKI.czyWynikiAStar) {
                 rysujWartosci(g2d_zawartosc, WYNIKI.wartosc_wezlow_a_star);
             }
 

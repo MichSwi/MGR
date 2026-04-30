@@ -39,7 +39,7 @@ public class Main extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        panelPobierania1 = new nieaktualne.PanelPobierania();
+        panelPobierania1 = new mgr.PanelPobierania();
         jButton4 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -212,6 +212,6 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
-    private nieaktualne.PanelPobierania panelPobierania1;
+    private mgr.PanelPobierania panelPobierania1;
     // End of variables declaration//GEN-END:variables
 }
