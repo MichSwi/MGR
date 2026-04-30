@@ -227,6 +227,14 @@ public class mapa extends javax.swing.JPanel {
 
     private void rysujDroge(Droga droga, Color kolor, Graphics2D g2d) {
         g2d.setColor(kolor);
+        String tag = droga.tags.getOrDefault("highway", "-");
+        if(tag.equals("trunk")||tag.equals("motorway")||tag.equals("primary")||tag.equals("secondary")||tag.equals("tertiary")
+                || tag.equals("residential") || tag.equals("unclassified")){
+            g2d.setStroke(new BasicStroke(3));
+        } else{
+            g2d.setStroke(new BasicStroke(1));
+        }
+        
         int il_pkt = droga.punkty.size();
         for (int i = 1; i < il_pkt; i++) {
             g2d.drawLine((int) droga.punkty.get(i - 1).X, (int) droga.punkty.get(i - 1).Y, (int) droga.punkty.get(i).X, (int) droga.punkty.get(i).Y);
@@ -543,11 +551,6 @@ public class mapa extends javax.swing.JPanel {
     }
 
     private void rysuj_wode_tory(Graphics2D g2d) {
-        // tory
-        for (Long kolej_id : DANE.kolej.keySet()) {
-            Droga kolej = DANE.kolej.get(kolej_id);
-            rysujDroge(kolej, Color.DARK_GRAY, g2d);
-        }
 
         // rzeki
         for (Long rzeka_id : DANE.rzeki.keySet()) {
@@ -583,6 +586,12 @@ public class mapa extends javax.swing.JPanel {
             g2d.setColor(kolor_wody);
             g2d.drawPolygon(xPoints, yPoints, nPoints);
             g2d.fillPolygon(xPoints, yPoints, nPoints);
+        }
+        
+        // tory
+        for (Long kolej_id : DANE.kolej.keySet()) {
+            Droga kolej = DANE.kolej.get(kolej_id);
+            rysujDroge(kolej, Color.DARK_GRAY, g2d);
         }
     }
 }
