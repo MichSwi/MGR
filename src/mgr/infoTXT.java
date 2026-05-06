@@ -26,7 +26,6 @@ public class infoTXT {
             _3_E_SZER_R,
             _1_W_LAT,
             _2_S_LON;
-    private int typPobrania; //1 - granice  2 - obszar  3 - kolo
     private double pole;
 
     public infoTXT() {
@@ -37,17 +36,15 @@ public class infoTXT {
         _3_E_SZER_R = 0;
         _1_W_LAT = 0;
         _2_S_LON = 0;
-        typPobrania = 0;
         pole = 0;
     }
 
-    public infoTXT(String nazwaPliku, double _4_N_WYS, double _3_E_SZER_R, double _1_W_LAT, double _2_S_LON, int typPobrania) {
+    public infoTXT(String nazwaPliku, double _4_N_WYS, double _3_E_SZER_R, double _1_W_LAT, double _2_S_LON) {
         this.nazwaPliku = nazwaPliku;
         this._4_N_WYS = _4_N_WYS;
         this._3_E_SZER_R = _3_E_SZER_R;
         this._1_W_LAT = _1_W_LAT;
         this._2_S_LON = _2_S_LON;
-        this.typPobrania = typPobrania;
 
         pole = obliczPole();
     }
@@ -61,7 +58,6 @@ public class infoTXT {
             _2_S_LON = Double.parseDouble(br.readLine());
             _3_E_SZER_R = Double.parseDouble(br.readLine());
             _4_N_WYS = Double.parseDouble(br.readLine());
-            typPobrania = Integer.parseInt(br.readLine());
             pole = Double.parseDouble(br.readLine());
             
             return true;
@@ -82,7 +78,6 @@ public class infoTXT {
             pw.println(_2_S_LON);
             pw.println(_3_E_SZER_R);
             pw.println(_4_N_WYS);
-            pw.println(typPobrania);
             pw.println(obliczPole());
 
         } catch (IOException e) {
@@ -91,14 +86,7 @@ public class infoTXT {
     }
 
     private double obliczPole() {
-        if (typPobrania == 1) { //granice
-            return abs((_4_N_WYS - _2_S_LON) * (_3_E_SZER_R - _1_W_LAT));
-        } else if (typPobrania == 2) { //obszar
-            return abs(_3_E_SZER_R * _4_N_WYS);
-        } else if (typPobrania == 3) {
-            return abs(Math.PI * _3_E_SZER_R * _3_E_SZER_R);
-        }
-        return -1;
+        return abs((_4_N_WYS - _2_S_LON) * (_3_E_SZER_R - _1_W_LAT));
     }
 
     public String getNazwaPliku() {
@@ -127,10 +115,6 @@ public class infoTXT {
 
     public double get2_S_LON() {
         return _2_S_LON;
-    }
-
-    public int getTypPobrania() {
-        return typPobrania;
     }
 
     public double getPole() {

@@ -36,11 +36,6 @@ import mgr.WatekPobierz;
  */
 public class PanelPobierania extends javax.swing.JPanel {
 
-    /**
-     * Creates new form PanelPobierania
-     */
-    private int tryb;          //1 - granice  2 - obszar  3 - kolo
-
     private List<TrafficSegment> TrafficFlow = new ArrayList<>();
     private List<Droga> drogi = new ArrayList<>();
     private Map<Long, Punkt> punktyLista = new HashMap<>();
@@ -49,8 +44,7 @@ public class PanelPobierania extends javax.swing.JPanel {
 
     public PanelPobierania() {
         initComponents();
-        tryb = 1;
-        jRadioButtonGran.setSelected(true);
+
         jProgressBarOSMDOWNLOAD.setStringPainted(true);
         jProgressBarOSMDOWNLOAD.setString("");
         jProgressBarOSMREAD.setStringPainted(true);
@@ -60,7 +54,6 @@ public class PanelPobierania extends javax.swing.JPanel {
         jProgressBarTFREAD.setStringPainted(true);
         jProgressBarTFREAD.setString("");
 
-        przelaczTryb();
         wywolajListenery();
         DANE._4_N_WYS = 0;
         DANE._1_W_LAT = 0;
@@ -90,41 +83,7 @@ public class PanelPobierania extends javax.swing.JPanel {
 //jTextField4.setText("54.3828"); // lat + 0.0009  // WRZESZ 100m X 100m
     }
 
-    private void przelaczTryb() {
-        //1 - granice  2 - obszar prost  3 -kolo
-
-        jTextField1.setText("");
-        jTextField2.setText("");
-        jTextField3.setText("");
-        jTextField4.setText("");
-
-        if (tryb == 1) {
-            jLabel1.setText("Zachodnia granica W:");
-            jLabel2.setText("Południowa granica S:");
-            jLabel3.setText("Wschodnia granica E:");
-
-            jLabel4.setVisible(true);
-            jTextField4.setVisible(true);
-            jLabel4.setText("Północna granica N:");
-
-        } else if (tryb == 2) {
-            jLabel1.setText("Szerokosc geograficzna LAT:");
-            jLabel2.setText("Długość geograficzna LON:");
-            jLabel3.setText("Szerokość obszaru:");
-
-            jLabel4.setVisible(true);
-            jTextField4.setVisible(true);
-            jLabel4.setText("Wysokość obszaru:");
-
-        } else if (tryb == 3) {
-            jLabel1.setText("Szerokosc geograficzna:");
-            jLabel2.setText("Długość geograficzna:");
-            jLabel3.setText("Promień:");
-
-            jLabel4.setVisible(false);
-            jTextField4.setVisible(false);
-        }
-    }
+   
 
     private void FormatujDane(JTextField textField, boolean czyWspolzedna) {
 
@@ -173,7 +132,6 @@ public class PanelPobierania extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        buttonGroup1 = new javax.swing.ButtonGroup();
         jLabelPobOSM = new javax.swing.JLabel();
         jProgressBarOSMDOWNLOAD = new javax.swing.JProgressBar();
         jLabelPobTF = new javax.swing.JLabel();
@@ -186,14 +144,11 @@ public class PanelPobierania extends javax.swing.JPanel {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jRadioButtonGran = new javax.swing.JRadioButton();
-        jRadioButtonpProst = new javax.swing.JRadioButton();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jTextFieldNazwaPliku = new javax.swing.JTextField();
         jButtonPobierz = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
-        jRadioButtonOkrag = new javax.swing.JRadioButton();
         jButton4 = new javax.swing.JButton();
         jProgressBarOSMREAD = new javax.swing.JProgressBar();
         jLabelPobOSM1 = new javax.swing.JLabel();
@@ -249,29 +204,13 @@ public class PanelPobierania extends javax.swing.JPanel {
             }
         });
 
-        jLabel1.setText("jLabel1");
+        jLabel1.setText("Zachodnia granica W:");
 
-        jLabel2.setText("jLabel2");
+        jLabel2.setText("Południowa granica S:");
 
-        jLabel3.setText("jLabel3");
+        jLabel3.setText("Wschodnia granica E:");
 
-        jLabel4.setText("jLabel4");
-
-        buttonGroup1.add(jRadioButtonGran);
-        jRadioButtonGran.setText("Granice");
-        jRadioButtonGran.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonGranActionPerformed(evt);
-            }
-        });
-
-        buttonGroup1.add(jRadioButtonpProst);
-        jRadioButtonpProst.setText("Obszar prostokątny");
-        jRadioButtonpProst.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonpProstActionPerformed(evt);
-            }
-        });
+        jLabel4.setText("Północna granica N:");
 
         jLabel5.setText("Nazwa pliku:");
 
@@ -292,14 +231,6 @@ public class PanelPobierania extends javax.swing.JPanel {
         });
 
         jLabel7.setText("Ilość pobranych TF w miesiącu: ");
-
-        buttonGroup1.add(jRadioButtonOkrag);
-        jRadioButtonOkrag.setText("Obszar okrągły");
-        jRadioButtonOkrag.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonOkragActionPerformed(evt);
-            }
-        });
 
         jButton4.setText("STOP DEBUG");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
@@ -505,32 +436,18 @@ public class PanelPobierania extends javax.swing.JPanel {
                 .addComponent(jButton4)
                 .addGap(76, 76, 76))
             .addGroup(layout.createSequentialGroup()
+                .addGap(264, 264, 264)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(107, 107, 107)
-                        .addComponent(jRadioButtonGran)
-                        .addGap(38, 38, 38)
-                        .addComponent(jRadioButtonpProst)
-                        .addGap(28, 28, 28)
-                        .addComponent(jRadioButtonOkrag))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(264, 264, 264)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButtonPobierz, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButtonPobierz, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addContainerGap(773, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(47, 47, 47)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jRadioButtonGran)
-                    .addComponent(jRadioButtonpProst)
-                    .addComponent(jRadioButtonOkrag))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(49, 49, 49)
+                        .addGap(117, 117, 117)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabelPobOSM)
                             .addComponent(jCheckBox1))
@@ -581,7 +498,7 @@ public class PanelPobierania extends javax.swing.JPanel {
                         .addGap(18, 18, 18)
                         .addComponent(jLabel7))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(124, 124, 124)
+                        .addGap(192, 192, 192)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonPobierz, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -605,31 +522,15 @@ public class PanelPobierania extends javax.swing.JPanel {
 
     private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
         // TODO add your handling code here:
-        if (tryb == 1)
-            FormatujDane(jTextField3, true);
-        else
-            FormatujDane(jTextField3, false);
+        FormatujDane(jTextField3, true);
+
     }//GEN-LAST:event_jTextField3ActionPerformed
 
     private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField4ActionPerformed
         // TODO add your handling code here:
-        if (tryb == 1)
             FormatujDane(jTextField4, true);
-        else
-            FormatujDane(jTextField4, false);
+
     }//GEN-LAST:event_jTextField4ActionPerformed
-
-    private void jRadioButtonGranActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonGranActionPerformed
-        // TODO add your handling code here:
-        tryb = 1;
-        przelaczTryb();
-    }//GEN-LAST:event_jRadioButtonGranActionPerformed
-
-    private void jRadioButtonpProstActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonpProstActionPerformed
-        // TODO add your handling code here:
-        tryb = 2;
-        przelaczTryb();
-    }//GEN-LAST:event_jRadioButtonpProstActionPerformed
 
     private void jButtonPobierzActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPobierzActionPerformed
         // TODO add your handling code here:
@@ -652,17 +553,10 @@ public class PanelPobierania extends javax.swing.JPanel {
 
             WatekPobierz watekPobierania = new WatekPobierz(drogi, punktyLista,
                     jProgressBarOSMDOWNLOAD, jProgressBarTFDOWNLOAD,
-                    jProgressBarOSMREAD, jProgressBarTFREAD,
-                    tryb);
+                    jProgressBarOSMREAD, jProgressBarTFREAD);
             watekPobierania.execute();
         }
     }//GEN-LAST:event_jButtonPobierzActionPerformed
-
-    private void jRadioButtonOkragActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonOkragActionPerformed
-        // TODO add your handling code here:
-        tryb = 3;
-        przelaczTryb();
-    }//GEN-LAST:event_jRadioButtonOkragActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
@@ -761,8 +655,6 @@ public class PanelPobierania extends javax.swing.JPanel {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
 
-        jRadioButtonGran.setSelected(true);
-        this.tryb = 1;
         double szer = Double.parseDouble(szer_input.getText().substring(0, szer_input.getText().length() - 3));
         double wys = Double.parseDouble(wys_input.getText().substring(0, wys_input.getText().length() - 3));
         szer = szer * 0.009;
@@ -854,14 +746,14 @@ public class PanelPobierania extends javax.swing.JPanel {
         jTextField3.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                FormatujDane(jTextField3, tryb == 1);
+                FormatujDane(jTextField3, true);
             }
         });
 
         jTextField4.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                FormatujDane(jTextField4, tryb == 1);
+                FormatujDane(jTextField4, true);
             }
         });
 
@@ -943,7 +835,6 @@ public class PanelPobierania extends javax.swing.JPanel {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton4;
@@ -972,9 +863,6 @@ public class PanelPobierania extends javax.swing.JPanel {
     private javax.swing.JProgressBar jProgressBarOSMREAD;
     private javax.swing.JProgressBar jProgressBarTFDOWNLOAD;
     private javax.swing.JProgressBar jProgressBarTFREAD;
-    private javax.swing.JRadioButton jRadioButtonGran;
-    private javax.swing.JRadioButton jRadioButtonOkrag;
-    private javax.swing.JRadioButton jRadioButtonpProst;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;

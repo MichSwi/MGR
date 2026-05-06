@@ -50,7 +50,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     private JProgressBar pasekPostepuOSM;
     private JProgressBar pasekPostepuCzytajOSM;
     private JProgressBar pasekPostepuCzytajTF;
-    int tryb;
 
     //czytanie osm
     private Map<Long, Punkt> allNodes = new HashMap<>();
@@ -58,21 +57,20 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     //czytanie TF
     private List<TrafficSegment> ruchUliczny = new ArrayList<>();
 
-    infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._1_W_LAT, DANE._2_S_LON, tryb);
+    infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._1_W_LAT, DANE._2_S_LON);
 
     public WatekPobierz(
             List<Droga> drogi,
             Map<Long, Punkt> punktyLista,
             JProgressBar pasekPostepuOSM, JProgressBar pasekPostepuTF,
-            JProgressBar pasekPostepuCzytajOSM, JProgressBar pasekPostepuCzytajTF,
-            int tryb) {
+            JProgressBar pasekPostepuCzytajOSM, JProgressBar pasekPostepuCzytajTF) {
 
         this.punktyLista = punktyLista;
         this.pasekPostepuOSM = pasekPostepuOSM;
         this.pasekPostepuTF = pasekPostepuTF;
         this.pasekPostepuCzytajOSM = pasekPostepuCzytajOSM;
         this.pasekPostepuCzytajTF = pasekPostepuCzytajTF;
-        this.tryb = tryb;
+
     }
 
     @Override
@@ -179,8 +177,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         pasekPostepuOSM.setIndeterminate(true);
 
         String query = "";
-        // 1 - granice  2 - obszar  3 - kolo
-        if (tryb == 1) {
             query = String.format(Locale.US,
                     "[out:xml][timeout:60];"
                     + "("
@@ -205,8 +201,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
                     DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R
-            );
+                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R);
+            
 
 //query = String.format(Locale.US,
 //    "[out:xml][timeout:60];"
@@ -218,19 +214,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 //  + "(._;>;);"
 //  + "out body;"
 //);
-        } else if (tryb == 2) {
-            query = String.format(Locale.US,
-                    "[out:xml][timeout:60];"
-                    + "way[\"highway\"](around:%d,%.6f,%.6f);" // promień, lat, lon
-                    + "(._;>;);"
-                    + "out body;",
-                    1000, 52.2297, 21.0122
-            );
-        } else if (tryb == 3) {
 
-        
-        ///////////////////////////wpisz url query
-        }
 
         String[] endpoints = new String[]{
             "https://overpass-api.de/api/interpreter",
@@ -290,7 +274,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     }
 
     private void czytajOSM() {
-        //setLabel "konwertowanie zmiennych"
         allNodes.clear();
         DANE.drogi.clear();
         DANE.wezly.clear();
@@ -480,24 +463,11 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         double maxLon = 0;
         double minLon = 0;
 
-        if (tryb == 2) {
-            double lat = DANE._1_W_LAT; //polnoc poludnie
-            double lon = DANE._2_S_LON; //wschod zachod
-            double offset_LON = DANE._3_E_SZER_R / 2;
-            double offset_LAT = DANE._4_N_WYS / 2;
-
-            // Wyliczenie granic prostokąta
-            minLat = lat - offset_LAT;
-            maxLat = lat + offset_LAT;
-            minLon = lon - offset_LON;
-            maxLon = lon + offset_LON;
-
-        } else if (tryb == 1) {
             minLat = DANE._2_S_LON;
             maxLat = DANE._4_N_WYS;
             minLon = DANE._1_W_LAT;
             maxLon = DANE._3_E_SZER_R;
-        }//1 - granice  2 - obszar  3 - kolo
+
 
         String endpoint = "https://data.traffic.hereapi.com/v7/flow"
                 + "?in=bbox:" + minLon + "," + minLat + "," + maxLon + "," + maxLat
