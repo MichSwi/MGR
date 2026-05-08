@@ -85,7 +85,7 @@ public class mapa extends javax.swing.JPanel {
     @Override
     protected void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
-        java.awt.Graphics2D g2d_static = (java.awt.Graphics2D) g;
+        //java.awt.Graphics2D g2d_static = (java.awt.Graphics2D) g;
 
         Graphics2D g2d_zawartosc = (Graphics2D) g.create();
         g2d_zawartosc.translate(widok_x, widok_y);
@@ -118,9 +118,10 @@ public class mapa extends javax.swing.JPanel {
                 }
 
                 for (Punkt p : drogi.get(ID).punkty) {
-                    rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
+                    //rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
                     if (p.tags.getOrDefault("highway", "brak").equalsIgnoreCase("crossing")) {
-                        rysujPunkt(p.X, p.Y, 10, czerw_przezr, g2d_zawartosc);
+                        //rysujPunkt(p.X, p.Y, 10, czerw_przezr, g2d_zawartosc);
+                        rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
                     }
                 }
 
@@ -154,7 +155,7 @@ public class mapa extends javax.swing.JPanel {
 
     private void rysuj_wezly(Graphics2D g2d_zawartosc) {
         for (Wezel w : DANE.wezly.values()) {
-            rysujPunkt(w.X, w.Y, 8, new Color(182, 5, 252, 25), g2d_zawartosc);
+            rysujPunkt(w.X, w.Y, 7, new Color(182, 5, 252, 80), g2d_zawartosc);
         }
         //new Color(5, 174, 252, 25)
     }
@@ -228,13 +229,13 @@ public class mapa extends javax.swing.JPanel {
     private void rysujDroge(Droga droga, Color kolor, Graphics2D g2d) {
         g2d.setColor(kolor);
         String tag = droga.tags.getOrDefault("highway", "-");
-        if(tag.equals("trunk")||tag.equals("motorway")||tag.equals("primary")||tag.equals("secondary")||tag.equals("tertiary")
-                || tag.equals("residential") || tag.equals("unclassified")){
+        if (tag.equals("trunk") || tag.equals("motorway") || tag.equals("primary") || tag.equals("secondary") || tag.equals("tertiary")
+                || tag.equals("residential") || tag.equals("unclassified")) {
             g2d.setStroke(new BasicStroke(3));
-        } else{
+        } else {
             g2d.setStroke(new BasicStroke(1));
         }
-        
+
         int il_pkt = droga.punkty.size();
         for (int i = 1; i < il_pkt; i++) {
             g2d.drawLine((int) droga.punkty.get(i - 1).X, (int) droga.punkty.get(i - 1).Y, (int) droga.punkty.get(i).X, (int) droga.punkty.get(i).Y);
@@ -587,7 +588,7 @@ public class mapa extends javax.swing.JPanel {
             g2d.drawPolygon(xPoints, yPoints, nPoints);
             g2d.fillPolygon(xPoints, yPoints, nPoints);
         }
-        
+
         // tory
         for (Long kolej_id : DANE.kolej.keySet()) {
             Droga kolej = DANE.kolej.get(kolej_id);

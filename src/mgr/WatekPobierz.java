@@ -57,7 +57,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
     //czytanie TF
     private List<TrafficSegment> ruchUliczny = new ArrayList<>();
 
-    infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_WYS, DANE._3_E_SZER_R, DANE._1_W_LAT, DANE._2_S_LON);
+    infoTXT info = new infoTXT(DANE.nazwaPliku, DANE._4_N_maxLAT, DANE._3_E_maxLON, DANE._1_W_minLON, DANE._2_S_minLAT);
 
     public WatekPobierz(
             List<Droga> drogi,
@@ -84,15 +84,15 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         //czytanie OSM
         if (DANE.coZaznaczone.get(1)) {
             info.wczytajPlik(DANE.nazwaPliku + ".txt");
-            DANE._1_W_LAT = info.get1_W_LAT();
-            DANE._2_S_LON = info.get2_S_LON();
-            DANE._3_E_SZER_R = info.get3_E_SZER_R();
-            DANE._4_N_WYS = info.get4_N_WYS();
+            DANE._1_W_minLON = info.get1_W_LAT();
+            DANE._2_S_minLAT = info.get2_S_LON();
+            DANE._3_E_maxLON = info.get3_E_SZER_R();
+            DANE._4_N_maxLAT = info.get4_N_WYS();
 
-            System.out.println("W=" + DANE._1_W_LAT);
-            System.out.println("S=" + DANE._2_S_LON);
-            System.out.println("E=" + DANE._3_E_SZER_R);
-            System.out.println("N=" + DANE._4_N_WYS);
+            System.out.println("W=" + DANE._1_W_minLON);
+            System.out.println("S=" + DANE._2_S_minLAT);
+            System.out.println("E=" + DANE._3_E_maxLON);
+            System.out.println("N=" + DANE._4_N_maxLAT);
 
             czytajOSM();
         }
@@ -177,33 +177,58 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         pasekPostepuOSM.setIndeterminate(true);
 
         String query = "";
-            query = String.format(Locale.US,
-                    "[out:xml][timeout:60];"
-                    + "("
-                    + "way[\"highway\"]"
-                    + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|driveway)$\"]"
-                    + "(%.6f,%.6f,%.6f,%.6f);"
-                    + "way[\"railway\"~\"^(rail|tram|light_rail|subway)$\"]"
-                    + "(%.6f,%.6f,%.6f,%.6f);"
-                    + "way[\"natural\"=\"water\"]"
-                    + "(%.6f,%.6f,%.6f,%.6f);"
-                    + "relation[\"natural\"=\"water\"]"
-                    + "(%.6f,%.6f,%.6f,%.6f);"
-                    + "way[\"waterway\"]"
-                    + "(%.6f,%.6f,%.6f,%.6f);"
-                    + "relation[\"waterway\"]"
-                    + "(%.6f,%.6f,%.6f,%.6f);"
-                    + ");"
-                    + "(._;>;);"
-                    + "out body;",
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R,
-                    DANE._2_S_LON, DANE._1_W_LAT, DANE._4_N_WYS, DANE._3_E_SZER_R);
-            
 
+        query = String.format(Locale.US,
+                "[out:xml][timeout:60];"
+                + "("
+                + "way[\"highway\"]"
+                + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|driveway)$\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "way[\"railway\"~\"^(rail|tram|light_rail|subway)$\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "way[\"natural\"=\"water\"][\"water\"!=\"ditch\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "relation[\"natural\"=\"water\"][\"water\"!=\"ditch\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "way[\"waterway\"][\"waterway\"!=\"ditch\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "relation[\"waterway\"][\"waterway\"!=\"ditch\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + ");"
+                + "(._;>;);"
+                + "out body;",
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON);
+
+//        query = String.format(Locale.US,
+//                "[out:xml][timeout:60];"
+//                + "("
+//                + "way[\"highway\"]"
+//                + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|driveway)$\"]"
+//                + "(%.6f,%.6f,%.6f,%.6f);"
+//                + "way[\"railway\"~\"^(rail|tram|light_rail|subway)$\"]"
+//                + "(%.6f,%.6f,%.6f,%.6f);"
+//                + "way[\"natural\"=\"water\"]"
+//                + "(%.6f,%.6f,%.6f,%.6f);"
+//                + "relation[\"natural\"=\"water\"]"
+//                + "(%.6f,%.6f,%.6f,%.6f);"
+//                + "way[\"waterway\"]"
+//                + "(%.6f,%.6f,%.6f,%.6f);"
+//                + "relation[\"waterway\"]"
+//                + "(%.6f,%.6f,%.6f,%.6f);"
+//                + ");"
+//                + "(._;>;);"
+//                + "out body;",
+//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON);
 //query = String.format(Locale.US,
 //    "[out:xml][timeout:60];"
 //  + "("
@@ -214,8 +239,6 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 //  + "(._;>;);"
 //  + "out body;"
 //);
-
-
         String[] endpoints = new String[]{
             "https://overpass-api.de/api/interpreter",
             "https://overpass.kumi.systems/api/interpreter",
@@ -414,6 +437,11 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                         continue;
                     }
 
+                    // SPRAWDZENIE GRANIC - jeśli poza -> skip
+                    if (!czyPunktWGranicach(wezel)) {
+                        continue;
+                    }
+
                     wezel.ustawXY();
 
                     boolean czyWspolnyNode = (ref != -1) && nodeWayLicznik.getOrDefault(ref, 0) >= 2;
@@ -463,11 +491,10 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         double maxLon = 0;
         double minLon = 0;
 
-            minLat = DANE._2_S_LON;
-            maxLat = DANE._4_N_WYS;
-            minLon = DANE._1_W_LAT;
-            maxLon = DANE._3_E_SZER_R;
-
+        minLat = DANE._2_S_minLAT;
+        maxLat = DANE._4_N_maxLAT;
+        minLon = DANE._1_W_minLON;
+        maxLon = DANE._3_E_maxLON;
 
         String endpoint = "https://data.traffic.hereapi.com/v7/flow"
                 + "?in=bbox:" + minLon + "," + minLat + "," + maxLon + "," + maxLat
@@ -641,4 +668,11 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 //            e.printStackTrace();
 //        }
 //    }
+    private boolean czyPunktWGranicach(Punkt p) {
+        return p.LAT >= DANE._2_S_minLAT
+                && p.LAT <= DANE._4_N_maxLAT
+                && p.LON >= DANE._1_W_minLON
+                && p.LON <= DANE._3_E_maxLON;
+    }
+
 }

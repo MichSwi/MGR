@@ -55,10 +55,10 @@ public class PanelPobierania extends javax.swing.JPanel {
         jProgressBarTFREAD.setString("");
 
         wywolajListenery();
-        DANE._4_N_WYS = 0;
-        DANE._1_W_LAT = 0;
-        DANE._2_S_LON = 0;
-        DANE._3_E_SZER_R = 0;
+        DANE._4_N_maxLAT = 0;
+        DANE._1_W_minLON = 0;
+        DANE._2_S_minLAT = 0;
+        DANE._3_E_maxLON = 0;
 
         // NEWS: 54.160, 19.380, 54.175, 19.430
         jTextField1.setText("13.3905");
@@ -540,10 +540,10 @@ public class PanelPobierania extends javax.swing.JPanel {
                 && !jTextField3.getText().isEmpty()
                 && !jTextField4.getText().isEmpty()) {
 
-            DANE._1_W_LAT = Double.parseDouble(jTextField1.getText());
-            DANE._2_S_LON = Double.parseDouble(jTextField2.getText());
-            DANE._3_E_SZER_R = Double.parseDouble(jTextField3.getText());
-            DANE._4_N_WYS = Double.parseDouble(jTextField4.getText());
+            DANE._1_W_minLON = Double.parseDouble(jTextField1.getText()); // _1_W_minLON STARE: _1_W_LAT
+            DANE._2_S_minLAT = Double.parseDouble(jTextField2.getText());//  _2_S_minLAT STARE: _2_S_LON
+            DANE._3_E_maxLON = Double.parseDouble(jTextField3.getText());//_3_E_maxLON STARE: _3_E_SZER_R
+            DANE._4_N_maxLAT = Double.parseDouble(jTextField4.getText());  // _4_N_maxLAT STARE: _4_N_WYS
 
             DANE.coZaznaczone.add(jCheckBox1.isSelected());
             DANE.coZaznaczone.add(jCheckBox2.isSelected());

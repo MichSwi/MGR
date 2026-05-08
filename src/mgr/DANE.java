@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class DANE {
 
-    public static double _2_S_LON, _1_W_LAT, _4_N_WYS, _3_E_SZER_R;
+    public static double _2_S_minLAT, _1_W_minLON, _4_N_maxLAT, _3_E_maxLON;
     public static List<Boolean> coZaznaczone = new ArrayList<>();
     public static String nazwaPliku;
     public static Map<Long, Droga> drogi = new HashMap<>();
