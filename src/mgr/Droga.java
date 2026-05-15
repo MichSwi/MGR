@@ -97,7 +97,15 @@ public class Droga {
         }
 
         // sygnalizacja
-        
+        for (Punkt pkt : this.punkty){
+            if(pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("traffic_signals")){
+                if (pkt.equals(this.pkt_koniec) || pkt.equals(this.pkt_start)) {
+                    czas_kary += czas_sygnalizacja / 2;
+                } else {
+                    czas_kary += czas_sygnalizacja;
+                }
+            }
+        }
         // odleglosc
         Double czas_jazdy = 0.0;
         czas_jazdy = this.dlugosc / (double) this.maxspeed;
