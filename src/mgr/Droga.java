@@ -27,7 +27,7 @@ public class Droga {
     public Punkt pkt_start, pkt_koniec;
     public TrafficSegment ruchUliczny;
     public int maxspeed = -1;
-    public int czas_przejazdu = Integer.MIN_VALUE;
+    public double czas_przejazdu = Double.MIN_VALUE;
 
     public Droga(long ID, String nazwa, double dlugosc, LinkedList<Punkt> punkty, LinkedList<Long> polaczenia_poczatek_ID, LinkedList<Long> polaczenia_koniec_ID, String jednokierunkowa) {
         this.ID = ID;
@@ -77,5 +77,31 @@ public class Droga {
         } else {
             throw new IllegalArgumentException("brak przeciwnego wezla w polaczeniu");
         }
+    }
+
+    public void obliczCzasPrzejazdu() {
+        double czas_przejscie = 10.5;
+        double czas_sygnalizacja = 30.5;
+
+        double czas_kary = 0; //[s]
+
+        // przejscia dla pieszych
+        for (Punkt pkt : this.punkty) {
+            if (pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("crossing")) {
+                if (pkt.equals(this.pkt_koniec) || pkt.equals(this.pkt_start)) {
+                    czas_kary += czas_przejscie / 2;
+                } else {
+                    czas_kary += czas_przejscie;
+                }
+            }
+        }
+
+        // sygnalizacja
+        
+        // odleglosc
+        Double czas_jazdy = 0.0;
+        czas_jazdy = this.dlugosc / (double) this.maxspeed;
+        
+        this.czas_przejazdu = czas_kary+czas_jazdy;
     }
 }
