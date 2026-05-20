@@ -52,20 +52,43 @@ public class Droga {
 
     public void ustawOdleglosc() {
         // WZOREM HAVERSINE
-
         this.dlugosc = 0.0;
+
+        final double R = 6371000.0; // promień Ziemi w metrach
 
         for (int i = 0; i < punkty.size() - 1; i++) {
             Punkt p1 = punkty.get(i);
             Punkt p2 = punkty.get(i + 1);
 
-            double sredniaLat = Math.toRadians((p1.LAT + p2.LAT) / 2.0);
+            double lat1 = Math.toRadians(p1.LAT);
+            double lat2 = Math.toRadians(p2.LAT);
 
-            double dx = (p2.LON - p1.LON) * 111320.0 * Math.cos(sredniaLat);
-            double dy = (p2.LAT - p1.LAT) * 111320.0;
+            double deltaLat = Math.toRadians(p2.LAT - p1.LAT);
+            double deltaLon = Math.toRadians(p2.LON - p1.LON);
 
-            this.dlugosc += Math.sqrt(dx * dx + dy * dy);
+            double a = Math.sin(deltaLat / 2.0) * Math.sin(deltaLat / 2.0)
+                    + Math.cos(lat1) * Math.cos(lat2)
+                    * Math.sin(deltaLon / 2.0) * Math.sin(deltaLon / 2.0);
+
+            double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a));
+
+            double odleglosc = R * c;
+            System.out.println(odleglosc);
+            this.dlugosc = odleglosc;
         }
+//        this.dlugosc = 0.0;
+//
+//        for (int i = 0; i < punkty.size() - 1; i++) {
+//            Punkt p1 = punkty.get(i);
+//            Punkt p2 = punkty.get(i + 1);
+//
+//            double sredniaLat = Math.toRadians((p1.LAT + p2.LAT) / 2.0);
+//
+//            double dx = (p2.LON - p1.LON) * 111320.0 * Math.cos(sredniaLat);
+//            double dy = (p2.LAT - p1.LAT) * 111320.0;
+//
+//            this.dlugosc += Math.sqrt(dx * dx + dy * dy);
+//        }
     }
 
     public Long getPrzeciwnyWezelId(Long wez) {
@@ -97,8 +120,8 @@ public class Droga {
         }
 
         // sygnalizacja
-        for (Punkt pkt : this.punkty){
-            if(pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("traffic_signals")){
+        for (Punkt pkt : this.punkty) {
+            if (pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("traffic_signals")) {
                 if (pkt.equals(this.pkt_koniec) || pkt.equals(this.pkt_start)) {
                     czas_kary += czas_sygnalizacja / 2;
                 } else {
@@ -109,7 +132,7 @@ public class Droga {
         // odleglosc
         Double czas_jazdy = 0.0;
         czas_jazdy = this.dlugosc / (double) this.maxspeed;
-        
-        this.czas_przejazdu = czas_kary+czas_jazdy;
+
+        this.czas_przejazdu = czas_kary + czas_jazdy;
     }
 }
