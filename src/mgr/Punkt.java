@@ -18,14 +18,12 @@ public class Punkt {
     public double Y;
     public double LAT;
     public double LON;
-    public TypPunkt typ;
     public Map<String, String> tags = new HashMap<>();
     public int ilosc_uzyc;
 
-    Punkt(double LAT, double LON, TypPunkt typ, long ID) {
+    Punkt(double LAT, double LON, long ID) {
         this.LAT = LAT;
         this.LON = LON;
-        this.typ = typ;
         this.ID = ID;
         this.ilosc_uzyc = 0;
     }
@@ -39,20 +37,15 @@ public class Punkt {
     }
 
     public void ustawXY() {
-        double szer_mapy = 1000;
-        double wys_mapy = 1000;
 
-//        System.out.println("PUNKT ID=" + ID);
-//        System.out.println("LON=" + LON + "  W=" + DANE._1_W_LAT + "  E=" + DANE._3_E_SZER_R);
-//        System.out.println("LAT=" + LAT + "  S=" + DANE._2_S_LON + "  N=" + DANE._4_N_WYS);
-        this.X = mapuj(LON, DANE._1_W_minLON, DANE._3_E_maxLON, -1000, szer_mapy);
-        this.Y = mapuj(LAT, DANE._4_N_maxLAT, DANE._2_S_minLAT, -1000, wys_mapy);
+        double latCenter = (DANE._2_S_minLAT + DANE._4_N_maxLAT) / 2.0;
+        double lonCenter = (DANE._1_W_minLON + DANE._3_E_maxLON) / 2.0;
+        // przeliczenie stopni na metry
+        double metersPerDegreeLat = 111320.0;
+        double metersPerDegreeLon = 111320.0 * Math.cos(Math.toRadians(latCenter));
 
-//        System.out.println("X=" + X + " Y=" + Y);
-    }
-
-    private double mapuj(double x, double in_min, double in_max, double out_min, double out_max) {
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        this.X = (this.LON - lonCenter) * metersPerDegreeLon;
+        this.Y = -(this.LAT - latCenter) * metersPerDegreeLat;
     }
 
     public String getNazwa() {

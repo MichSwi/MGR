@@ -29,7 +29,7 @@ public class ReadOSM {
                 double lat = Double.parseDouble(e.getAttribute("lat"));
                 double lon = Double.parseDouble(e.getAttribute("lon"));
                 //OSMNode node = new OSMNode(id, lat, lon);
-                Punkt Punkt = new Punkt(lat,lon,TypPunkt.DROGA_PKT, id);
+                Punkt Punkt = new Punkt(lat,lon, id);
                 Punkt.ustawXY();
 
                 // sprawdź tagi w node

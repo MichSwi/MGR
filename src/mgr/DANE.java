@@ -29,37 +29,38 @@ public class DANE {
     public static Map<Long, Droga> rzeki = new HashMap<>();
     public static Map<Long, Droga> woda = new HashMap<>();
     public static Map<Long, Droga> kolej = new HashMap<>();
+    public static Map<Long, Relacja> relacje = new HashMap<>();
 
     public static void ustawPolaczenia() {
 
-        System.out.println("WSZYSTKIE: " + drogi.size());
-        List<Long> ListaKluczy = new ArrayList<>(drogi.keySet());
-        Long pierwsza_pocz, pierwsza_kon, druga_pocz, druga_kon;
-
-        // iteruje po kluczach od poczatku
-        for (int i = 0; i < ListaKluczy.size(); i++) {
-            pierwsza_pocz = drogi.get(ListaKluczy.get(i)).pkt_start.ID;
-            pierwsza_kon = drogi.get(ListaKluczy.get(i)).pkt_koniec.ID;
-            for (int pozostale = i + 1; pozostale <= drogi.size() - 1; pozostale++) {
-                druga_pocz = drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID;
-                druga_kon = drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID;
-                if (pierwsza_pocz.equals(druga_pocz)) {
-                    drogi.get(ListaKluczy.get(i)).polaczenia_poczatek_ID.add(ListaKluczy.get(pozostale));
-                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_poczatek_ID.add(ListaKluczy.get(i));
-                } else if (pierwsza_pocz.equals(druga_kon)) {
-                    drogi.get(ListaKluczy.get(i)).polaczenia_poczatek_ID.add(ListaKluczy.get(pozostale));
-                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_koniec_ID.add(ListaKluczy.get(i));
-
-                } else if (pierwsza_kon.equals(druga_pocz)) {
-                    drogi.get(ListaKluczy.get(i)).polaczenia_koniec_ID.add(ListaKluczy.get(pozostale));
-                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_poczatek_ID.add(ListaKluczy.get(i));
-
-                } else if (pierwsza_kon.equals(druga_kon)) {
-                    drogi.get(ListaKluczy.get(i)).polaczenia_koniec_ID.add(ListaKluczy.get(pozostale));
-                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_koniec_ID.add(ListaKluczy.get(i));
-                }
-            }
-        }
+//        System.out.println("WSZYSTKIE: " + drogi.size());
+//        List<Long> ListaKluczy = new ArrayList<>(drogi.keySet());
+//        Long pierwsza_pocz, pierwsza_kon, druga_pocz, druga_kon;
+//
+//        // iteruje po kluczach od poczatku
+//        for (int i = 0; i < ListaKluczy.size(); i++) {
+//            pierwsza_pocz = drogi.get(ListaKluczy.get(i)).pkt_start.ID;
+//            pierwsza_kon = drogi.get(ListaKluczy.get(i)).pkt_koniec.ID;
+//            for (int pozostale = i + 1; pozostale <= drogi.size() - 1; pozostale++) {
+//                druga_pocz = drogi.get(ListaKluczy.get(pozostale)).pkt_start.ID;
+//                druga_kon = drogi.get(ListaKluczy.get(pozostale)).pkt_koniec.ID;
+//                if (pierwsza_pocz.equals(druga_pocz)) {
+//                    drogi.get(ListaKluczy.get(i)).polaczenia_poczatek_ID.add(ListaKluczy.get(pozostale));
+//                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_poczatek_ID.add(ListaKluczy.get(i));
+//                } else if (pierwsza_pocz.equals(druga_kon)) {
+//                    drogi.get(ListaKluczy.get(i)).polaczenia_poczatek_ID.add(ListaKluczy.get(pozostale));
+//                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_koniec_ID.add(ListaKluczy.get(i));
+//
+//                } else if (pierwsza_kon.equals(druga_pocz)) {
+//                    drogi.get(ListaKluczy.get(i)).polaczenia_koniec_ID.add(ListaKluczy.get(pozostale));
+//                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_poczatek_ID.add(ListaKluczy.get(i));
+//
+//                } else if (pierwsza_kon.equals(druga_kon)) {
+//                    drogi.get(ListaKluczy.get(i)).polaczenia_koniec_ID.add(ListaKluczy.get(pozostale));
+//                    drogi.get(ListaKluczy.get(pozostale)).polaczenia_koniec_ID.add(ListaKluczy.get(i));
+//                }
+//            }
+//        }
     }
 
     public static void ustawOdleglosci() {
@@ -179,6 +180,14 @@ public class DANE {
             }
         }
 
+        for (Relacja rel : DANE.relacje.values()) {
+            for (Droga dr_w_rel : rel.drogi) {
+                doUsuniecia.add(dr_w_rel.ID * 100);
+                rzeki.put(dr_w_rel.ID * 100, dr_w_rel);
+            }
+
+        }
+
         for (Long id : doUsuniecia) {
             drogi.remove(id);
         }
@@ -187,5 +196,20 @@ public class DANE {
         System.out.println("Przeniesiono rzeki: " + rzeki.size());
         System.out.println("Przeniesiono zbiorniki wodne: " + woda.size());
         System.out.println("Pozostalo drog: " + drogi.size());
+    }
+
+    static public void ustawMaxSpeed() {
+        int licznik = 0;
+        for (Droga dr : drogi.values()) {
+            String maxspeedString = dr.tags.getOrDefault("maxspeed", "-");
+            if (maxspeedString.equalsIgnoreCase("walk")) {
+                dr.maxspeed = 7;
+                continue;
+            } else if (!maxspeedString.equals("-")) {
+                dr.maxspeed = Integer.parseInt(maxspeedString);
+                licznik++;
+            }
+        }
+        System.out.println("Tag maxspeed ma ilość odcinków: " + licznik);
     }
 }

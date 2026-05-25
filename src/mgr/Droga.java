@@ -17,6 +17,7 @@ import java.util.Map;
 public class Droga {
 
     public long ID;
+    public long IDosm;
     public String nazwa;
     public double dlugosc;
     public List<Punkt> punkty;
@@ -38,7 +39,7 @@ public class Droga {
         this.polaczenia_koniec_ID = polaczenia_koniec_ID;
         this.jednokierunkowa = jednokierunkowa;
         tags = new HashMap<>();
-
+        IDosm = -1;
     }
 
     public Droga(long ID) {
@@ -54,7 +55,7 @@ public class Droga {
         // WZOREM HAVERSINE
         this.dlugosc = 0.0;
 
-        final double R = 6371000.0; // promień Ziemi w metrach
+        final double R = 6371000.0; // promień ziemi w metrach
 
         for (int i = 0; i < punkty.size() - 1; i++) {
             Punkt p1 = punkty.get(i);
@@ -73,7 +74,7 @@ public class Droga {
             double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a));
 
             double odleglosc = R * c;
-            System.out.println(odleglosc);
+            //System.out.println(odleglosc);
             this.dlugosc = odleglosc;
         }
 //        this.dlugosc = 0.0;

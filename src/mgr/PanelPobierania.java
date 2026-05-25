@@ -24,11 +24,6 @@ import org.json.JSONObject;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import mgr.DANE;
-import mgr.Droga;
-import mgr.Punkt;
-import mgr.TrafficSegment;
-import mgr.WatekPobierz;
 
 /**
  *
@@ -528,7 +523,7 @@ public class PanelPobierania extends javax.swing.JPanel {
 
     private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField4ActionPerformed
         // TODO add your handling code here:
-            FormatujDane(jTextField4, true);
+        FormatujDane(jTextField4, true);
 
     }//GEN-LAST:event_jTextField4ActionPerformed
 
@@ -655,15 +650,24 @@ public class PanelPobierania extends javax.swing.JPanel {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
 
-        double szer = Double.parseDouble(szer_input.getText().substring(0, szer_input.getText().length() - 3));
-        double wys = Double.parseDouble(wys_input.getText().substring(0, wys_input.getText().length() - 3));
-        szer = szer * 0.009;
-        wys = wys * 0.009;
+        double szerKm = Double.parseDouble(
+                szer_input.getText().replace("km", "").trim().replace(",", ".")
+        );
 
-        jTextField1.setText(Double.toString((temp_LON - szer / 2)));
-        jTextField2.setText(Double.toString(temp_LAT - wys / 2));
-        jTextField3.setText(Double.toString(temp_LON + szer / 2));
-        jTextField4.setText(Double.toString(temp_LAT + wys / 2));
+        double wysKm = Double.parseDouble(
+                wys_input.getText().replace("km", "").trim().replace(",", ".")
+        );
+
+// 1 stopień szerokości geograficznej ≈ 111.32 km
+        double deltaLat = wysKm / 111.32;
+
+// 1 stopień długości geograficznej zależy od LAT
+        double deltaLon = szerKm / (111.32 * Math.cos(Math.toRadians(temp_LAT)));
+
+        jTextField1.setText(Double.toString(temp_LON - deltaLon / 2)); // W
+        jTextField2.setText(Double.toString(temp_LAT - deltaLat / 2)); // S
+        jTextField3.setText(Double.toString(temp_LON + deltaLon / 2)); // E
+        jTextField4.setText(Double.toString(temp_LAT + deltaLat / 2)); // N
 
 
     }//GEN-LAST:event_jButton2ActionPerformed

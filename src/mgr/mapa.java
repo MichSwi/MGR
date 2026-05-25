@@ -6,12 +6,16 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import static java.lang.Math.abs;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import mgr.ALGORYTMY.WYNIKI;
 
 public class mapa extends javax.swing.JPanel {
 
+    private Boolean zmienna = false;
     public Wezel ZaznaczonyWezel;
     public int clickX;
     public int clickY;
@@ -106,17 +110,20 @@ public class mapa extends javax.swing.JPanel {
         try {
             rysuj_wode_tory(g2d_zawartosc);
             for (Long ID : drogi.keySet()) {
-//                if (d.maxspeed != -1) {
-//                    rysujDroge(d, Color.GREEN, g2d_zawartosc);
-//                } else {
-//                    rysujDroge(d, Color.RED, g2d_zawartosc);
-//                }
-                if (drogi.get(ID).ruchUliczny != null) {
-                    rysujDroge(drogi.get(ID), Color.GREEN, g2d_zawartosc);
-                } else {
-                    rysujDroge(drogi.get(ID), Color.ORANGE, g2d_zawartosc);
+                if (zmienna == false) {
+                    if (drogi.get(ID).maxspeed != -1) {
+                        rysujDroge(drogi.get(ID), Color.GREEN, g2d_zawartosc);
+                    } else {
+                        rysujDroge(drogi.get(ID), Color.RED, g2d_zawartosc);
+                    }
+                } else if (zmienna == true) {
+                    if (drogi.get(ID).ruchUliczny != null) {
+                        rysujDroge(drogi.get(ID), Color.GREEN, g2d_zawartosc);
+                    } else {
+                        rysujDroge(drogi.get(ID), Color.ORANGE, g2d_zawartosc);
+                    }
                 }
-
+               
                 for (Punkt p : drogi.get(ID).punkty) {
                     //rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
                     if (p.tags.getOrDefault("highway", "brak").equalsIgnoreCase("crossing")) {
@@ -300,6 +307,8 @@ public class mapa extends javax.swing.JPanel {
         jButton2 = new javax.swing.JButton();
         roundedJPanel1 = new mgr.RoundedJPanel();
         skala_label = new javax.swing.JLabel();
+        jButton4 = new javax.swing.JButton();
+        jToggleButton1 = new javax.swing.JToggleButton();
 
         jButton1.setText("jButton1");
         jButton1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -411,6 +420,20 @@ public class mapa extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
+        jButton4.setText("CHECK ALL");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        jToggleButton1.setText("zmien widok");
+        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -427,13 +450,16 @@ public class mapa extends javax.swing.JPanel {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(roundedJPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jButton3)
-                                .addGap(36, 36, 36))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())))))
+                        .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jToggleButton1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jButton4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButton3)))
+                        .addGap(36, 36, 36))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -443,8 +469,12 @@ public class mapa extends javax.swing.JPanel {
                 .addGap(12, 12, 12)
                 .addComponent(infoKlik, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 469, Short.MAX_VALUE)
-                .addComponent(jButton3)
-                .addGap(70, 70, 70)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton3)
+                    .addComponent(jButton4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jToggleButton1)
+                .addGap(35, 35, 35)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(roundedJPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -514,6 +544,165 @@ public class mapa extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+        System.out.println("======================= CHECK ALL ========================");
+        System.out.println("Ilosc relacji w DANE: " + DANE.relacje.size());
+
+        int ilosc_dopasowanego_ruchu = 0;
+        for (Droga dr : DANE.drogi.values()) {
+            if (dr.ruchUliczny != null) {
+                ilosc_dopasowanego_ruchu++;
+            }
+        }
+        System.out.println("Ruch uliczny w pliku: " + DANE.ruchUliczny.size() + " | Ruch uliczny dopisany: " + ilosc_dopasowanego_ruchu);
+        System.out.println("Drogi w DANE: " + DANE.drogi.size());
+        System.out.println("Drogi jako tory: " + DANE.kolej.size());
+        System.out.println("Drogi jako rzeki: " + DANE.rzeki.size());
+        System.out.println("Ilosc wezlow: " + DANE.wezly.size());
+
+        Set<Long> listaUniklanychIDosm = new HashSet<>();
+        int licznik_brak_IDOSM = 0;
+        for (Droga dr : DANE.drogi.values()) {
+            if (dr.IDosm == -1) {
+                licznik_brak_IDOSM++;
+            } else {
+                listaUniklanychIDosm.add(dr.IDosm);
+            }
+        }
+        for (Droga dr : DANE.kolej.values()) {
+            if (dr.IDosm == -1) {
+                licznik_brak_IDOSM++;
+            } else {
+                listaUniklanychIDosm.add(dr.IDosm);
+            }
+        }
+        for (Droga dr : DANE.rzeki.values()) {
+            if (dr.IDosm == -1) {
+                licznik_brak_IDOSM++;
+            } else {
+                listaUniklanychIDosm.add(dr.IDosm);
+            }
+        }
+        for (Relacja rel : DANE.relacje.values()) {
+            for (Droga dr : rel.drogi) {
+                if (dr.IDosm == -1) {
+                    licznik_brak_IDOSM++;
+                } else {
+                    listaUniklanychIDosm.add(dr.IDosm);
+                }
+            }
+        }
+        System.out.println("Liczba drog Z IDOSM w drogi+kolej+rzeki+relacje: " + listaUniklanychIDosm.size());
+        System.out.println("Liczba drog BEZ IDOSM w drogi+kolej+rzeki+relacje: " + licznik_brak_IDOSM);
+
+        int ilosc_przejsc = 0;
+        int ilosc_sygnalizacji = 0;
+        int ilosc_sygnalizacji_na_wezlach = 0;
+        int ilosc_przejsc_na_wezlach = 0;
+        for (Droga dr : DANE.drogi.values()) {
+            for (Punkt pkt : dr.punkty) {
+                if (pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("crossing")) {
+                    if (pkt.ID == dr.punkty.getFirst().ID || pkt.ID == dr.punkty.getLast().ID) {
+                        ilosc_przejsc_na_wezlach++;
+                    } else {
+                        ilosc_przejsc++;
+                    }
+                }
+                if (pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("traffic_signals")) {
+                    if (pkt.ID == dr.punkty.getFirst().ID || pkt.ID == dr.punkty.getLast().ID) {
+                        ilosc_sygnalizacji_na_wezlach++;
+                    } else {
+                        ilosc_sygnalizacji++;
+                    }
+                }
+            }
+        }
+        System.out.println("Ilosc przejsc dla pieszych (ilosc punktow z tagiem higway=crossing): " + ilosc_przejsc);
+        System.out.println("Ilosc sygnalizacji swietlnej (ilosc punktow z tagiem higway=traffic_signals): " + ilosc_sygnalizacji);
+        System.out.println("Ilosc przejsc dla pieszych NA WEZLACH (ilosc FIRST/LAST punktow z tagiem higway=crossing): " + ilosc_przejsc_na_wezlach);
+        System.out.println("Ilosc sygnalizacji swietlnej NA WEZLACH (ilosc FIRST/LAST punktow z tagiem higway=traffic_signals): " + ilosc_sygnalizacji_na_wezlach);
+
+        int ilosc_tagow_maxspeed = 0;
+        int ilosc_brakow_maxspeed = 0;
+        for (Droga dr : DANE.drogi.values()) {
+            String maxspeedString = dr.tags.getOrDefault("maxspeed", "-");
+            if (maxspeedString.equals("-")) {
+                ilosc_brakow_maxspeed++;
+                continue;
+            }
+            if (maxspeedString.equals("walk")){
+                ilosc_tagow_maxspeed++;
+                continue;
+            }
+            int maxSpeedInt = Integer.parseInt(maxspeedString);
+            if (maxSpeedInt > 1) {
+                ilosc_tagow_maxspeed++;
+            }
+        }
+        System.out.println("Ilosc tagow maxspeed: " + ilosc_tagow_maxspeed + " / " + DANE.drogi.size());
+        System.out.println("Ilosc brakow maxspeed: " + ilosc_brakow_maxspeed);
+
+        HashSet<String> set_kategorii_drog = new HashSet();
+        for (Droga dr : DANE.drogi.values()) {
+            String kategoria_drogi = dr.tags.getOrDefault("highway", "-");
+            set_kategorii_drog.add(kategoria_drogi);
+        }
+        System.out.println("Lista unikalnych kategorii drog: (" + set_kategorii_drog.size() + ")");
+        System.out.println(set_kategorii_drog.toString());
+
+        System.out.println("Ilosc ruchu_ulicznego: " + DANE.ruchUliczny.size());
+        int ilosc_drog_w_DANE_z_ruchem = 0;
+        int ilosc_drog_w_DANE_BEZ_ruchu = 0;
+        HashSet<Long> ilosc_osmID_z_ruchem = new HashSet();
+        HashSet<Long> ilosc_osmID_bez_ruchu = new HashSet();
+
+        for (Droga dr : DANE.drogi.values()) {
+            if (dr.ruchUliczny == null) {
+                ilosc_drog_w_DANE_BEZ_ruchu++;
+                ilosc_osmID_bez_ruchu.add(dr.IDosm);
+            } else {
+                ilosc_drog_w_DANE_z_ruchem++;
+                ilosc_osmID_z_ruchem.add(dr.IDosm);
+            }
+        }
+        System.out.println("Ilosc drog w DANE z ruchem ulicznym: " + ilosc_drog_w_DANE_z_ruchem);
+        System.out.println("Ilosc uniklanych IDOSM z ruchem uliczym: " + ilosc_osmID_z_ruchem.size());
+        System.out.println("Ilosc drog w DANE BEZ ruchu ulicznego: " + ilosc_drog_w_DANE_BEZ_ruchu);
+        System.out.println("Ilosc uniklanych IDOSM BEZ ruchu ulicznego: " + ilosc_osmID_bez_ruchu.size());
+
+        int liczba_max_speed = 0;
+        int liczba_tf = 0;
+        int liczba_kategoryzowanych = 0;
+        int liczba_brakow = 0;
+        for (Droga dr : DANE.drogi.values()) {
+            if (dr.ruchUliczny != null) {
+                liczba_tf++;
+                continue;
+            }
+            String maxspeedString = dr.tags.getOrDefault("maxspeed", "-");
+            if (!maxspeedString.equals("-")) {
+                liczba_max_speed++;
+                continue;
+            }
+            String kategoria_drogi = dr.tags.getOrDefault("highway", "-");
+            if (kategoria_drogi == null || "".equals(kategoria_drogi) || kategoria_drogi.equalsIgnoreCase("unclassified")) {
+                liczba_brakow++;
+            } else {
+                liczba_kategoryzowanych++;
+            }
+        }
+        System.out.println("Maja tf: " + liczba_tf);
+        System.out.println("Maja maxspeed: " + liczba_max_speed);
+        System.out.println("Maja kategorie: " + liczba_kategoryzowanych);
+        System.out.println("Braki: " + liczba_brakow);
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
+        // TODO add your handling code here:
+        this.zmienna = !zmienna;
+    }//GEN-LAST:event_jToggleButton1ActionPerformed
+
     static Color losowyKolor() {
         var r = ThreadLocalRandom.current();
         return new Color(r.nextInt(256), r.nextInt(256), r.nextInt(256)); // nowy za każdym wywołaniem
@@ -530,7 +719,9 @@ public class mapa extends javax.swing.JPanel {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JButton reset_widoku_button;
     private mgr.RoundedJPanel roundedJPanel1;
     private javax.swing.JLabel skala_label;
@@ -587,6 +778,46 @@ public class mapa extends javax.swing.JPanel {
             g2d.setColor(kolor_wody);
             g2d.drawPolygon(xPoints, yPoints, nPoints);
             g2d.fillPolygon(xPoints, yPoints, nPoints);
+
+        }
+
+        // relacje (zbiorniki też)
+        for (Long rel_id : DANE.relacje.keySet()) {
+            Relacja rel = DANE.relacje.get(rel_id);
+
+            if (rel == null || rel.drogi == null || rel.drogi.isEmpty()) {
+                continue;
+            }
+
+            ArrayList<ArrayList<Punkt>> ringi = zbudujRingiZRelacji(rel.drogi);
+
+            g2d.setColor(kolor_wody);
+
+            for (ArrayList<Punkt> ring : ringi) {
+                if (ring.size() < 3) {
+                    continue;
+                }
+
+                Punkt pierwszy = ring.get(0);
+                Punkt ostatni = ring.get(ring.size() - 1);
+
+                if (pierwszy.ID != ostatni.ID) {
+                    continue;
+                }
+
+                int nPoints = ring.size();
+                int[] xPoints = new int[nPoints];
+                int[] yPoints = new int[nPoints];
+
+                for (int i = 0; i < nPoints; i++) {
+                    Punkt p = ring.get(i);
+                    xPoints[i] = (int) p.X;
+                    yPoints[i] = (int) p.Y;
+                }
+
+                g2d.fillPolygon(xPoints, yPoints, nPoints);
+                g2d.drawPolygon(xPoints, yPoints, nPoints);
+            }
         }
 
         // tory
@@ -594,5 +825,102 @@ public class mapa extends javax.swing.JPanel {
             Droga kolej = DANE.kolej.get(kolej_id);
             rysujDroge(kolej, Color.DARK_GRAY, g2d);
         }
+    }
+
+    private ArrayList<ArrayList<Punkt>> zbudujRingiZRelacji(ArrayList<Droga> drogiRelacji) {
+        ArrayList<ArrayList<Punkt>> ringi = new ArrayList<>();
+
+        ArrayList<Droga> pozostale = new ArrayList<>();
+
+        for (Droga d : drogiRelacji) {
+            if (d != null && d.punkty != null && d.punkty.size() >= 2) {
+                pozostale.add(d);
+            }
+        }
+
+        while (!pozostale.isEmpty()) {
+            Droga pierwszaDroga = pozostale.remove(0);
+
+            ArrayList<Punkt> ring = new ArrayList<>(pierwszaDroga.punkty);
+
+            boolean cosDolaczono = true;
+
+            while (cosDolaczono) {
+                cosDolaczono = false;
+
+                Punkt pierwszy = ring.get(0);
+                Punkt ostatni = ring.get(ring.size() - 1);
+
+                for (int i = 0; i < pozostale.size(); i++) {
+                    Droga d = pozostale.get(i);
+
+                    Punkt dPierwszy = d.punkty.get(0);
+                    Punkt dOstatni = d.punkty.get(d.punkty.size() - 1);
+
+                    // koniec aktualnego ringu łączy się z początkiem drogi
+                    if (ostatni.ID == dPierwszy.ID) {
+                        for (int j = 1; j < d.punkty.size(); j++) {
+                            ring.add(d.punkty.get(j));
+                        }
+
+                        pozostale.remove(i);
+                        cosDolaczono = true;
+                        break;
+                    }
+
+                    // koniec aktualnego ringu łączy się z końcem drogi, więc trzeba odwrócić
+                    if (ostatni.ID == dOstatni.ID) {
+                        for (int j = d.punkty.size() - 2; j >= 0; j--) {
+                            ring.add(d.punkty.get(j));
+                        }
+
+                        pozostale.remove(i);
+                        cosDolaczono = true;
+                        break;
+                    }
+
+                    // początek aktualnego ringu łączy się z końcem drogi
+                    if (pierwszy.ID == dOstatni.ID) {
+                        ArrayList<Punkt> nowyRing = new ArrayList<>();
+
+                        for (int j = 0; j < d.punkty.size() - 1; j++) {
+                            nowyRing.add(d.punkty.get(j));
+                        }
+
+                        nowyRing.addAll(ring);
+                        ring = nowyRing;
+
+                        pozostale.remove(i);
+                        cosDolaczono = true;
+                        break;
+                    }
+
+                    // początek aktualnego ringu łączy się z początkiem drogi, więc trzeba odwrócić
+                    if (pierwszy.ID == dPierwszy.ID) {
+                        ArrayList<Punkt> nowyRing = new ArrayList<>();
+
+                        for (int j = d.punkty.size() - 1; j >= 1; j--) {
+                            nowyRing.add(d.punkty.get(j));
+                        }
+
+                        nowyRing.addAll(ring);
+                        ring = nowyRing;
+
+                        pozostale.remove(i);
+                        cosDolaczono = true;
+                        break;
+                    }
+                }
+            }
+
+            Punkt pierwszy = ring.get(0);
+            Punkt ostatni = ring.get(ring.size() - 1);
+
+            if (pierwszy.ID == ostatni.ID) {
+                ringi.add(ring);
+            }
+        }
+
+        return ringi;
     }
 }
