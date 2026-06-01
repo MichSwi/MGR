@@ -24,10 +24,10 @@ public class Droga {
     public LinkedList<Long> polaczenia_poczatek_ID = new LinkedList<>();
     public LinkedList<Long> polaczenia_koniec_ID = new LinkedList<>();
     public String jednokierunkowa = "";
-    Map<String, String> tags;
+    public Map<String, String> tags;
     public Punkt pkt_start, pkt_koniec;
     public TrafficSegment ruchUliczny;
-    public int maxspeed = -1;
+    public double maxspeed = -1;
     public double czas_przejazdu = Double.MIN_VALUE;
 
     public Droga(long ID, String nazwa, double dlugosc, LinkedList<Punkt> punkty, LinkedList<Long> polaczenia_poczatek_ID, LinkedList<Long> polaczenia_koniec_ID, String jednokierunkowa) {
@@ -75,7 +75,7 @@ public class Droga {
 
             double odleglosc = R * c;
             //System.out.println(odleglosc);
-            this.dlugosc = odleglosc;
+            this.dlugosc += odleglosc;
         }
 //        this.dlugosc = 0.0;
 //
@@ -132,8 +132,98 @@ public class Droga {
         }
         // odleglosc
         Double czas_jazdy = 0.0;
-        czas_jazdy = this.dlugosc / (double) this.maxspeed;
+        czas_jazdy = this.dlugosc / this.maxspeed*3.6; //   m/1000 / km/h * 3600 = [s]
 
         this.czas_przejazdu = czas_kary + czas_jazdy;
+    }
+
+    public String ustawMaxSpeed() {
+
+        if (this.ruchUliczny != null) {
+            this.maxspeed = this.ruchUliczny.speed*3.6; // z m/s na km/h
+            return "ruch_uliczny";
+        }
+
+        String maxspeedString = tags.getOrDefault("maxspeed", "-");
+        if (maxspeedString.equalsIgnoreCase("walk")) {
+            maxspeed = 7;
+            return "tag";
+        } else if (!maxspeedString.equals("-")) {
+            maxspeed = Integer.parseInt(maxspeedString);
+            return "tag";
+        }
+
+        String typ_drogi = tags.getOrDefault("highway", "brak tagu");
+        switch (typ_drogi) {
+            case "brak tagu":
+                // brak informacji o typie drogi
+                maxspeed = 50;
+                return "brak";
+            case "unclassified":
+                // droga lokalna niesklasyfikowana
+                maxspeed = 50;
+                return "unclassified";
+            case "tertiary_link":
+                // łącznica drogi trzeciorzędnej
+                maxspeed = 40;
+                break;
+            case "tertiary":
+                // droga trzeciorzędna / lokalnie ważna
+                maxspeed = 50;
+                break;
+            case "living_street":
+                // strefa zamieszkania
+                maxspeed = 20;
+                break;
+            case "motorway_link":
+                // łącznica autostrady
+                maxspeed = 70;
+                break;
+            case "trunk":
+                // droga główna przyspieszona / droga szybkiego ruchu niższa niż autostrada
+                maxspeed = 100;
+                break;
+            case "motorway":
+                // autostrada
+                maxspeed = 140;
+                break;
+            case "rest_area":
+                // miejsce obsługi podróżnych / parking przy trasie
+                maxspeed = 20;
+                break;
+            case "secondary":
+                // droga drugorzędna / zbiorcza
+                maxspeed = 60;
+                break;
+            case "residential":
+                // droga osiedlowa / mieszkaniowa
+                maxspeed = 30;
+                break;
+            case "service":
+                // droga serwisowa / dojazdowa
+                maxspeed = 20;
+                break;
+            case "secondary_link":
+                // łącznica drogi drugorzędnej
+                maxspeed = 40;
+                break;
+            case "trunk_link":
+                // łącznica drogi głównej przyspieszonej
+                maxspeed = 60;
+                break;
+            case "primary":
+                // droga główna / ważna droga przelotowa
+                maxspeed = 70;
+                break;
+            case "walk":
+                // predkosc pieszych
+                maxspeed = 7;
+                break;
+            default:
+                // nieznany typ drogi
+                maxspeed = 50;
+                return "brak";
+        }
+        return "klasa";
     }
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 import mgr.DANE;
 import mgr.Droga;
 import mgr.Wezel;
+import mgr.Wezel.Polaczenie;
 
 /**
  *
@@ -54,9 +55,10 @@ public class AntColonyAlg {
             }
 
             trasa_wezlow_id.add(kolejnyWezel);
-            for (Long id_drogi : wezly.get(aktualnyWezel).drogiIDs){
-                if (DANE.drogi.get(id_drogi).pkt_start.ID == kolejnyWezel || DANE.drogi.get(id_drogi).pkt_koniec.ID == kolejnyWezel){
-                    trasa_drog.add(DANE.drogi.get(id_drogi));
+            
+            for(Polaczenie pol : DANE.wezly.get(aktualnyWezel).polaczenia){
+                if(pol.kolejnyWezel.equals(kolejnyWezel)){
+                    trasa_drog.add(DANE.drogi.get(pol.IDdrogi));
                 }
             }
             
@@ -70,7 +72,12 @@ public class AntColonyAlg {
     }
 
     private Long wybierzKolejnyWezel(Long aktualny_wezel, List<Long> odwiedzone) {
-        List<Long> drogi = DANE.wezly.get(aktualny_wezel).drogiIDs;
+        List<Long> drogi = new ArrayList<>();
+        for(Polaczenie pol : DANE.wezly.get(aktualny_wezel).polaczenia){
+            if(pol.przejazd==true){
+                drogi.add(pol.IDdrogi);
+            }
+        }
         Map<Long, Double> ocenyWezlow = new HashMap<>();
         double sumaOcen = 0.0;
 

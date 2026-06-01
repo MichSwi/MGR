@@ -9,7 +9,7 @@ public class WYNIKI {
     public static boolean czyWynikiAlgGen = false;
     public static boolean czyWynikiAntColony = false;
     public static boolean czyWynikiAStar = false;
-
+    
     public static Map<Long, Double> wartosc_wezlow_dijkstra = new HashMap<>();
     public static Map<Long, Double> wartosc_wezlow_a_star = new HashMap<>();
 

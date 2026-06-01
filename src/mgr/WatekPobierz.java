@@ -159,12 +159,20 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         DANE.ruchUliczny.addAll(this.ruchUliczny);
 
         DANE.ustawToryWode();
+
         DANE.ustawOdleglosci();
+
         DANE.ustawStartKoniec();
+
         DANE.ustawPolaczenia();
+
         DANE.ustawRuchUliczny();
+
         DANE.budujWezlyZDrog();
+
         DANE.ustawMaxSpeed();
+        
+        DANE.ustawCzasPrzejazdu();
 
         System.out.println("DONE");
     }
@@ -190,86 +198,104 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 "[out:xml][timeout:60];"
                 + "("
                 + "way[\"highway\"]"
-                + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|driveway)$\"]"
+                + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|construction|driveway)$\"]"
                 + "(%.6f,%.6f,%.6f,%.6f);"
-//                + "way[\"railway\"~\"^(rail|tram|light_rail|subway)$\"]"
-//                + "(%.6f,%.6f,%.6f,%.6f);"
-//                + "way[\"natural\"=\"water\"][\"water\"!=\"ditch\"]"
-//                + "(%.6f,%.6f,%.6f,%.6f);"
-//                + "relation[\"natural\"=\"water\"][\"water\"!=\"ditch\"]"
-//                + "(%.6f,%.6f,%.6f,%.6f);"
-//                + "way[\"waterway\"][\"waterway\"!=\"ditch\"]"
-//                + "(%.6f,%.6f,%.6f,%.6f);"
-//                + "relation[\"waterway\"][\"waterway\"!=\"ditch\"]"
-//                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "way[\"railway\"~\"^(rail|tram|light_rail|subway)$\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "way[\"natural\"=\"water\"][\"water\"!=\"ditch\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "relation[\"natural\"=\"water\"][\"water\"!=\"ditch\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "way[\"waterway\"][\"waterway\"!=\"ditch\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
+                + "relation[\"waterway\"][\"waterway\"!=\"ditch\"]"
+                + "(%.6f,%.6f,%.6f,%.6f);"
                 + ");"
                 + "(._;>;);"
                 + "out body;",
-                //DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
-//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
-//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
-//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
-//                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
+                DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON,
                 DANE._2_S_minLAT, DANE._1_W_minLON, DANE._4_N_maxLAT, DANE._3_E_maxLON
         );
 
         String[] endpoints = new String[]{
             "https://overpass-api.de/api/interpreter",
-            "https://overpass.kumi.systems/api/interpreter",
-            "https://overpass.openstreetmap.fr/api/interpreter"
+            "https://overpass.kumi.systems/api/interpreter", //"https://overpass.openstreetmap.fr/api/interpreter"
         };
 
         File out = new File("POBRANE_PLIKI", DANE.nazwaPliku + ".osm");
 
         System.out.println("Zapisuję do: " + out.getAbsolutePath());
 
+        int maxProbNaMirror = 3;
+
         for (String endpoint : endpoints) {
-            String urlStr = endpoint + "?data=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
 
-            System.out.println("➡ Pobieram z: " + endpoint);
-            System.out.println(urlStr);
+            for (int proba = 1; proba <= maxProbNaMirror; proba++) {
 
-            try {
-                HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
-                conn.setRequestMethod("GET");
-                conn.setConnectTimeout(15000);
-                conn.setReadTimeout(60000);
-                conn.setRequestProperty("User-Agent", "MGR-Downloader/1.0 (Java)");
+                String urlStr = endpoint + "?data=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
 
-                int code = conn.getResponseCode();
+                System.out.println("➡ Pobieram z: " + endpoint);
+                System.out.println("Próba " + proba + "/" + maxProbNaMirror);
+                System.out.println(urlStr);
 
-                InputStream in = (code >= 200 && code < 300)
-                        ? conn.getInputStream()
-                        : conn.getErrorStream();
+                try {
+                    HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setConnectTimeout(15000);
+                    conn.setReadTimeout(60000);
+                    conn.setRequestProperty("User-Agent", "MGR-Downloader/1.0 (Java)");
 
-                int pobraneBajty = 0;
+                    int code = conn.getResponseCode();
 
-                try (in; FileOutputStream fos = new FileOutputStream(out)) {
-                    byte[] buf = new byte[8192];
-                    int r;
+                    InputStream in = (code >= 200 && code < 300)
+                            ? conn.getInputStream()
+                            : conn.getErrorStream();
 
-                    while ((r = in.read(buf)) != -1) {
-                        fos.write(buf, 0, r);
-                        pobraneBajty += r;
-                        publish(new stanRealTime(pobraneBajty, 0, 1));
+                    if (in == null) {
+                        throw new IOException("Brak strumienia odpowiedzi z serwera.");
                     }
+
+                    int pobraneBajty = 0;
+
+                    try (InputStream input = in; FileOutputStream fos = new FileOutputStream(out)) {
+
+                        byte[] buf = new byte[8192];
+                        int r;
+
+                        while ((r = input.read(buf)) != -1) {
+                            fos.write(buf, 0, r);
+                            pobraneBajty += r;
+                            publish(new stanRealTime(pobraneBajty, 0, 1));
+                        }
+                    }
+
+                    if (code >= 200 && code < 300) {
+                        System.out.println("Gotowe: " + out.length() + " bajtów");
+
+                        pasekPostepuOSM.setIndeterminate(false);
+                        pasekPostepuOSM.setValue(100);
+                        pasekPostepuOSM.setString("Pobieranie zakończone");
+
+                        return;
+                    } else {
+                        System.err.println("Overpass HTTP " + code
+                                + " – próba " + proba + "/" + maxProbNaMirror
+                                + " dla mirrora: " + endpoint);
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("Błąd połączenia z " + endpoint
+                            + " – próba " + proba + "/" + maxProbNaMirror
+                            + ": " + e.getMessage());
                 }
-
-                if (code >= 200 && code < 300) {
-                    System.out.println("Gotowe: " + out.length() + " bajtów");
-
-                    pasekPostepuOSM.setIndeterminate(false);
-                    pasekPostepuOSM.setValue(100);
-                    pasekPostepuOSM.setString("Pobieranie zakończone");
-
-                    return;
-                } else {
-                    System.err.println("Overpass HTTP " + code + " – spróbuję kolejny mirror.");
-                }
-
-            } catch (Exception e) {
-                System.err.println("Błąd połączenia z " + endpoint + ": " + e.getMessage());
             }
+
+            System.err.println("Mirror nie zadziałał po "
+                    + maxProbNaMirror + " próbach, przechodzę do kolejnego.");
         }
 
         System.err.println("Nie udało się pobrać – spróbuj mniejszego bboxa lub później.");
@@ -431,6 +457,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 if (czyWspolnyNode && czySrodek && czyDrogaSamochodowa) {
                     if (!biezaca.punkty.isEmpty()) {
                         biezaca.punkty.add(wezel);
+                        biezaca.IDosm = idOSM;
                         DANE.drogi.put(biezaca.ID, biezaca);
 
                         ilosc[0]++;

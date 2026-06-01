@@ -8,6 +8,7 @@ import java.util.Map;
 import mgr.DANE;
 import mgr.Droga;
 import mgr.Wezel;
+import mgr.Wezel.Polaczenie;
 
 /**
  *
@@ -56,11 +57,14 @@ public class BELLMAN_FORD {
                     continue;
                 }
 
-                for (Long idDrogi : w.drogiIDs) {
-
+                for (Polaczenie pol : w.polaczenia) {
+                    if(pol.przejazd==false){
+                        continue;
+                    }
+                    Long idDrogi = pol.IDdrogi;
                     Droga droga = DANE.drogi.get(idDrogi);
 
-                    Long sasiedniWezel = droga.getPrzeciwnyWezelId(w.ID);
+                    Long sasiedniWezel = pol.kolejnyWezel;
 
                     if (sasiedniWezel == null) {
                         continue;
@@ -101,8 +105,11 @@ public class BELLMAN_FORD {
                 continue;
             }
 
-            for (Long idDrogi : w.drogiIDs) {
-
+            for (Polaczenie pol : w.polaczenia) {
+                if(pol.przejazd==false){
+                    continue;
+                }
+                Long idDrogi = pol.IDdrogi;
                 Droga droga = DANE.drogi.get(idDrogi);
 
                 if (droga == null) {
@@ -204,22 +211,6 @@ public class BELLMAN_FORD {
         return najlepsza_trasa;
     }
 
-    private Long getSasiedniWezel(Long aktualnyWezelID, Droga droga) {
-
-        if (droga == null || droga.pkt_start == null || droga.pkt_koniec == null) {
-            return null;
-        }
-
-        if (droga.pkt_start.ID == aktualnyWezelID) {
-            return droga.pkt_koniec.ID;
-        }
-
-        if (droga.pkt_koniec.ID == aktualnyWezelID) {
-            return droga.pkt_start.ID;
-        }
-
-        return null;
-    }
 
     private double getWagaDrogi(Droga droga) {
 

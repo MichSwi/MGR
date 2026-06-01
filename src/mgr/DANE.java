@@ -97,7 +97,6 @@ public class DANE {
                 ws = new Wezel(s.ID, s.X, s.Y);
                 wezly.put(s.ID, ws);
             }
-            //ws.dodajDroge(d.ID);
 
             // KONIEC
             Wezel wk = wezly.get(k.ID);
@@ -107,13 +106,19 @@ public class DANE {
             }
 
             if (d.jednokierunkowa.equals("true")) {
-                ws.dodajDroge(d.ID);
+                ws.dodajPolaczenie(d.ID, true);
+                wk.dodajPolaczenie(d.ID, false);  // false = nie ma przejazdu
             } else if (d.jednokierunkowa.equals("false")) {
-                ws.dodajDroge(d.ID);
-                wk.dodajDroge(d.ID);
+                ws.dodajPolaczenie(d.ID, true);
+                wk.dodajPolaczenie(d.ID, true);
             } else if (d.jednokierunkowa.equals("-1")) {
                 // jednokierunkowa ale w druga strone (od pkt_koniec do pkt_pocz)
-                wk.dodajDroge(d.ID);
+                wk.dodajPolaczenie(d.ID, true);
+                ws.dodajPolaczenie(d.ID, false); // false = nie ma przejazdu
+            } else if (d.jednokierunkowa.equals("alternating")) {
+                // zmieniajaca sie
+                ws.dodajPolaczenie(d.ID, true);
+                wk.dodajPolaczenie(d.ID, true);
             }
         }
         System.out.print("Dodano wezly");
@@ -199,17 +204,44 @@ public class DANE {
     }
 
     static public void ustawMaxSpeed() {
-        int licznik = 0;
+        int licznik_brak = 0;
+        int licznik_tag = 0;
+        int licznik_ruch_uliczny = 0;
+        int licznik_klasa = 0;
+        int licznik_unclassified = 0;
+
         for (Droga dr : drogi.values()) {
-            String maxspeedString = dr.tags.getOrDefault("maxspeed", "-");
-            if (maxspeedString.equalsIgnoreCase("walk")) {
-                dr.maxspeed = 7;
-                continue;
-            } else if (!maxspeedString.equals("-")) {
-                dr.maxspeed = Integer.parseInt(maxspeedString);
-                licznik++;
+            String zrodlo = dr.ustawMaxSpeed();
+            switch (zrodlo) {
+                case "brak":
+                    licznik_brak++;
+                    break;
+                case "tag":
+                    licznik_tag++;
+                    break;
+                case "klasa":
+                    licznik_klasa++;
+                    break;
+                case "ruch_uliczny":
+                    licznik_ruch_uliczny++;
+                    break;
+                case "unclassified":
+                    licznik_unclassified++;
+                    break;
             }
         }
-        System.out.println("Tag maxspeed ma ilość odcinków: " + licznik);
+        System.out.println("========== DODANO MAXSPEED, ZLODLA: ==========");
+        System.out.println("zrodlo_brak: " + licznik_brak);
+        System.out.println("zrodlo_tag: " + licznik_tag);
+        System.out.println("zrodlo_ruch_uliczny: " + licznik_ruch_uliczny);
+        System.out.println("zrodlo_klasa: " + licznik_klasa);
+        System.out.println("zrodlo_unclassified: " + licznik_unclassified);
+        System.out.println("=========================================");
+    }
+
+    static void ustawCzasPrzejazdu() {
+        for (Droga dr : DANE.drogi.values()) {
+            dr.obliczCzasPrzejazdu();
+        }
     }
 }

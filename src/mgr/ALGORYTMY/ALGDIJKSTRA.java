@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 import mgr.DANE;
 import mgr.Droga;
 import mgr.Wezel;
+import mgr.Wezel.Polaczenie;
 
 public class ALGDIJKSTRA {
 
@@ -61,25 +62,31 @@ public class ALGDIJKSTRA {
 
             // jeśli doszliśmy do celu, można zakończyć
             if (akt_wez.equals(pktKoniec)) {
-                WYNIKI.czyWynikiDijkstra=true;
+                WYNIKI.czyWynikiDijkstra = true;
                 break;
             }
 
             // sprawdzanie sasiadow
-            for (Long polaczenie_id : wezly.get(akt_wez).drogiIDs) {
-                Long przeciwny_wezel = drogi.get(polaczenie_id).getPrzeciwnyWezelId(akt_wez);
+            //for (Long polaczenie_id : wezly.get(akt_wez).polaczenia) {
+            for (Polaczenie pol : wezly.get(akt_wez).polaczenia) {
 
+                if(pol.przejazd==false){
+                    continue;
+                }
+                
+                //Long przeciwny_wezel = drogi.get(polaczenie_id).getPrzeciwnyWezelId(akt_wez);
+                Long przeciwny_wezel = pol.kolejnyWezel;
                 // sąsiad już odwiedzony
                 if (!nieodwiedzone.contains(przeciwny_wezel)) {
                     continue;
                 }
 
-                Double new_koszt = wartosc_wezlow.get(akt_wez) + drogi.get(polaczenie_id).dlugosc;
+                Double new_koszt = wartosc_wezlow.get(akt_wez) + drogi.get(pol.IDdrogi).dlugosc;
 
                 if (new_koszt < wartosc_wezlow.get(przeciwny_wezel)) {
                     wartosc_wezlow.put(przeciwny_wezel, new_koszt);
                     poprzedni_wezel.put(przeciwny_wezel, akt_wez);
-                    poprzednia_droga.put(przeciwny_wezel, polaczenie_id);
+                    poprzednia_droga.put(przeciwny_wezel, pol.IDdrogi);
                     kolejka.add(Map.entry(przeciwny_wezel, new_koszt));
                 }
             }

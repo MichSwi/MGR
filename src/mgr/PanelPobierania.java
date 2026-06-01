@@ -664,10 +664,10 @@ public class PanelPobierania extends javax.swing.JPanel {
 // 1 stopień długości geograficznej zależy od LAT
         double deltaLon = szerKm / (111.32 * Math.cos(Math.toRadians(temp_LAT)));
 
-        jTextField1.setText(Double.toString(temp_LON - deltaLon / 2)); // W
-        jTextField2.setText(Double.toString(temp_LAT - deltaLat / 2)); // S
-        jTextField3.setText(Double.toString(temp_LON + deltaLon / 2)); // E
-        jTextField4.setText(Double.toString(temp_LAT + deltaLat / 2)); // N
+        jTextField1.setText(Double.toString(temp_LON - deltaLon / 2).substring(0, 9)); // W
+        jTextField2.setText(Double.toString(temp_LAT - deltaLat / 2).substring(0, 9)); // S
+        jTextField3.setText(Double.toString(temp_LON + deltaLon / 2).substring(0, 9)); // E
+        jTextField4.setText(Double.toString(temp_LAT + deltaLat / 2).substring(0, 9)); // N
 
 
     }//GEN-LAST:event_jButton2ActionPerformed

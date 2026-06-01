@@ -5,10 +5,11 @@
 package mgr;
 
 import mgr.ALGORYTMY.ALGDIJKSTRA;
-import mgr.ALGORYTMY.ALGGEN;
 import mgr.ALGORYTMY.ALG_A_STAR;
+import mgr.ALGORYTMY.ALG_GEN;
 import mgr.ALGORYTMY.AntColonyAlg;
 import mgr.ALGORYTMY.BELLMAN_FORD;
+import mgr.ALGORYTMY.LOSOWA_TRASA;
 import mgr.ALGORYTMY.WYNIKI;
 
 /**
@@ -46,6 +47,8 @@ public class oknoMapy extends javax.swing.JFrame {
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
+        jButton8 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -137,6 +140,20 @@ public class oknoMapy extends javax.swing.JFrame {
             }
         });
 
+        jButton6.setText("losowa");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        jButton8.setText("stop losowa");
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -154,8 +171,13 @@ public class oknoMapy extends javax.swing.JFrame {
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(595, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(64, 64, 64)
+                        .addComponent(jButton6)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton8)))
+                .addContainerGap(553, Short.MAX_VALUE))
             .addComponent(mapa1, javax.swing.GroupLayout.DEFAULT_SIZE, 1721, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
@@ -175,7 +197,9 @@ public class oknoMapy extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton6)
+                            .addComponent(jButton8))
                         .addGap(46, 46, 46))))
         );
 
@@ -186,8 +210,13 @@ public class oknoMapy extends javax.swing.JFrame {
         // TODO add your handling code here:
 
         Wezel zaznaczony = mapa1.ZaznaczonyWezel;
+        if(zaznaczony==null){
+            return;
+        }
         DANE.wezelKoncowyAlgorytmu = zaznaczony;
 
+        
+        
         this.LabelPktEnd.setText("" + zaznaczony.ID);
 
         if (DANE.wezelKoncowyAlgorytmu.ID == DANE.wezelStartowyAlgorytmu.ID) {
@@ -200,6 +229,9 @@ public class oknoMapy extends javax.swing.JFrame {
         // TODO add your handling code here:
 
         Wezel zaznaczony = mapa1.ZaznaczonyWezel;
+        if(zaznaczony==null){
+            return;
+        }
         DANE.wezelStartowyAlgorytmu = zaznaczony;
 
         this.LabelPktStart.setText(zaznaczony.ID + "");
@@ -212,8 +244,8 @@ public class oknoMapy extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        ALGGEN alg = new ALGGEN();
-        alg.startAlg();
+        ALG_GEN alg = new ALG_GEN(DANE.wezelStartowyAlgorytmu, DANE.wezelKoncowyAlgorytmu);
+        alg.start();
 
         mapa1.repaint();
 
@@ -238,9 +270,9 @@ public class oknoMapy extends javax.swing.JFrame {
         // TODO add your handling code here:
         AntColonyAlg AntAlg = new AntColonyAlg();
         DANE.ALG_SCIEZKA = AntAlg.startAlg();
-         
+
         mapa1.repaint();
-        
+
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -256,6 +288,22 @@ public class oknoMapy extends javax.swing.JFrame {
         DANE.ALG_SCIEZKA = belford.getNajlepszaTrasa();
         mapa1.repaint();
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here:
+        
+        LOSOWA_TRASA los = new LOSOWA_TRASA();
+        los.startAnimowany(DANE.wezelStartowyAlgorytmu, DANE.wezelKoncowyAlgorytmu, mapa1);
+//        ALG_GEN alg = new ALG_GEN();
+//        alg.startAnimowany(mapa1);
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        // TODO add your handling code here:
+        //ALG_GEN.przerwijAlgorytm();
+        LOSOWA_TRASA.przerwijAlgorytm();
+System.out.println("STOP ALGORYTMU - kliknieto przycisk.");
+    }//GEN-LAST:event_jButton8ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -290,6 +338,8 @@ public class oknoMapy extends javax.swing.JFrame {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton8;
     private javax.swing.JPanel jPanel1;
     private mgr.mapa mapa1;
     private javax.swing.JButton wybierzPktKoniec;

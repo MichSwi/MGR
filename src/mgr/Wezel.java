@@ -15,7 +15,7 @@ public class Wezel {
 
     public final long ID;
     public final double X, Y;
-    public final List<Long> drogiIDs = new ArrayList<>();
+    public final List<Polaczenie> polaczenia = new ArrayList<>();
 
     public Wezel() {
         this.ID = 0L;
@@ -29,7 +29,23 @@ public class Wezel {
         this.Y = y;
     }
 
-    public final void dodajDroge(long drogaId) {
-        drogiIDs.add(drogaId);
+    public final void dodajPolaczenie(long drogaId, Boolean przejazd) {
+        
+        Long kolejnyWezel = DANE.drogi.get(drogaId).getPrzeciwnyWezelId(this.ID);
+        
+        Polaczenie pol = new Polaczenie(drogaId, kolejnyWezel, przejazd);
+        polaczenia.add(pol);
+    }
+    
+    public class Polaczenie{
+        public Long IDdrogi;
+        public Long kolejnyWezel;
+        public boolean przejazd;
+
+        public Polaczenie(Long IDdrogi, Long kolejnyWezel, boolean przejazd) {
+            this.IDdrogi = IDdrogi;
+            this.kolejnyWezel = kolejnyWezel;
+            this.przejazd = przejazd;
+        }
     }
 }

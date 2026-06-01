@@ -12,10 +12,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import mgr.ALGORYTMY.WYNIKI;
+import mgr.Wezel.Polaczenie;
 
 public class mapa extends javax.swing.JPanel {
 
-    private Boolean zmienna = false;
+    private Boolean tryb_widoku = false;
     public Wezel ZaznaczonyWezel;
     public int clickX;
     public int clickY;
@@ -109,47 +110,12 @@ public class mapa extends javax.swing.JPanel {
 
         try {
             rysuj_wode_tory(g2d_zawartosc);
-            for (Long ID : drogi.keySet()) {
-                if (zmienna == false) {
-                    if (drogi.get(ID).maxspeed != -1) {
-                        rysujDroge(drogi.get(ID), Color.GREEN, g2d_zawartosc);
-                    } else {
-                        rysujDroge(drogi.get(ID), Color.RED, g2d_zawartosc);
-                    }
-                } else if (zmienna == true) {
-                    if (drogi.get(ID).ruchUliczny != null) {
-                        rysujDroge(drogi.get(ID), Color.GREEN, g2d_zawartosc);
-                    } else {
-                        rysujDroge(drogi.get(ID), Color.ORANGE, g2d_zawartosc);
-                    }
-                }
-               
-                for (Punkt p : drogi.get(ID).punkty) {
-                    //rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
-                    if (p.tags.getOrDefault("highway", "brak").equalsIgnoreCase("crossing")) {
-                        //rysujPunkt(p.X, p.Y, 10, czerw_przezr, g2d_zawartosc);
-                        rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
-                    }
-                }
-
-                if (ZaznaczonyWezel != null) {
-                    zaznaczWezel(g2d_zawartosc, ZaznaczonyWezel);
-                }
-            }
-            if (!DANE.ALG_SCIEZKA.isEmpty()) {
-                //System.out.println("dane maja sciezke");
-                for (Droga dr : DANE.ALG_SCIEZKA) {
-                    rysujDroge(dr, Color.magenta, g2d_zawartosc);
-                    //System.out.println("rysuje jedna droge");
-                }
-            }
+            rysuj_strukture_drog(g2d_zawartosc);
+            rysuj_punkty(g2d_zawartosc);
+            rysuj_zaznaczone_wezly(g2d_zawartosc);
+            rysuj_sciezke(g2d_zawartosc);
             rysuj_wezly(g2d_zawartosc);
-            if (WYNIKI.czyWynikiDijkstra) {
-                rysujWartosci(g2d_zawartosc, WYNIKI.wartosc_wezlow_dijkstra);
-            } else if (WYNIKI.czyWynikiAStar) {
-                rysujWartosci(g2d_zawartosc, WYNIKI.wartosc_wezlow_a_star);
-            }
-
+            rysuj_wartosci(g2d_zawartosc);
             rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
 
         } finally {
@@ -167,8 +133,8 @@ public class mapa extends javax.swing.JPanel {
         //new Color(5, 174, 252, 25)
     }
 
-    private void zaznaczWezel(Graphics2D g2d_zawartosc, Wezel wez) {
-        rysujPunkt(wez.X, wez.Y, 20, losowyKolor(), g2d_zawartosc);
+    private void zaznaczWezel(Graphics2D g2d_zawartosc, Wezel wez, Color kolor) {
+        rysujPunkt(wez.X, wez.Y, 20, kolor, g2d_zawartosc);
     }
 
     private void rysujPodzialke(Graphics2D g2d_podzialka_poz, Graphics2D g2d_podzialka_pion) {
@@ -241,6 +207,9 @@ public class mapa extends javax.swing.JPanel {
             g2d.setStroke(new BasicStroke(3));
         } else {
             g2d.setStroke(new BasicStroke(1));
+        }
+        if (DANE.ALG_SCIEZKA.contains(droga)) {
+            g2d.setStroke(new BasicStroke(4));
         }
 
         int il_pkt = droga.punkty.size();
@@ -513,8 +482,9 @@ public class mapa extends javax.swing.JPanel {
                 this.ZaznaczonyWezel = wez;
 
                 StringBuilder string = new StringBuilder("<html>Przynależne ulice:<br>");
-                for (Long id : wez.drogiIDs) {
-                    string.append(id).append(" ").append(drogi.get(id).nazwa).append("<br>");
+                //for (Long id : wez.polaczenia) {
+                for (Polaczenie pol : wez.polaczenia) {
+                    string.append(pol.IDdrogi).append(" ").append(drogi.get(pol.IDdrogi).nazwa).append("<br>");
                 }
                 string.append("</html>");
                 infoUlica.setText(string.toString());
@@ -623,15 +593,50 @@ public class mapa extends javax.swing.JPanel {
         System.out.println("Ilosc przejsc dla pieszych NA WEZLACH (ilosc FIRST/LAST punktow z tagiem higway=crossing): " + ilosc_przejsc_na_wezlach);
         System.out.println("Ilosc sygnalizacji swietlnej NA WEZLACH (ilosc FIRST/LAST punktow z tagiem higway=traffic_signals): " + ilosc_sygnalizacji_na_wezlach);
 
+        System.out.println("========PRZEJSCIA I SYGNALIZACJA=======");
+
+        HashSet<Long> set_przejsc = new HashSet();
+        HashSet<Long> set_sygnalizacji = new HashSet();
+        for (Droga dr : DANE.drogi.values()) {
+            for (Punkt pkt : dr.punkty) {
+                if (pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("crossing")) {
+                    set_przejsc.add(pkt.ID);
+                }
+                if (pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("traffic_signals")) {
+                    set_sygnalizacji.add(pkt.ID);
+                }
+            }
+        }
+        int il_pkt_z_przejsciem_bez_powtorek = set_przejsc.size();
+        int il_pkt_z_sygnalizacja_bez_powtorek = set_sygnalizacji.size();
+        System.out.println("Ilosc punktow w drogach z przejsciem dla pieszych bez powtorek: " + il_pkt_z_przejsciem_bez_powtorek);
+        System.out.println("Ilosc punktow w drogach z sygnalizacja swietlna bez powtorek: " + il_pkt_z_sygnalizacja_bez_powtorek);
+        HashSet<Long> set_przejsc_rail = new HashSet();
+        HashSet<Long> set_sygnalizacji_rail = new HashSet();
+        for (Droga dr : DANE.kolej.values()) {
+            for (Punkt pkt : dr.punkty) {
+                if (pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("crossing")) {
+                    set_przejsc_rail.add(pkt.ID);
+                }
+                if (pkt.tags.getOrDefault("highway", "-").equalsIgnoreCase("traffic_signals")) {
+                    set_sygnalizacji_rail.add(pkt.ID);
+                }
+            }
+        }
+        System.out.println("Ilosc punktow w rail z przejsciem dla pieszych bez powtorek: " + set_przejsc_rail.size());
+        System.out.println("Ilosc punktow w rail z sygnalizacja swietlna bez powtorek: " + set_sygnalizacji_rail.size());
+
+        System.out.println("===============");
         int ilosc_tagow_maxspeed = 0;
         int ilosc_brakow_maxspeed = 0;
         for (Droga dr : DANE.drogi.values()) {
+
             String maxspeedString = dr.tags.getOrDefault("maxspeed", "-");
             if (maxspeedString.equals("-")) {
                 ilosc_brakow_maxspeed++;
                 continue;
             }
-            if (maxspeedString.equals("walk")){
+            if (maxspeedString.equals("walk")) {
                 ilosc_tagow_maxspeed++;
                 continue;
             }
@@ -640,8 +645,8 @@ public class mapa extends javax.swing.JPanel {
                 ilosc_tagow_maxspeed++;
             }
         }
-        System.out.println("Ilosc tagow maxspeed: " + ilosc_tagow_maxspeed + " / " + DANE.drogi.size());
-        System.out.println("Ilosc brakow maxspeed: " + ilosc_brakow_maxspeed);
+        System.out.println("Ilosc tagow maxspeed W WAY: " + ilosc_tagow_maxspeed + " / " + DANE.drogi.size());
+        System.out.println("Ilosc brakow maxspeed W WAY: " + ilosc_brakow_maxspeed);
 
         HashSet<String> set_kategorii_drog = new HashSet();
         for (Droga dr : DANE.drogi.values()) {
@@ -692,15 +697,71 @@ public class mapa extends javax.swing.JPanel {
                 liczba_kategoryzowanych++;
             }
         }
+        System.out.println("HIERARCHIA:");
         System.out.println("Maja tf: " + liczba_tf);
         System.out.println("Maja maxspeed: " + liczba_max_speed);
         System.out.println("Maja kategorie: " + liczba_kategoryzowanych);
         System.out.println("Braki: " + liczba_brakow);
+
+        int liczba_drog_z_maxspeed_i_1pkt_maxspeed = 0;
+        int liczba_drog_z_maxspeed_i_wiecej1_pkt_maxspeed = 0;
+        int liczba_drog_z_maxspeed_i_bez_pkt_maxspeed = 0;
+        int liczba_drog_bez_maxspeed_i_1pkt_maxspeed = 0;
+        int liczba_drog_bez_maxspeed_i_wiecej1_pkt_maxspeed = 0;
+        int liczba_drog_bez_maxspeed_i_bez_pkt_maxspeed = 0;
+
+        boolean dr_z_maxspeed = false;
+        for (Droga dr : DANE.drogi.values()) {
+
+            String String_dr_maxspeed = dr.tags.getOrDefault("maxspeed", "-");
+            if (String_dr_maxspeed.equals("-")) {
+                dr_z_maxspeed = false;
+            } else {
+                dr_z_maxspeed = true;
+            }
+
+            int ile_droga_ma_pkt_maxspeed = 0;
+            for (Punkt pkt : dr.punkty) {
+
+                String Stringmaxspeed = pkt.tags.getOrDefault("maxspeed", "-");
+                if (Stringmaxspeed != "-") {
+                    ile_droga_ma_pkt_maxspeed++;
+                }
+            }
+
+            if (dr_z_maxspeed) {
+                //droga ma maxspeed
+                if (ile_droga_ma_pkt_maxspeed == 0) {
+                    liczba_drog_z_maxspeed_i_bez_pkt_maxspeed++;
+                } else if (ile_droga_ma_pkt_maxspeed == 1) {
+                    liczba_drog_z_maxspeed_i_1pkt_maxspeed++;
+                } else if (ile_droga_ma_pkt_maxspeed > 1) {
+                    liczba_drog_z_maxspeed_i_wiecej1_pkt_maxspeed++;
+                }
+            } else {
+                //droga bez maxspeed
+                if (ile_droga_ma_pkt_maxspeed == 0) {
+                    liczba_drog_bez_maxspeed_i_bez_pkt_maxspeed++;
+                } else if (ile_droga_ma_pkt_maxspeed == 1) {
+                    liczba_drog_bez_maxspeed_i_1pkt_maxspeed++;
+                } else if (ile_droga_ma_pkt_maxspeed > 1) {
+                    liczba_drog_bez_maxspeed_i_wiecej1_pkt_maxspeed++;
+                }
+            }
+        }
+
+        System.out.println("liczba_drog_z_maxspeed_i_1pkt_maxspeed: " + liczba_drog_z_maxspeed_i_1pkt_maxspeed);
+        System.out.println("liczba_drog_z_maxspeed_i_wiecej1_pkt_maxspeed: " + liczba_drog_z_maxspeed_i_wiecej1_pkt_maxspeed);
+        System.out.println("liczba_drog_z_maxspeed_i_bez_pkt_maxspeed: " + liczba_drog_z_maxspeed_i_bez_pkt_maxspeed);
+        System.out.println("liczba_drog_bez_maxspeed_i_1pkt_maxspeed: " + liczba_drog_bez_maxspeed_i_1pkt_maxspeed);
+        System.out.println("liczba_drog_bez_maxspeed_i_wiecej1_pkt_maxspeed: " + liczba_drog_bez_maxspeed_i_wiecej1_pkt_maxspeed);
+        System.out.println("liczba_drog_bez_maxspeed_i_bez_pkt_maxspeed: " + liczba_drog_bez_maxspeed_i_bez_pkt_maxspeed);
+
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         // TODO add your handling code here:
-        this.zmienna = !zmienna;
+        this.tryb_widoku = !tryb_widoku;
     }//GEN-LAST:event_jToggleButton1ActionPerformed
 
     static Color losowyKolor() {
@@ -727,7 +788,17 @@ public class mapa extends javax.swing.JPanel {
     private javax.swing.JLabel skala_label;
     // End of variables declaration//GEN-END:variables
 
-    private void rysujWartosci(Graphics2D g2d, Map<Long, Double> wartoscWezlow) {
+    private void rysuj_wartosci(Graphics2D g2d) {
+
+        Map<Long, Double> wartoscWezlow;
+
+        if (WYNIKI.wartosc_wezlow_dijkstra != null) {
+            wartoscWezlow = WYNIKI.wartosc_wezlow_dijkstra;
+        } else if (WYNIKI.wartosc_wezlow_a_star != null) {
+            wartoscWezlow = WYNIKI.wartosc_wezlow_a_star;
+        } else {
+            return;
+        }
 
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.PLAIN, 5));
@@ -735,7 +806,9 @@ public class mapa extends javax.swing.JPanel {
         for (Long wez_id : wartoscWezlow.keySet()) {
             float x = (float) DANE.wezly.get(wez_id).X;
             float y = (float) DANE.wezly.get(wez_id).Y;
+
             String wartosc = String.format("%.1f", wartoscWezlow.get(wez_id));
+
             if (!wartosc.equalsIgnoreCase("infinity")) {
                 g2d.drawString(wartosc, x + 5, y);
             }
@@ -922,5 +995,56 @@ public class mapa extends javax.swing.JPanel {
         }
 
         return ringi;
+    }
+
+    private void rysuj_sciezke(Graphics2D g2d_zawartosc) {
+        if (!DANE.ALG_SCIEZKA.isEmpty()) {
+            for (Droga dr : DANE.ALG_SCIEZKA) {
+                rysujDroge(dr, Color.BLACK, g2d_zawartosc);
+            }
+        }
+    }
+
+    private void rysuj_zaznaczone_wezly(Graphics2D g2d_zawartosc) {
+        if (ZaznaczonyWezel != null) {
+            zaznaczWezel(g2d_zawartosc, ZaznaczonyWezel, losowyKolor());
+        }
+        if (DANE.wezelStartowyAlgorytmu != null) {
+            zaznaczWezel(g2d_zawartosc, DANE.wezelStartowyAlgorytmu, Color.GREEN);
+        }
+        if (DANE.wezelStartowyAlgorytmu != null) {
+            zaznaczWezel(g2d_zawartosc, DANE.wezelKoncowyAlgorytmu, Color.RED);
+        }
+    }
+
+    private void rysuj_punkty(Graphics2D g2d_zawartosc) {
+        for (Droga dr : DANE.drogi.values()) {
+            for (Punkt p : dr.punkty) {
+                //rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
+                if (p.tags.getOrDefault("highway", "brak").equalsIgnoreCase("crossing")) {
+                    //rysujPunkt(p.X, p.Y, 10, czerw_przezr, g2d_zawartosc);
+                    rysujPunkt(p.X, p.Y, 2, Color.BLACK, g2d_zawartosc);
+                }
+                if (p.tags.getOrDefault("maxspeed", "-").equals("-")) {
+                    System.out.print("");
+                } else {
+                    rysujPunkt(p.X, p.Y, 20, Color.MAGENTA, g2d_zawartosc);
+                }
+            }
+        }
+    }
+
+    private void rysuj_strukture_drog(Graphics2D g2d_zawartosc) {
+        for (Droga dr : drogi.values()) {
+            if (tryb_widoku == false) {
+                rysujDroge(dr, Color.ORANGE, g2d_zawartosc);
+            } else if (tryb_widoku == true) {
+                if (dr.ruchUliczny != null) {
+                    rysujDroge(dr, Color.GREEN, g2d_zawartosc);
+                } else {
+                    rysujDroge(dr, Color.ORANGE, g2d_zawartosc);
+                }
+            }
+        }
     }
 }

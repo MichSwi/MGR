@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 import mgr.DANE;
 import mgr.Droga;
 import mgr.Wezel;
+import mgr.Wezel.Polaczenie;
 
 public class ALG_A_STAR {
 
@@ -56,9 +57,12 @@ public class ALG_A_STAR {
 
             closedSet.add(aktualny_wezel.ID);
 
-            for (Long dr_sasiad : aktualny_wezel.drogiIDs) {
-                Long sasiad_wezel_id = DANE.drogi.get(dr_sasiad).getPrzeciwnyWezelId(aktualny_wezel.ID);
-
+            for (Polaczenie pol : aktualny_wezel.polaczenia) {
+                if(pol.przejazd==false){
+                    continue;
+                }
+                Long dr_sasiad = pol.IDdrogi;
+                Long sasiad_wezel_id = pol.kolejnyWezel;
                 if (closedSet.contains(sasiad_wezel_id)) {
                     continue;
                 }
