@@ -26,15 +26,15 @@ public class LOSOWA_TRASA {
 
 // Maksymalne oddalenie aktualnego punktu od celu.
 // 1.4 oznacza, że trasa może oddalić się od celu maksymalnie o 140% odległości start-koniec.
-    private double MNOZNIK_MAX_ODDALENIA_OD_CELU = 1.4;
+    private double MNOZNIK_MAX_ODDALENIA_OD_CELU = 1.2;
 
 // Minimalna wartość maksymalnego oddalenia od celu.
 // 300 ozaczna, że trasa ZAWSZE może oddalić się o 300m od celu.
-    private double MINIMALNA_WARTOSC_MAX_ODDALENIA = 300;
+    private double MINIMALNA_WARTOSC_MAX_ODDALENIA = 200;
 
 // Określa, jak długi dystans trasa może przejść bez wyraźnego zbliżania się do celu.
 // 0.2 oznacza 20% odległości start-koniec.
-    private double MNOZNIK_BRAKU_POSTEPU = 0.2;
+    private double MNOZNIK_BRAKU_POSTEPU = 0.3;
 
 // Minimalny dopuszczalny dystans bez postępu.
 // Chroni przed zbyt małym limitem przy krótkich trasach.
@@ -64,17 +64,17 @@ public class LOSOWA_TRASA {
 // Współczynnik luzowania limitu oddalenia od celu.
 // 1.10 oznacza, że po restarcie z powodu zbyt dużego oddalenia
 // algorytm zwiększy dopuszczalne oddalenie od celu o 10%.
-private double LUZOWANIE_ODDALENIA = 1.10;
+private double LUZOWANIE_ODDALENIA = 1.05;
 
 // Współczynnik luzowania limitu dystansu bez postępu.
 // 1.10 oznacza, że po restarcie z powodu braku postępu
 // algorytm pozwoli przejść o 10% dłuższy dystans bez wyraźnego zbliżania się do celu.
-private double LUZOWANIE_BRAKU_POSTEPU = 1.10;
+private double LUZOWANIE_BRAKU_POSTEPU = 1.1;
 
 // Współczynnik zmniejszania progu znaczącego postępu.
 // 0.95 oznacza, że po restarcie z powodu braku postępu
 // wymagany postęp zostanie zmniejszony o 5%, więc algorytm łatwiej uzna ruch za postęp.
-private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
+private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.96;
 
     public void startAnimowany(Wezel w_start, Wezel w_koniec, JPanel panelMapy) {
         STOP_ALGORYTMU = false;
