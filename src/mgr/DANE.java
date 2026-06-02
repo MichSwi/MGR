@@ -244,4 +244,8 @@ public class DANE {
             dr.obliczCzasPrzejazdu();
         }
     }
+    
+    public static void print(Object tekst) {
+        System.out.println(tekst);
+    }
 }

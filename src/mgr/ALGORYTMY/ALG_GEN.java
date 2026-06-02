@@ -6,6 +6,7 @@ package mgr.ALGORYTMY;
 
 import java.util.ArrayList;
 import mgr.DANE;
+import static mgr.DANE.print;
 import mgr.Wezel;
 
 /**
@@ -16,9 +17,9 @@ public class ALG_GEN {
 
     double szansa_na_mutacje = 0.1;
     double szansa_na_krzyzowanie = 0.9;
-    int LICZEBNOSC_POPULACJI = 20;
-    int max_iter = 20;
-    boolean elitarnosc= true;
+    int LICZEBNOSC_POPULACJI = 40;
+    int max_iter = 10;
+    boolean elitarnosc = true;
 
     int KRZYZOWANIE_GDY_BRAK_WSPOLNEGO = 0;
     // 0 - brak krzyzowania
@@ -28,6 +29,9 @@ public class ALG_GEN {
     Wezel w_start;
     Wezel w_koniec;
     //Random random = new Random();
+
+    ArrayList<ArrayList<TRASA>> zapisaneGeneracje = new ArrayList<>();
+    ArrayList<TRASA> zapisaniElitarni = new ArrayList<>();
 
     public ALG_GEN(Wezel w_start, Wezel w_koniec) {
         this.w_start = w_start;
@@ -39,9 +43,8 @@ public class ALG_GEN {
 
         ArrayList<TRASA> pop = new ArrayList<>();
         ArrayList<TRASA> dzieci = new ArrayList<>();
-        ArrayList<Double> srednie_pop = new ArrayList<>();
         TRASA najlepszy = new TRASA();
-        
+
         pop = init_pop();
         najlepszy = getElitarny(pop, pop.get(0));
         System.out.println("");
@@ -49,6 +52,7 @@ public class ALG_GEN {
         int iter = 0;
         while (iter < max_iter) {
             iter++;
+            print("iteracja nr: " + iter);
             dzieci.clear();
 
             // ocena - liczona na bierzaco
@@ -60,15 +64,23 @@ public class ALG_GEN {
                     rodzic2 = sel_ruletka(pop);
                 } while (rodzic1 == rodzic2);
 
+                print("krzyzowanie nr " + i);
+                print("Rodzic1 : " + rodzic1.czas_przejazdu);
+                print("Rodzic2 : " + rodzic2.czas_przejazdu);
                 if (Math.random() < szansa_na_krzyzowanie) {
                     TRASA dziecko1 = krzyzowanie_wspolny_punkt(rodzic1, rodzic2);
                     TRASA dziecko2 = krzyzowanie_wspolny_punkt(rodzic2, rodzic1);
 
                     if (KRZYZOWANIE_GDY_BRAK_WSPOLNEGO == 0) {
                         if (dziecko1 != null && dziecko2 != null) {
+                            print("UDANE krzyzowanie");
+                            print("dziecko1: " + dziecko1.czas_przejazdu);
+                            print("dziecko2: " + dziecko2.czas_przejazdu);
                             dzieci.add(dziecko1);
                             dzieci.add(dziecko2);
+
                         } else {
+                            print("NIE UDANE krzyzowanie, oddaje rodzicow");
                             dzieci.add(rodzic1);
                             dzieci.add(rodzic2);
                         }
@@ -77,6 +89,7 @@ public class ALG_GEN {
                     dzieci.add(rodzic1);
                     dzieci.add(rodzic2);
                 }
+
             }
 
             //mutacja
@@ -86,17 +99,13 @@ public class ALG_GEN {
             //warunki stopu
             //najlepszy save
             najlepszy = getElitarny(pop, najlepszy);
-            
+
             pop = new ArrayList<>(dzieci);
-            double srednia_populacji = 0;
-            for (TRASA tr : dzieci) {
-                srednia_populacji += tr.czas_przejazdu;
-            }
-            srednia_populacji = srednia_populacji / pop.size();
-            srednie_pop.add(srednia_populacji);
+
+            zapiszPop(pop);
 
         }
-        System.out.println("kolejne srednie po iteracjach: " + srednie_pop.toString());
+        printMetryki();
         return new TRASA();
     }
 
@@ -111,15 +120,16 @@ public class ALG_GEN {
     }
 
     private TRASA sel_ruletka(ArrayList<TRASA> pop) {
+        print("START RULETKA");
         Double suma_fitness = 0.0;
         for (TRASA trasa : pop) {
             double fitness = 1.0 / (trasa.czas_przejazdu);
             suma_fitness += fitness;
         }
-
+        print("suma_fitness: " + suma_fitness);
         // losowanie punktu na ruletce
         double los = Math.random() * suma_fitness;
-
+        print("losowy punkt na ruletce: " + los);
         // szukanie wyniku
         double sumaNarastajaca = 0.0;
         for (TRASA trasa : pop) {
@@ -127,6 +137,7 @@ public class ALG_GEN {
             sumaNarastajaca += fitness;
 
             if (sumaNarastajaca >= los) {
+                print("wylosowano drroge o czasie: " + trasa.czas_przejazdu);
                 return trasa;
             }
         }
@@ -170,6 +181,7 @@ public class ALG_GEN {
                 wspolne.add(id);
             }
         }
+        print("Ilosc wspolnych wezlow: " + wspolne.size());
 
         // usuniecei start i koniec
         if (!wspolne.isEmpty()) {
@@ -183,13 +195,17 @@ public class ALG_GEN {
         }
 
         Long punktKrzyzowania = wspolne.get((int) (Math.random() * wspolne.size()));
+        print("Wylosowany wezle/punktkrzyzowania: " + (int) (Math.random() * wspolne.size()));
         return punktKrzyzowania;
     }
 
     private ArrayList<TRASA> wykonajMutacje(ArrayList<TRASA> dzieci) {
+
+        print("START funkcji MUTACJI");
         ArrayList<TRASA> noweDzieci = new ArrayList<>();
         for (TRASA dziecko : dzieci) {
             if (Math.random() < szansa_na_mutacje) {
+                print("ROZPOCZETA MUTACJA");
                 int il_wezlow = dziecko.trasa_wezly_id.size() - 2; //odjety poczatkowy i koncowy
 
                 int losowyIndex1 = (int) (Math.random() * il_wezlow) + 1;
@@ -203,13 +219,16 @@ public class ALG_GEN {
                     losowyIndex1 = losowyIndex2;
                     losowyIndex2 = temp;
                 }
-
+                print("Mutowana trasa: " + dziecko.trasa_drogi_id.toString()+" czas przejazdu= "+dziecko.czas_przejazdu+" , ilosc wezlow: "+dziecko.trasa_wezly_id.size());
+                print("losowyIndex1 = " + losowyIndex1);
+                print("losowyIndex2 = " + losowyIndex2);
                 Wezel w1 = DANE.wezly.get(dziecko.trasa_wezly_id.get(losowyIndex1));
                 Wezel w2 = DANE.wezly.get(dziecko.trasa_wezly_id.get(losowyIndex2));
 
                 LOSOWA_TRASA losowa = new LOSOWA_TRASA();
                 TRASA wypelnienie = losowa.start(w1, w2);
-
+                print("Czas wypelniajacej losowej trasy: " + wypelnienie.czas_przejazdu);
+                print("Trasa wypelniajaca: " + wypelnienie.trasa_wezly_id.toString());
                 ArrayList<Long> nowa_trasa_wezly_id = new ArrayList<>();
                 for (int i = 0; i < losowyIndex1; i++) {
                     nowa_trasa_wezly_id.add(dziecko.trasa_wezly_id.get(i));
@@ -218,7 +237,10 @@ public class ALG_GEN {
                 for (int i = losowyIndex2 + 1; i < dziecko.trasa_wezly_id.size(); i++) {
                     nowa_trasa_wezly_id.add(dziecko.trasa_wezly_id.get(i));
                 }
-                noweDzieci.add(TRASA.stworz_z_wezlow_id(nowa_trasa_wezly_id));
+                TRASA nowa_trasa = TRASA.stworz_z_wezlow_id(nowa_trasa_wezly_id);
+                noweDzieci.add(nowa_trasa);
+                print("Nowa zmutowana trasa czas: " + nowa_trasa.czas_przejazdu+" , ilosc wezlow: "+nowa_trasa.trasa_wezly_id.size());
+
             } else {
                 noweDzieci.add(dziecko);
             }
@@ -227,11 +249,44 @@ public class ALG_GEN {
     }
 
     private TRASA getElitarny(ArrayList<TRASA> pop, TRASA best) {
-        for (TRASA tr : pop){
-            if(tr.czas_przejazdu<best.czas_przejazdu){
-                best=tr;
+        for (TRASA tr : pop) {
+            if (tr.czas_przejazdu < best.czas_przejazdu) {
+                best = tr;
+                print("Nowy elitarny czas: " + best.czas_przejazdu);
             }
         }
+        this.zapisaniElitarni.add(best);
         return best;
+    }
+
+    private void printMetryki() {
+
+        ArrayList<Double> srednie_generacji = new ArrayList<>();
+        double srednia_populacji = 0;
+        for (ArrayList<TRASA> pop : zapisaneGeneracje) {
+            for (TRASA tr : pop) {
+                srednia_populacji += tr.czas_przejazdu;
+            }
+            srednia_populacji = srednia_populacji / pop.size();
+            srednie_generacji.add(srednia_populacji);
+        }
+
+        for (ArrayList<TRASA> pop : zapisaneGeneracje) {
+            print("====== GEN " + zapisaneGeneracje.indexOf(pop) + " ======");
+            for (TRASA tr : pop) {
+                print("Ilosc wezlow: " + tr.trasa_wezly_id.size() + " czas: " + tr.czas_przejazdu);
+            }
+            print("Srednia czasu generacji: " + srednie_generacji.get(zapisaneGeneracje.indexOf(pop)));
+        }
+
+        int i = 0;
+        for (TRASA elitarny : zapisaniElitarni) {
+            i++;
+            print("Elita gen " + i + " ilosc wezlow : " + elitarny.trasa_wezly_id.size() + " czas przejazdu: " + elitarny.czas_przejazdu + " odleglosc [m]: " + elitarny.dlugosc);
+        }
+    }
+
+    private void zapiszPop(ArrayList<TRASA> pop) {
+        this.zapisaneGeneracje.add(pop);
     }
 }

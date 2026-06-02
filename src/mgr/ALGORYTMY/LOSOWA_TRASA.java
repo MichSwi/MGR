@@ -88,10 +88,10 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
 
             if (t != null) {
                 DANE.ALG_SCIEZKA = t.trasa_drogi;
-                System.out.println("ZNALEZIONO TRASE ANIMOWANA.");
+                //System.out.println("ZNALEZIONO TRASE ANIMOWANA.");
             } else {
                 DANE.ALG_SCIEZKA = new ArrayList<>();
-                System.out.println("NIE ZNALEZIONO TRASY ANIMOWANEJ.");
+                //System.out.println("NIE ZNALEZIONO TRASY ANIMOWANEJ.");
             }
 
             odswiezMape(panelMapy);
@@ -109,10 +109,10 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
 
         if (t != null) {
             DANE.ALG_SCIEZKA = t.trasa_drogi;
-            System.out.println("ZNALEZIONO TRASE.");
+            //System.out.println("ZNALEZIONO TRASE.");
         } else {
             DANE.ALG_SCIEZKA = new ArrayList<>();
-            System.out.println("NIE ZNALEZIONO TRASY.");
+            //System.out.println("NIE ZNALEZIONO TRASY.");
         }
         return t;
     }
@@ -133,12 +133,12 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
         // ZABEZPIECZENIA BRAKU ARGUMENTOW
 
         if (!DANE.wezly.containsKey(w_start_id)) {
-            System.out.println("BLAD: brak wezla startowego.");
+            //System.out.println("BLAD: brak wezla startowego.");
             return null;
         }
 
         if (!DANE.wezly.containsKey(w_koniec_id)) {
-            System.out.println("BLAD: brak wezla koncowego.");
+            //System.out.println("BLAD: brak wezla koncowego.");
             return null;
         }
 
@@ -161,14 +161,14 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
         StanPoszukiwania trasaOdStartu = new StanPoszukiwania("OD STARTU", w_start_id, w_koniec_id);
         StanPoszukiwania trasaOdKonca = new StanPoszukiwania("OD KONCA", w_koniec_id, w_start_id);
 
-        System.out.println("=======================================");
-        System.out.println("START ALGORYTMU DWUKIERUNKOWEGO Z HISTORIA");
-        System.out.println("Odleglosc start-koniec: " + odlegloscStartKoniec + " m");
-        System.out.println("Max oddalenie od celu: " + maxOddalenieOdCelu + " m");
-        System.out.println("Max dystans bez postepu: " + maxDystansBezPostepu + " m");
-        System.out.println("Znaczny postep: " + znacznyPostepMetry + " m");
-        System.out.println("Historia tras: " + MAX_HISTORIA_TRAS);
-        System.out.println("=======================================");
+        //System.out.println("=======================================");
+        //System.out.println("START ALGORYTMU DWUKIERUNKOWEGO Z HISTORIA");
+        //System.out.println("Odleglosc start-koniec: " + odlegloscStartKoniec + " m");
+        //System.out.println("Max oddalenie od celu: " + maxOddalenieOdCelu + " m");
+        //System.out.println("Max dystans bez postepu: " + maxDystansBezPostepu + " m");
+        //System.out.println("Znaczny postep: " + znacznyPostepMetry + " m");
+        //System.out.println("Historia tras: " + MAX_HISTORIA_TRAS);
+        //System.out.println("=======================================");
 
         rysujTrasy(trasaOdStartu, trasaOdKonca, panelMapy);
 
@@ -180,14 +180,14 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
             // TRASA OD STARTU
             // zastopowanie algorytmu
             if (STOP_ALGORYTMU) {
-                System.out.println("STOP: algorytm przerwany.");
+                //System.out.println("STOP: algorytm przerwany.");
                 return null;
             }
 
             // sprawdzenie czy istnieje juz trasa
             TRASA znalezniona = sprawdzCzyIsteniejePolaczenieTras(trasaOdStartu, trasaOdKonca, historiaTrasOdStartu, historiaTrasOdKonca);
             if (znalezniona != null) {
-                System.out.println("SUKCES: znaleziono polaczenie tras.");
+                //System.out.println("SUKCES: znaleziono polaczenie tras.");
                 return znalezniona;
             }
 
@@ -198,12 +198,12 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
             // sprawdzenie czy pod kroku istnieje juz trasa
             znalezniona = sprawdzCzyIsteniejePolaczenieTras(trasaOdStartu, trasaOdKonca, historiaTrasOdStartu, historiaTrasOdKonca);
             if (znalezniona != null) {
-                System.out.println("SUKCES: znaleziono polaczenie tras po wykonaniu kroku trasyOdStartu");
+                //System.out.println("SUKCES: znaleziono polaczenie tras po wykonaniu kroku trasyOdStartu");
                 return znalezniona;
             }
 
             if (coZrobilaTrasaOdStartu.equals("stop")) {
-                System.out.println("STOP, przerwano po wykonaniu kroku trasyOdStartu");
+                //System.out.println("STOP, przerwano po wykonaniu kroku trasyOdStartu");
                 return null;
             }
 
@@ -212,7 +212,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
 
                 if (coZrobilaTrasaOdStartu.equals("restart_za_daleko")) {
                     maxOddalenieOdCelu *= LUZOWANIE_ODDALENIA;
-                    System.out.println("Zwiekszono maxOddalenieOdCelu do: " + maxOddalenieOdCelu);
+                    //System.out.println("Zwiekszono maxOddalenieOdCelu do: " + maxOddalenieOdCelu);
                 }
 
                 if (coZrobilaTrasaOdStartu.equals("restart_brak_postepu")
@@ -221,15 +221,15 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
                     maxDystansBezPostepu *= LUZOWANIE_BRAKU_POSTEPU;
                     znacznyPostepMetry *= LUZOWANIE_ZNACZNEGO_POSTEPU;
 
-                    System.out.println("Zwiekszono maxDystansBezPostepu do: " + maxDystansBezPostepu);
-                    System.out.println("Zmniejszono znacznyPostepMetry do: " + znacznyPostepMetry);
+                    //System.out.println("Zwiekszono maxDystansBezPostepu do: " + maxDystansBezPostepu);
+                    //System.out.println("Zmniejszono znacznyPostepMetry do: " + znacznyPostepMetry);
                 }
 
-                System.out.println("RESTART trasy OD STARTU");
+                //System.out.println("RESTART trasy OD STARTU");
                 trasaOdStartu = restartujTrase(trasaOdStartu, historiaTrasOdStartu);
 
                 if (restartyOdStartu > MAX_RESTARTOW_NA_STRONE) {
-                    System.out.println("przekroczono MAX_RESTARTOW_NA_STRONE dla OD STARTU");
+                    //System.out.println("przekroczono MAX_RESTARTOW_NA_STRONE dla OD STARTU");
                     return null;
                 }
 
@@ -240,7 +240,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
             // sprawdzenie czy istnieje juz trasa
             znalezniona = sprawdzCzyIsteniejePolaczenieTras(trasaOdStartu, trasaOdKonca, historiaTrasOdStartu, historiaTrasOdKonca);
             if (znalezniona != null) {
-                System.out.println("SUKCES: znaleziono polaczenie tras.");
+                //System.out.println("SUKCES: znaleziono polaczenie tras.");
                 return znalezniona;
             }
 
@@ -251,12 +251,12 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
             // sprawdzenie czy po kroku istnieje juz trasa
             znalezniona = sprawdzCzyIsteniejePolaczenieTras(trasaOdStartu, trasaOdKonca, historiaTrasOdStartu, historiaTrasOdKonca);
             if (znalezniona != null) {
-                System.out.println("SUKCES: znaleziono polaczenie tras po wykonaniu kroku trasyOdKonca");
+                //System.out.println("SUKCES: znaleziono polaczenie tras po wykonaniu kroku trasyOdKonca");
                 return znalezniona;
             }
 
             if (coZrobilaTrasaOdKonca.equals("stop")) {
-                System.out.println("STOP, przerwano po wykonaniu kroku trasyOdKonca");
+                //System.out.println("STOP, przerwano po wykonaniu kroku trasyOdKonca");
                 return null;
             }
 
@@ -265,7 +265,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
 
                 if (coZrobilaTrasaOdKonca.equals("restart_za_daleko")) {
                     maxOddalenieOdCelu *= LUZOWANIE_ODDALENIA;
-                    System.out.println("Zwiekszono maxOddalenieOdCelu do: " + maxOddalenieOdCelu);
+                    //System.out.println("Zwiekszono maxOddalenieOdCelu do: " + maxOddalenieOdCelu);
                 }
 
                 if (coZrobilaTrasaOdKonca.equals("restart_brak_postepu")
@@ -274,15 +274,15 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
                     maxDystansBezPostepu *= LUZOWANIE_BRAKU_POSTEPU;
                     znacznyPostepMetry *= LUZOWANIE_ZNACZNEGO_POSTEPU;
 
-                    System.out.println("Zwiekszono maxDystansBezPostepu do: " + maxDystansBezPostepu);
-                    System.out.println("Zmniejszono znacznyPostepMetry do: " + znacznyPostepMetry);
+                    //System.out.println("Zwiekszono maxDystansBezPostepu do: " + maxDystansBezPostepu);
+                    //System.out.println("Zmniejszono znacznyPostepMetry do: " + znacznyPostepMetry);
                 }
 
-                System.out.println("RESTART trasy OD KONCA");
+                //System.out.println("RESTART trasy OD KONCA");
                 trasaOdKonca = restartujTrase(trasaOdKonca, historiaTrasOdKonca);
 
                 if (restartyOdKonca > MAX_RESTARTOW_NA_STRONE) {
-                    System.out.println("przekroczono MAX_RESTARTOW_NA_STRONE dla OD KONCA");
+                    //System.out.println("przekroczono MAX_RESTARTOW_NA_STRONE dla OD KONCA");
                     return null;
                 }
 
@@ -290,7 +290,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
             }
 
         }
-        System.out.println("KONIEC: przekroczono MAX KROKOW PETLI WHILE.");
+        //System.out.println("KONIEC: przekroczono MAX KROKOW PETLI WHILE.");
         return null;
     }
 
@@ -341,14 +341,14 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
         // sprawdzenie czy trasy sie lacza
         Long wspolny_wezel_id = znajdzWspolnyWezel(aktualnaStart, aktualnaKoniec);
         if (wspolny_wezel_id != null) {
-            System.out.println("POLACZENIE: aktualna OD STARTU + aktualna OD KONCA, wezel: " + wspolny_wezel_id);
+            //System.out.println("POLACZENIE: aktualna OD STARTU + aktualna OD KONCA, wezel: " + wspolny_wezel_id);
             return polaczListyWezlow(aktualnaStart, aktualnaKoniec, wspolny_wezel_id);
         }
 
         for (ArrayList<Long> staraKoniec : historiaTrasOdKonca) {
             wspolny_wezel_id = znajdzWspolnyWezel(aktualnaStart, staraKoniec);
             if (wspolny_wezel_id != null) {
-                System.out.println("POLACZENIE: aktualna OD STARTU + historyczna OD KONCA, wezel: " + wspolny_wezel_id);
+                //System.out.println("POLACZENIE: aktualna OD STARTU + historyczna OD KONCA, wezel: " + wspolny_wezel_id);
                 return polaczListyWezlow(aktualnaStart, staraKoniec, wspolny_wezel_id);
             }
         }
@@ -356,7 +356,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
         for (ArrayList<Long> staraStart : historiaTrasOdStartu) {
             wspolny_wezel_id = znajdzWspolnyWezel(staraStart, aktualnaKoniec);
             if (wspolny_wezel_id != null) {
-                System.out.println("POLACZENIE: historyczna OD STARTU + aktualna OD KONCA, wezel: " + wspolny_wezel_id);
+                //System.out.println("POLACZENIE: historyczna OD STARTU + aktualna OD KONCA, wezel: " + wspolny_wezel_id);
                 return polaczListyWezlow(staraStart, aktualnaKoniec, wspolny_wezel_id);
             }
         }
@@ -404,13 +404,13 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
         // jesli ostatni wezel trasy jest za daleko od celu-> restrat
         double odlegloscAktualnegoDoCelu = zmierz_odl_2pkt(aktualny_wezel, trasa.wezel_docelowy);
         if (odlegloscAktualnegoDoCelu > maxOddalenieOdCelu && odlegloscAktualnegoDoCelu > this.MINIMALNA_WARTOSC_MAX_ODDALENIA) {
-            System.out.println("RESTART: " + trasa.typ + " punkt za daleko od celu.");
+            //System.out.println("RESTART: " + trasa.typ + " punkt za daleko od celu.");
             return "restart_za_daleko";
         }
 
         // jesli dystans bez postepu za duzy -> restart
         if (ostatniPktTrasy.dystansBezPostepu > maxDystansBezPostepu) {
-            System.out.println("RESTART: " + trasa.typ + " zbyt dlugi brak postepu.");
+            //System.out.println("RESTART: " + trasa.typ + " zbyt dlugi brak postepu.");
             return "restart_brak_postepu";
         }
 
@@ -420,7 +420,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
         if (kolejne_mozliwe_wezly.isEmpty()) {
             if (wykonajBacktracking(trasa) == true) {
                 if (trasa.przebyta_trasa.getLast().dystansBezPostepu > maxDystansBezPostepu) {
-                    System.out.println("RESTART: " + trasa.typ + " backtracking przekroczyl maxDystansBezPostepu");
+                    //System.out.println("RESTART: " + trasa.typ + " backtracking przekroczyl maxDystansBezPostepu");
                     return "restart_backtracking_brak_postepu"; // jesli backtracking przekroczyl maxDystansBezPostepu
                 } else {
                     return "backtracking"; // jesli backtracking ok
@@ -444,7 +444,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
             }
         }
         if (wybrana_droga_id == -1L) {
-            System.out.println("Nie znaleziono drogi miedzy aktualnym wezlem a wybranym wezlem");
+            //System.out.println("Nie znaleziono drogi miedzy aktualnym wezlem a wybranym wezlem");
             return "stop";
         }
 
@@ -457,7 +457,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
         if (odlegloscWybranegoDoCelu < ostatniPktTrasy.najlepszaOdlegloscDoCelu - znacznyPostepMetry) {
             nowaNajlepszaOdlegloscDoCelu = odlegloscWybranegoDoCelu;
             nowyDystansBezPostepu = 0.0;
-            System.out.println("POSTEP: " + trasa.typ + "Nowa najlepsza odleglosc: " + nowaNajlepszaOdlegloscDoCelu);
+            //System.out.println("POSTEP: " + trasa.typ + "Nowa najlepsza odleglosc: " + nowaNajlepszaOdlegloscDoCelu);
         } else {
             nowyDystansBezPostepu += dlugoscWybranejDrogi;
         }
@@ -528,7 +528,7 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.95;
     private StanPoszukiwania restartujTrase(StanPoszukiwania trasa, ArrayList<ArrayList<Long>> historia) {
         ArrayList<Long> trasa_jako_wezly = trasa.pobierzWezly();
         zapiszTrase(historia, trasa_jako_wezly);
-        System.out.println("Zapisano trase" + trasa.typ + " do historii");
+        //System.out.println("Zapisano trase" + trasa.typ + " do historii");
 
         return new StanPoszukiwania(trasa.typ, trasa.wezel_poczatkowy, trasa.wezel_docelowy);
     }
