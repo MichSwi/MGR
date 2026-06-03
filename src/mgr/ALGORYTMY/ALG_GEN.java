@@ -19,7 +19,7 @@ public class ALG_GEN {
     double szansa_na_krzyzowanie = 0.9;
     int LICZEBNOSC_POPULACJI = 40;
     int max_iter = 10;
-    boolean elitarnosc = true;
+    boolean ZACHOWANIE_ELITARNEGO = true;
 
     int KRZYZOWANIE_GDY_BRAK_WSPOLNEGO = 0;
     // 0 - brak krzyzowania
@@ -32,6 +32,7 @@ public class ALG_GEN {
 
     ArrayList<ArrayList<TRASA>> zapisaneGeneracje = new ArrayList<>();
     ArrayList<TRASA> zapisaniElitarni = new ArrayList<>();
+    private int MAX_BRAK_PROGRESU = 20;
 
     public ALG_GEN(Wezel w_start, Wezel w_koniec) {
         this.w_start = w_start;
@@ -41,14 +42,13 @@ public class ALG_GEN {
 
     public TRASA start() {
 
-        ArrayList<TRASA> pop = new ArrayList<>();
         ArrayList<TRASA> dzieci = new ArrayList<>();
-        TRASA najlepszy = new TRASA();
+        ArrayList<TRASA> pop = init_pop();
 
-        pop = init_pop();
-        najlepszy = getElitarny(pop, pop.get(0));
+        TRASA elitarny = getNajlepszy(pop);
         System.out.println("");
 
+        int brak_progresu = 0;
         int iter = 0;
         while (iter < max_iter) {
             iter++;
@@ -89,24 +89,39 @@ public class ALG_GEN {
                     dzieci.add(rodzic1);
                     dzieci.add(rodzic2);
                 }
-
             }
-
             //mutacja
             dzieci = wykonajMutacje(dzieci);
 
-            // nowa pop
-            //warunki stopu
-            //najlepszy save
-            najlepszy = getElitarny(pop, najlepszy);
+            // elitarnosc - dodaj jesli usunieto elitarnego
+            if (ZACHOWANIE_ELITARNEGO) {
+                if (!dzieci.contains(elitarny)) {
+                    dzieci.remove(getNajgorszy(dzieci));
+                    dzieci.add(elitarny);
+                }
+            }
+            
+            //elitarnosc - sprawdz czy nowy elitarny / sprawdz czy postep
+            TRASA najlepszaAktualnie = getNajlepszy(dzieci);
+            if (najlepszaAktualnie.czas_przejazdu < elitarny.czas_przejazdu) {
+                elitarny = najlepszaAktualnie;
+                this.zapisaniElitarni.add(elitarny);
+                brak_progresu = 0;
+            } else {
+                brak_progresu++;
+            }
 
             pop = new ArrayList<>(dzieci);
-
             zapiszPop(pop);
+
+            // warunki stopu
+            if (brak_progresu > MAX_BRAK_PROGRESU) {
+                return elitarny;
+            }
 
         }
         printMetryki();
-        return new TRASA();
+        return elitarny;
     }
 
     private ArrayList<TRASA> init_pop() {
@@ -219,7 +234,7 @@ public class ALG_GEN {
                     losowyIndex1 = losowyIndex2;
                     losowyIndex2 = temp;
                 }
-                print("Mutowana trasa: " + dziecko.trasa_drogi_id.toString()+" czas przejazdu= "+dziecko.czas_przejazdu+" , ilosc wezlow: "+dziecko.trasa_wezly_id.size());
+                print("Mutowana trasa: " + dziecko.trasa_drogi_id.toString() + " czas przejazdu= " + dziecko.czas_przejazdu + " , ilosc wezlow: " + dziecko.trasa_wezly_id.size());
                 print("losowyIndex1 = " + losowyIndex1);
                 print("losowyIndex2 = " + losowyIndex2);
                 Wezel w1 = DANE.wezly.get(dziecko.trasa_wezly_id.get(losowyIndex1));
@@ -239,7 +254,7 @@ public class ALG_GEN {
                 }
                 TRASA nowa_trasa = TRASA.stworz_z_wezlow_id(nowa_trasa_wezly_id);
                 noweDzieci.add(nowa_trasa);
-                print("Nowa zmutowana trasa czas: " + nowa_trasa.czas_przejazdu+" , ilosc wezlow: "+nowa_trasa.trasa_wezly_id.size());
+                print("Nowa zmutowana trasa czas: " + nowa_trasa.czas_przejazdu + " , ilosc wezlow: " + nowa_trasa.trasa_wezly_id.size());
 
             } else {
                 noweDzieci.add(dziecko);
@@ -248,14 +263,13 @@ public class ALG_GEN {
         return noweDzieci;
     }
 
-    private TRASA getElitarny(ArrayList<TRASA> pop, TRASA best) {
+    private TRASA getNajlepszy(ArrayList<TRASA> pop) {
+        TRASA best = pop.get(0);
         for (TRASA tr : pop) {
             if (tr.czas_przejazdu < best.czas_przejazdu) {
                 best = tr;
-                print("Nowy elitarny czas: " + best.czas_przejazdu);
             }
         }
-        this.zapisaniElitarni.add(best);
         return best;
     }
 
@@ -264,6 +278,7 @@ public class ALG_GEN {
         ArrayList<Double> srednie_generacji = new ArrayList<>();
         double srednia_populacji = 0;
         for (ArrayList<TRASA> pop : zapisaneGeneracje) {
+            srednia_populacji=0;
             for (TRASA tr : pop) {
                 srednia_populacji += tr.czas_przejazdu;
             }
@@ -289,4 +304,15 @@ public class ALG_GEN {
     private void zapiszPop(ArrayList<TRASA> pop) {
         this.zapisaneGeneracje.add(pop);
     }
+
+    private TRASA getNajgorszy(ArrayList<TRASA> pop) {
+        TRASA worst = pop.get(0);
+        for (TRASA tr : pop) {
+            if (tr.czas_przejazdu > worst.czas_przejazdu) {
+                worst = tr;
+            }
+        }
+        return worst;
+    }
+
 }
