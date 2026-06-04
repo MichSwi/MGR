@@ -5,6 +5,7 @@
 package mgr.ALGORYTMY;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import mgr.DANE;
 import static mgr.DANE.print;
 import mgr.Wezel;
@@ -15,10 +16,10 @@ import mgr.Wezel;
  */
 public class ALG_GEN {
 
-    double szansa_na_mutacje = 0.1;
-    double szansa_na_krzyzowanie = 0.9;
-    int LICZEBNOSC_POPULACJI = 40;
-    int max_iter = 10;
+    double SZANSA_NA_MUTACJE = 0.15;
+    double SZANSA_NA_KRZYZOWANIE = 0.9;
+    int LICZEBNOSC_POPULACJI = 30;
+    int MAX_GENERACJI = 50;
     boolean ZACHOWANIE_ELITARNEGO = true;
 
     int KRZYZOWANIE_GDY_BRAK_WSPOLNEGO = 0;
@@ -32,16 +33,16 @@ public class ALG_GEN {
 
     ArrayList<ArrayList<TRASA>> zapisaneGeneracje = new ArrayList<>();
     ArrayList<TRASA> zapisaniElitarni = new ArrayList<>();
-    private int MAX_BRAK_PROGRESU = 20;
+    private final int MAX_BRAK_PROGRESU = 10;
+    private final int ROZMIAR_TURNIEJU = 3;
 
     public ALG_GEN(Wezel w_start, Wezel w_koniec) {
         this.w_start = w_start;
         this.w_koniec = w_koniec;
-
     }
 
     public TRASA start() {
-
+        print("============== START ALG GEN =================");
         ArrayList<TRASA> dzieci = new ArrayList<>();
         ArrayList<TRASA> pop = init_pop();
 
@@ -50,7 +51,7 @@ public class ALG_GEN {
 
         int brak_progresu = 0;
         int iter = 0;
-        while (iter < max_iter) {
+        while (iter < MAX_GENERACJI) {
             iter++;
             print("iteracja nr: " + iter);
             dzieci.clear();
@@ -59,15 +60,19 @@ public class ALG_GEN {
             //krzyzowanie + selekcja
             for (int i = 0; i < pop.size(); i += 2) {
                 TRASA rodzic2 = new TRASA();
-                TRASA rodzic1 = sel_ruletka(pop);
+                //TRASA rodzic1 = sel_ruletka(pop);
+                //TRASA rodzic1 = sel_turniejowa(pop);
+                TRASA rodzic1 = sel_rankingowa(pop);
                 do {
-                    rodzic2 = sel_ruletka(pop);
+                    //rodzic2 = sel_ruletka(pop);
+                    //rodzic2 = sel_turniejowa(pop);
+                    rodzic2 = sel_rankingowa(pop);
                 } while (rodzic1 == rodzic2);
 
                 print("krzyzowanie nr " + i);
                 print("Rodzic1 : " + rodzic1.czas_przejazdu);
                 print("Rodzic2 : " + rodzic2.czas_przejazdu);
-                if (Math.random() < szansa_na_krzyzowanie) {
+                if (Math.random() < SZANSA_NA_KRZYZOWANIE) {
                     TRASA dziecko1 = krzyzowanie_wspolny_punkt(rodzic1, rodzic2);
                     TRASA dziecko2 = krzyzowanie_wspolny_punkt(rodzic2, rodzic1);
 
@@ -100,7 +105,7 @@ public class ALG_GEN {
                     dzieci.add(elitarny);
                 }
             }
-            
+
             //elitarnosc - sprawdz czy nowy elitarny / sprawdz czy postep
             TRASA najlepszaAktualnie = getNajlepszy(dzieci);
             if (najlepszaAktualnie.czas_przejazdu < elitarny.czas_przejazdu) {
@@ -116,20 +121,25 @@ public class ALG_GEN {
 
             // warunki stopu
             if (brak_progresu > MAX_BRAK_PROGRESU) {
+                print("ZADZIALAL WARUNEK STOP BRAK PROGERSU");
+                printMetryki();
                 return elitarny;
             }
 
         }
+        print("ZADZIALAL MAX ITER" + iter);
         printMetryki();
         return elitarny;
     }
 
     private ArrayList<TRASA> init_pop() {
+        print("start init pop");
         ArrayList<TRASA> new_pop = new ArrayList<>();
         LOSOWA_TRASA los = new LOSOWA_TRASA();
 
         for (int i = 1; i <= LICZEBNOSC_POPULACJI; i++) {
             new_pop.add(los.start(w_start, w_koniec));
+            print("stworzono " + i + "/" + LICZEBNOSC_POPULACJI);
         }
         return new_pop;
     }
@@ -157,6 +167,51 @@ public class ALG_GEN {
             }
         }
         return null;
+    }
+
+    private TRASA sel_turniejowa(ArrayList<TRASA> pop) {
+
+        TRASA najlepszy = null;
+
+        for (int i = 0; i < ROZMIAR_TURNIEJU; i++) {
+
+            int losowyIndex = (int) (Math.random() * pop.size());
+            TRASA kandydat = pop.get(losowyIndex);
+
+            if (najlepszy == null || kandydat.czas_przejazdu < najlepszy.czas_przejazdu) {
+                najlepszy = kandydat;
+            }
+        }
+
+        return najlepszy;
+    }
+
+    private TRASA sel_rankingowa(ArrayList<TRASA> pop) {
+
+        ArrayList<TRASA> posortowane = new ArrayList<>(pop);
+
+        // najmniejszy czas przejazdu idzie na poczatek
+        posortowane.sort(Comparator.comparingDouble(t -> t.czas_przejazdu));
+
+        int n = posortowane.size();
+        int sumaRang = n * (n + 1) / 2;
+        double los = Math.random() * sumaRang;
+
+        double sumaNarastajaca = 0.0;
+
+        for (int i = 0; i < n; i++) {
+
+            // najlepszy dostaje najwyzsza range
+            int ranga = n - i;
+
+            sumaNarastajaca += ranga;
+
+            if (sumaNarastajaca >= los) {
+                return posortowane.get(i);
+            }
+        }
+
+        return posortowane.get(n - 1);
     }
 
     private TRASA krzyzowanie_wspolny_punkt(TRASA trasa1, TRASA trasa2) {
@@ -219,7 +274,7 @@ public class ALG_GEN {
         print("START funkcji MUTACJI");
         ArrayList<TRASA> noweDzieci = new ArrayList<>();
         for (TRASA dziecko : dzieci) {
-            if (Math.random() < szansa_na_mutacje) {
+            if (Math.random() < SZANSA_NA_MUTACJE) {
                 print("ROZPOCZETA MUTACJA");
                 int il_wezlow = dziecko.trasa_wezly_id.size() - 2; //odjety poczatkowy i koncowy
 
@@ -264,13 +319,17 @@ public class ALG_GEN {
     }
 
     private TRASA getNajlepszy(ArrayList<TRASA> pop) {
-        TRASA best = pop.get(0);
-        for (TRASA tr : pop) {
-            if (tr.czas_przejazdu < best.czas_przejazdu) {
-                best = tr;
-            }
-        }
-        return best;
+//        TRASA best = pop.get(0);
+//        for (TRASA tr : pop) {
+//            if (tr.czas_przejazdu < best.czas_przejazdu) {
+//                best = tr;
+//            }
+//        }
+//        return best;
+
+        ArrayList<TRASA> posortowane = new ArrayList<>(pop);
+        posortowane.sort(Comparator.comparingDouble(t -> t.czas_przejazdu));
+        return posortowane.getFirst();
     }
 
     private void printMetryki() {
@@ -278,7 +337,7 @@ public class ALG_GEN {
         ArrayList<Double> srednie_generacji = new ArrayList<>();
         double srednia_populacji = 0;
         for (ArrayList<TRASA> pop : zapisaneGeneracje) {
-            srednia_populacji=0;
+            srednia_populacji = 0;
             for (TRASA tr : pop) {
                 srednia_populacji += tr.czas_przejazdu;
             }
@@ -292,12 +351,13 @@ public class ALG_GEN {
                 print("Ilosc wezlow: " + tr.trasa_wezly_id.size() + " czas: " + tr.czas_przejazdu);
             }
             print("Srednia czasu generacji: " + srednie_generacji.get(zapisaneGeneracje.indexOf(pop)));
+            print("Najlepszy z generacji [s]: " + getNajlepszy(pop).czas_przejazdu + " | [m]: " + getNajlepszy(pop).dlugosc);
         }
 
         int i = 0;
         for (TRASA elitarny : zapisaniElitarni) {
             i++;
-            print("Elita gen " + i + " ilosc wezlow : " + elitarny.trasa_wezly_id.size() + " czas przejazdu: " + elitarny.czas_przejazdu + " odleglosc [m]: " + elitarny.dlugosc);
+            print("Elita nr " + i + " ilosc wezlow : " + elitarny.trasa_wezly_id.size() + " czas przejazdu: " + elitarny.czas_przejazdu + " odleglosc [m]: " + elitarny.dlugosc);
         }
     }
 
@@ -306,13 +366,16 @@ public class ALG_GEN {
     }
 
     private TRASA getNajgorszy(ArrayList<TRASA> pop) {
-        TRASA worst = pop.get(0);
-        for (TRASA tr : pop) {
-            if (tr.czas_przejazdu > worst.czas_przejazdu) {
-                worst = tr;
-            }
-        }
-        return worst;
+//        TRASA worst = pop.get(0);
+//        for (TRASA tr : pop) {
+//            if (tr.czas_przejazdu > worst.czas_przejazdu) {
+//                worst = tr;
+//            }
+//        }
+//        return worst;
+        ArrayList<TRASA> posortowane = new ArrayList<>(pop);
+        posortowane.sort(Comparator.comparingDouble(t -> t.czas_przejazdu));
+        return posortowane.getLast();
     }
 
 }

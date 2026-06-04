@@ -10,6 +10,7 @@ import mgr.ALGORYTMY.ALG_GEN;
 import mgr.ALGORYTMY.AntColonyAlg;
 import mgr.ALGORYTMY.BELLMAN_FORD;
 import mgr.ALGORYTMY.LOSOWA_TRASA;
+import mgr.ALGORYTMY.TRASA;
 import mgr.ALGORYTMY.WYNIKI;
 
 /**
@@ -245,7 +246,8 @@ public class oknoMapy extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         ALG_GEN alg = new ALG_GEN(DANE.wezelStartowyAlgorytmu, DANE.wezelKoncowyAlgorytmu);
-        alg.start();
+        DANE.ALG_SCIEZKA = alg.start().trasa_drogi;
+        
 
         mapa1.repaint();
 
@@ -269,7 +271,7 @@ public class oknoMapy extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         AntColonyAlg AntAlg = new AntColonyAlg();
-        DANE.ALG_SCIEZKA = AntAlg.startAlg();
+        DANE.ALG_SCIEZKA = AntAlg.start();
 
         mapa1.repaint();
 

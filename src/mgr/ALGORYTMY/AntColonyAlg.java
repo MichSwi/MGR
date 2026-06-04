@@ -38,7 +38,7 @@ public class AntColonyAlg {
 
     }
 
-    public List<Droga> startAlg() {
+    public List<Droga> start() {
         List<Droga> trasa_drog = new ArrayList<>();
         List<Long> trasa_wezlow_id = new ArrayList<>();
         Long aktualnyWezel = pkt_start;

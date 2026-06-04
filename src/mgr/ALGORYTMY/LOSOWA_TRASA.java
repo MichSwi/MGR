@@ -107,13 +107,6 @@ private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.96;
                 null
         );
 
-        if (t != null) {
-            DANE.ALG_SCIEZKA = t.trasa_drogi;
-            //System.out.println("ZNALEZIONO TRASE.");
-        } else {
-            DANE.ALG_SCIEZKA = new ArrayList<>();
-            //System.out.println("NIE ZNALEZIONO TRASY.");
-        }
         return t;
     }
 

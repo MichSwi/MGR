@@ -81,7 +81,7 @@ public class ALGDIJKSTRA {
                     continue;
                 }
 
-                Double new_koszt = wartosc_wezlow.get(akt_wez) + drogi.get(pol.IDdrogi).dlugosc;
+                Double new_koszt = wartosc_wezlow.get(akt_wez) + drogi.get(pol.IDdrogi).czas_przejazdu;
 
                 if (new_koszt < wartosc_wezlow.get(przeciwny_wezel)) {
                     wartosc_wezlow.put(przeciwny_wezel, new_koszt);

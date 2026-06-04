@@ -16,10 +16,10 @@ import mgr.Wezel.Polaczenie;
  */
 public class TRASA {
 
-    ArrayList<Droga> trasa_drogi;
-    ArrayList<Wezel> trasa_wezly;
-    ArrayList<Long> trasa_drogi_id;
-    ArrayList<Long> trasa_wezly_id;
+    public ArrayList<Droga> trasa_drogi;
+    public ArrayList<Wezel> trasa_wezly;
+    public ArrayList<Long> trasa_drogi_id;
+    public ArrayList<Long> trasa_wezly_id;
     Double dlugosc;
     int czas_przejazdu;
 

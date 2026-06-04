@@ -1009,10 +1009,10 @@ public class mapa extends javax.swing.JPanel {
         if (ZaznaczonyWezel != null) {
             zaznaczWezel(g2d_zawartosc, ZaznaczonyWezel, losowyKolor());
         }
-        if (DANE.wezelStartowyAlgorytmu != null) {
+        if (DANE.wezelStartowyAlgorytmu.ID != 0) {
             zaznaczWezel(g2d_zawartosc, DANE.wezelStartowyAlgorytmu, Color.GREEN);
         }
-        if (DANE.wezelStartowyAlgorytmu != null) {
+        if (DANE.wezelStartowyAlgorytmu.ID != 0) {
             zaznaczWezel(g2d_zawartosc, DANE.wezelKoncowyAlgorytmu, Color.RED);
         }
     }
