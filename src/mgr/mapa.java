@@ -114,6 +114,7 @@ public class mapa extends javax.swing.JPanel {
             rysuj_punkty(g2d_zawartosc);
             rysuj_zaznaczone_wezly(g2d_zawartosc);
             rysuj_sciezke(g2d_zawartosc);
+            //rysuj_feromony_na_drogach(g2d_zawartosc);
             rysuj_wezly(g2d_zawartosc);
             rysuj_wartosci(g2d_zawartosc);
             rysujPodzialke(g2d_podzialka_poz, g2d_podzialka_pion);
@@ -792,9 +793,9 @@ public class mapa extends javax.swing.JPanel {
 
         Map<Long, Double> wartoscWezlow;
 
-        if (WYNIKI.wartosc_wezlow_dijkstra != null) {
+        if (!WYNIKI.wartosc_wezlow_dijkstra.isEmpty()) {
             wartoscWezlow = WYNIKI.wartosc_wezlow_dijkstra;
-        } else if (WYNIKI.wartosc_wezlow_a_star != null) {
+        } else if (!WYNIKI.wartosc_wezlow_a_star.isEmpty()) {
             wartoscWezlow = WYNIKI.wartosc_wezlow_a_star;
         } else {
             return;
@@ -1000,10 +1001,95 @@ public class mapa extends javax.swing.JPanel {
     private void rysuj_sciezke(Graphics2D g2d_zawartosc) {
         if (!DANE.ALG_SCIEZKA.isEmpty()) {
             for (Droga dr : DANE.ALG_SCIEZKA) {
-                rysujDroge(dr, Color.BLACK, g2d_zawartosc);
+                rysujDroge(dr, Color.magenta, g2d_zawartosc);
             }
         }
     }
+
+private void rysuj_feromony_na_drogach(Graphics2D g2d) {
+
+    Map<Long, Double> feromony = WYNIKI.wartosci_feromonow_na_drogach;
+
+    if (feromony == null || feromony.isEmpty()) {
+        return;
+    }
+
+    double minFeromon = Double.MAX_VALUE;
+    double maxFeromon = -Double.MAX_VALUE;
+
+    for (Map.Entry<Long, Double> entry : feromony.entrySet()) {
+
+        Long drogaId = entry.getKey();
+        Double wartosc = entry.getValue();
+
+        if (wartosc == null || wartosc.isNaN() || wartosc.isInfinite()) {
+            continue;
+        }
+
+        if (!DANE.drogi.containsKey(drogaId)) {
+            continue;
+        }
+
+        if (wartosc < minFeromon) {
+            minFeromon = wartosc;
+        }
+
+        if (wartosc > maxFeromon) {
+            maxFeromon = wartosc;
+        }
+    }
+
+    if (minFeromon == Double.MAX_VALUE || maxFeromon == -Double.MAX_VALUE) {
+        return;
+    }
+
+    if (maxFeromon == minFeromon) {
+        return;
+    }
+
+    for (Map.Entry<Long, Double> entry : feromony.entrySet()) {
+
+        Long drogaId = entry.getKey();
+        Double wartosc = entry.getValue();
+
+        Droga droga = DANE.drogi.get(drogaId);
+
+        if (droga == null || wartosc == null || wartosc.isNaN() || wartosc.isInfinite()) {
+            continue;
+        }
+
+        double poziom = (wartosc - minFeromon) / (maxFeromon - minFeromon);
+
+        // TO JEST KLUCZ:
+        // ignoruj bardzo słabe feromony, bo inaczej wszystko będzie żółte
+        if (poziom < 0.10) {
+            continue;
+        }
+
+        if (poziom > 1.0) {
+            poziom = 1.0;
+        }
+
+        int red = 255;
+        int green = (int) (255 * (1.0 - poziom));
+        int blue = 0;
+
+        Color kolor = new Color(red, green, blue);
+
+        g2d.setColor(kolor);
+        g2d.setStroke(new BasicStroke(6));
+
+        int il_pkt = droga.punkty.size();
+        for (int i = 1; i < il_pkt; i++) {
+            g2d.drawLine(
+                    (int) droga.punkty.get(i - 1).X,
+                    (int) droga.punkty.get(i - 1).Y,
+                    (int) droga.punkty.get(i).X,
+                    (int) droga.punkty.get(i).Y
+            );
+        }
+    }
+}
 
     private void rysuj_zaznaczone_wezly(Graphics2D g2d_zawartosc) {
         if (ZaznaczonyWezel != null) {
@@ -1042,7 +1128,7 @@ public class mapa extends javax.swing.JPanel {
                 if (dr.ruchUliczny != null) {
                     rysujDroge(dr, Color.GREEN, g2d_zawartosc);
                 } else {
-                    rysujDroge(dr, Color.ORANGE, g2d_zawartosc);
+                    rysujDroge(dr, Color.darkGray, g2d_zawartosc);
                 }
             }
         }

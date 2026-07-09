@@ -34,7 +34,7 @@ public class LOSOWA_TRASA {
 
 // Określa, jak długi dystans trasa może przejść bez wyraźnego zbliżania się do celu.
 // 0.2 oznacza 20% odległości start-koniec.
-    private double MNOZNIK_BRAKU_POSTEPU = 0.3;
+    private double MNOZNIK_BRAKU_POSTEPU = 0.2;
 
 // Minimalny dopuszczalny dystans bez postępu.
 // Chroni przed zbyt małym limitem przy krótkich trasach.
@@ -56,7 +56,7 @@ public class LOSOWA_TRASA {
 
 // Maksymalna liczba zapamiętanych poprzednich tras.
 // Historia służy do sprawdzania, czy nowa trasa nie połączyła się ze starszą próbą.
-    private int MAX_HISTORIA_TRAS = 50;
+    private int MAX_HISTORIA_TRAS = 90;
 
 // Maksymalna liczba restartów dla jednej strony wyszukiwania.
     private int MAX_RESTARTOW_NA_STRONE = 500;
@@ -69,12 +69,12 @@ private double LUZOWANIE_ODDALENIA = 1.05;
 // Współczynnik luzowania limitu dystansu bez postępu.
 // 1.10 oznacza, że po restarcie z powodu braku postępu
 // algorytm pozwoli przejść o 10% dłuższy dystans bez wyraźnego zbliżania się do celu.
-private double LUZOWANIE_BRAKU_POSTEPU = 1.1;
+private double LUZOWANIE_BRAKU_POSTEPU = 1.05;
 
 // Współczynnik zmniejszania progu znaczącego postępu.
 // 0.95 oznacza, że po restarcie z powodu braku postępu
 // wymagany postęp zostanie zmniejszony o 5%, więc algorytm łatwiej uzna ruch za postęp.
-private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.96;
+private double LUZOWANIE_ZNACZNEGO_POSTEPU = 0.97;
 
     public void startAnimowany(Wezel w_start, Wezel w_koniec, JPanel panelMapy) {
         STOP_ALGORYTMU = false;

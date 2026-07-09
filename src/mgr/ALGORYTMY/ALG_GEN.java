@@ -289,7 +289,7 @@ public class ALG_GEN {
                     losowyIndex1 = losowyIndex2;
                     losowyIndex2 = temp;
                 }
-                print("Mutowana trasa: " + dziecko.trasa_drogi_id.toString() + " czas przejazdu= " + dziecko.czas_przejazdu + " , ilosc wezlow: " + dziecko.trasa_wezly_id.size());
+                //print("Mutowana trasa: " + dziecko.trasa_drogi_id.toString() + " czas przejazdu= " + dziecko.czas_przejazdu + " , ilosc wezlow: " + dziecko.trasa_wezly_id.size());
                 print("losowyIndex1 = " + losowyIndex1);
                 print("losowyIndex2 = " + losowyIndex2);
                 Wezel w1 = DANE.wezly.get(dziecko.trasa_wezly_id.get(losowyIndex1));

@@ -18,7 +18,6 @@ public class ALGDIJKSTRA {
     private List<Long> nieodwiedzone = new ArrayList<>();
     private Map<Long, Double> wartosc_wezlow = new HashMap<>();
     private Map<Long, Long> poprzedni_wezel = new HashMap<>();
-    private Map<Long, Long> poprzednia_droga = new HashMap<>();
 
     private PriorityQueue<Map.Entry<Long, Double>> kolejka
             = new PriorityQueue<>(Comparator.comparingDouble(Map.Entry::getValue));
@@ -36,7 +35,6 @@ public class ALGDIJKSTRA {
             nieodwiedzone.add(wezel_id);
             wartosc_wezlow.put(wezel_id, Double.POSITIVE_INFINITY);
             poprzedni_wezel.put(wezel_id, null);
-            poprzednia_droga.put(wezel_id, null);
         }
 
         wartosc_wezlow.put(pktStart, 0.0);
@@ -52,7 +50,7 @@ public class ALGDIJKSTRA {
                 continue;
             }
 
-            // jeśli już odwiedzony, pomijamy
+            // jesli już odwiedzony - pomijamy
             if (!nieodwiedzone.contains(akt_wez)) {
                 continue;
             }
@@ -60,23 +58,21 @@ public class ALGDIJKSTRA {
             // oznacz jako odwiedzony
             nieodwiedzone.remove(akt_wez);
 
-            // jeśli doszliśmy do celu, można zakończyć
+            // jeśli doszlismy do celu - return
             if (akt_wez.equals(pktKoniec)) {
                 WYNIKI.czyWynikiDijkstra = true;
                 break;
             }
 
             // sprawdzanie sasiadow
-            //for (Long polaczenie_id : wezly.get(akt_wez).polaczenia) {
             for (Polaczenie pol : wezly.get(akt_wez).polaczenia) {
 
-                if(pol.przejazd==false){
+                if (pol.przejazd == false) {
                     continue;
                 }
-                
-                //Long przeciwny_wezel = drogi.get(polaczenie_id).getPrzeciwnyWezelId(akt_wez);
+
                 Long przeciwny_wezel = pol.kolejnyWezel;
-                // sąsiad już odwiedzony
+                // sąsiad już odwiedzony - kolejny sasiad
                 if (!nieodwiedzone.contains(przeciwny_wezel)) {
                     continue;
                 }
@@ -86,7 +82,6 @@ public class ALGDIJKSTRA {
                 if (new_koszt < wartosc_wezlow.get(przeciwny_wezel)) {
                     wartosc_wezlow.put(przeciwny_wezel, new_koszt);
                     poprzedni_wezel.put(przeciwny_wezel, akt_wez);
-                    poprzednia_droga.put(przeciwny_wezel, pol.IDdrogi);
                     kolejka.add(Map.entry(przeciwny_wezel, new_koszt));
                 }
             }
@@ -97,11 +92,11 @@ public class ALGDIJKSTRA {
         return wartosc_wezlow.get(pktKoniec);
     }
 
-    public List<Long> getSciezka() {
-        List<Long> sciezka = new ArrayList<>();
+    public TRASA getSciezka() {
+        ArrayList<Long> sciezka = new ArrayList<>();
 
         if (wartosc_wezlow.get(pktKoniec).equals(Double.POSITIVE_INFINITY)) {
-            return sciezka;
+            return TRASA.stworz_z_wezlow_id(sciezka);
         }
 
         Long akt = pktKoniec;
@@ -109,26 +104,7 @@ public class ALGDIJKSTRA {
             sciezka.add(0, akt);
             akt = poprzedni_wezel.get(akt);
         }
-
-        return sciezka;
-    }
-
-    public List<Droga> getSciezkaDrog() {
-        List<Droga> sciezkaDrog = new ArrayList<>();
-
-        if (wartosc_wezlow.get(pktKoniec).equals(Double.POSITIVE_INFINITY)) {
-            return sciezkaDrog;
-        }
-
-        Long akt = pktKoniec;
-
-        while (akt != null && poprzednia_droga.get(akt) != null) {
-            Long drogaId = poprzednia_droga.get(akt);
-            sciezkaDrog.add(0, drogi.get(drogaId));
-            akt = poprzedni_wezel.get(akt);
-        }
-
-        return sciezkaDrog;
+        return TRASA.stworz_z_wezlow_id(sciezka);
     }
 
     public Map<Long, Double> getWartosc_wezlow() {

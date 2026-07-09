@@ -12,7 +12,7 @@ public class WYNIKI {
     
     public static Map<Long, Double> wartosc_wezlow_dijkstra = new HashMap<>();
     public static Map<Long, Double> wartosc_wezlow_a_star = new HashMap<>();
-
+    public static Map<Long, Double> wartosci_feromonow_na_drogach = new HashMap<>();
 
     public static void setWynikiDijkstra() {
         czyWynikiDijkstra = true;

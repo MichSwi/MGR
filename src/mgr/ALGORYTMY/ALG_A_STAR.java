@@ -14,7 +14,7 @@ import mgr.Wezel.Polaczenie;
 public class ALG_A_STAR {
 
     private static Map<Long, Double> gScore = new HashMap<>();
-    
+
     public static void start() {
         List<Long> closedSet = new ArrayList<>();
         PriorityQueue<Map.Entry<Long, Double>> openSet
@@ -58,7 +58,7 @@ public class ALG_A_STAR {
             closedSet.add(aktualny_wezel.ID);
 
             for (Polaczenie pol : aktualny_wezel.polaczenia) {
-                if(pol.przejazd==false){
+                if (pol.przejazd == false) {
                     continue;
                 }
                 Long dr_sasiad = pol.IDdrogi;
@@ -68,7 +68,7 @@ public class ALG_A_STAR {
                 }
 
                 Double kosztCalkowity = gScore.get(aktualny_wezel.ID)
-                        + DANE.drogi.get(dr_sasiad).dlugosc;
+                        + DANE.drogi.get(dr_sasiad).czas_przejazdu;
 
                 if (kosztCalkowity < gScore.get(sasiad_wezel_id)) {
                     cameFromDro.put(sasiad_wezel_id, dr_sasiad);
@@ -77,10 +77,7 @@ public class ALG_A_STAR {
                     gScore.put(sasiad_wezel_id, kosztCalkowity);
                     fScore.put(
                             sasiad_wezel_id,
-                            kosztCalkowity + odlegloscWLiniProstej(
-                                    sasiad_wezel_id,
-                                    DANE.wezelKoncowyAlgorytmu.ID
-                            )
+                            kosztCalkowity + heurystyka(sasiad_wezel_id, DANE.wezelKoncowyAlgorytmu.ID)
                     );
 
                     openSet.add(Map.entry(
@@ -121,12 +118,12 @@ public class ALG_A_STAR {
             sciezkaDrogTmp.add(0, drogaId);
             aktualnyWezelId = poprzedniWezelId;
         }
-        List<Droga> trasa = new ArrayList<>();
+        ArrayList<Droga> trasa = new ArrayList<>();
         for (Long droga_id : sciezkaDrogTmp) {
             trasa.add(DANE.drogi.get(droga_id));
         }
         DANE.ALG_SCIEZKA = trasa;
-        
+
         WYNIKI.wartosc_wezlow_a_star = getgScore();
         WYNIKI.setWynikiAStar();
     }
@@ -134,6 +131,13 @@ public class ALG_A_STAR {
     public static Map<Long, Double> getgScore() {
         return gScore;
     }
-    
-    
+
+    private static double heurystyka(Long id1, Long id2) {
+        double odlegloscM = odlegloscWLiniProstej(id1, id2);
+
+        double maxPredkoscMS = 80.0 / 3.6; // 130 km/h -> m/s
+
+        return odlegloscM / maxPredkoscMS;
+    }
+
 }

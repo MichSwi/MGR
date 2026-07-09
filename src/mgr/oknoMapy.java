@@ -259,7 +259,7 @@ public class oknoMapy extends javax.swing.JFrame {
         ALGDIJKSTRA algdij = new ALGDIJKSTRA();
 
         System.out.println("Koszt do konca: " + algdij.getKosztDoKonca());
-        DANE.ALG_SCIEZKA = algdij.getSciezkaDrog();
+        DANE.ALG_SCIEZKA = algdij.getSciezka().trasa_drogi;
         System.out.println();
         for (Droga droga : DANE.ALG_SCIEZKA) {
             System.out.println(droga.ID);
@@ -270,6 +270,8 @@ public class oknoMapy extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        DANE.ALG_SCIEZKA.clear();
+        WYNIKI.wartosci_feromonow_na_drogach.clear();
         AntColonyAlg AntAlg = new AntColonyAlg();
         DANE.ALG_SCIEZKA = AntAlg.start();
 
@@ -303,8 +305,13 @@ public class oknoMapy extends javax.swing.JFrame {
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
         // TODO add your handling code here:
         //ALG_GEN.przerwijAlgorytm();
+        WYNIKI.wartosc_wezlow_a_star.clear();
+        WYNIKI.wartosc_wezlow_dijkstra.clear();
+        DANE.ALG_SCIEZKA.clear();
+        WYNIKI.wartosci_feromonow_na_drogach.clear();
         LOSOWA_TRASA.przerwijAlgorytm();
 System.out.println("STOP ALGORYTMU - kliknieto przycisk.");
+mapa1.repaint();
     }//GEN-LAST:event_jButton8ActionPerformed
 
     /**
