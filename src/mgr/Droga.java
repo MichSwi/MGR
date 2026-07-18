@@ -29,6 +29,7 @@ public class Droga {
     public TrafficSegment ruchUliczny;
     public double maxspeed = -1;
     public double czas_przejazdu = Double.MIN_VALUE;
+    public String temp_source;
 
     public Droga(long ID, String nazwa, double dlugosc, LinkedList<Punkt> punkty, LinkedList<Long> polaczenia_poczatek_ID, LinkedList<Long> polaczenia_koniec_ID, String jednokierunkowa) {
         this.ID = ID;
@@ -132,7 +133,7 @@ public class Droga {
         }
         // odleglosc
         Double czas_jazdy = 0.0;
-        czas_jazdy = this.dlugosc / this.maxspeed*3.6; //   m/1000 / km/h * 3600 = [s]
+        czas_jazdy = this.dlugosc / this.maxspeed * 3.6; //   m/1000 / km/h * 3600 = [s]
 
         this.czas_przejazdu = czas_kary + czas_jazdy;
     }
@@ -140,17 +141,17 @@ public class Droga {
     public String ustawMaxSpeed() {
 
         if (this.ruchUliczny != null) {
-            this.maxspeed = this.ruchUliczny.speed*3.6; // z m/s na km/h
-            return "ruch_uliczny";
+            this.maxspeed = this.ruchUliczny.speed * 3.6; // z m/s na km/h
+            return "HERE";
         }
 
         String maxspeedString = tags.getOrDefault("maxspeed", "-");
         if (maxspeedString.equalsIgnoreCase("walk")) {
-            maxspeed = 7;
-            return "tag";
+            maxspeed = 7 * DANE.WSPOLCZYNNIK_PREDKOSCI;
+            return "MaxSpeed";
         } else if (!maxspeedString.equals("-")) {
-            maxspeed = Integer.parseInt(maxspeedString);
-            return "tag";
+            maxspeed = Integer.parseInt(maxspeedString) * DANE.WSPOLCZYNNIK_PREDKOSCI;
+            return "MaxSpeed";
         }
 
         String typ_drogi = tags.getOrDefault("highway", "brak tagu");
@@ -159,66 +160,87 @@ public class Droga {
                 // brak informacji o typie drogi
                 maxspeed = 50;
                 return "brak";
-            case "unclassified":
-                // droga lokalna niesklasyfikowana
-                maxspeed = 50;
-                return "unclassified";
-            case "tertiary_link":
-                // łącznica drogi trzeciorzędnej
-                maxspeed = 40;
-                break;
-            case "tertiary":
-                // droga trzeciorzędna / lokalnie ważna
-                maxspeed = 50;
-                break;
-            case "living_street":
-                // strefa zamieszkania
-                maxspeed = 20;
-                break;
-            case "motorway_link":
-                // łącznica autostrady
-                maxspeed = 70;
-                break;
-            case "trunk":
-                // droga główna przyspieszona / droga szybkiego ruchu niższa niż autostrada
-                maxspeed = 100;
-                break;
+
             case "motorway":
                 // autostrada
-                maxspeed = 140;
+                maxspeed = 120;
                 break;
-            case "rest_area":
-                // miejsce obsługi podróżnych / parking przy trasie
-                maxspeed = 20;
-                break;
-            case "secondary":
-                // droga drugorzędna / zbiorcza
+
+            case "motorway_link":
+                // łącznica autostrady
                 maxspeed = 60;
                 break;
-            case "residential":
-                // droga osiedlowa / mieszkaniowa
-                maxspeed = 30;
+
+            case "trunk":
+                // droga ekspresowa lub główna
+                maxspeed = 100;
                 break;
-            case "service":
-                // droga serwisowa / dojazdowa
-                maxspeed = 20;
+
+            case "trunk_link":
+                // łącznica drogi głównej
+                maxspeed = 50;
                 break;
+
+            case "primary":
+                // droga pierwszorzędna
+                maxspeed = 50;
+                break;
+
+            case "primary_link":
+                // łącznica drogi pierwszorzędnej
+                maxspeed = 40;
+                break;
+
+            case "secondary":
+                // droga drugorzędna
+                maxspeed = 50;
+                break;
+
             case "secondary_link":
                 // łącznica drogi drugorzędnej
                 maxspeed = 40;
                 break;
-            case "trunk_link":
-                // łącznica drogi głównej przyspieszonej
-                maxspeed = 60;
+
+            case "tertiary":
+                // droga trzeciorzędna
+                maxspeed = 40;
                 break;
-            case "primary":
-                // droga główna / ważna droga przelotowa
-                maxspeed = 70;
+
+            case "tertiary_link":
+                // łącznica drogi trzeciorzędnej
+                maxspeed = 30;
                 break;
+
+            case "unclassified":
+                // droga lokalna
+                maxspeed = 30;
+                return "unclassified";
+
+            case "residential":
+                // droga osiedlowa
+                maxspeed = 30;
+                break;
+
+            case "living_street":
+                // strefa zamieszkania
+                maxspeed = 10;
+                break;
+
+            case "service":
+                // droga serwisowa
+                maxspeed = 20;
+                break;
+
+            case "rest_area":
+                // miejsce obsługi podróżnych lub parking przy trasie
+                maxspeed = 10;
+                break;
+
             case "walk":
-                // predkosc pieszych
+                // prędkość pieszych
                 maxspeed = 7;
                 break;
+
             default:
                 // nieznany typ drogi
                 maxspeed = 50;

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  *
  * @author Michal
@@ -31,6 +32,9 @@ public class DANE {
     public static Map<Long, Droga> kolej = new HashMap<>();
     public static Map<Long, Relacja> relacje = new HashMap<>();
 
+    private static final double MAX_ODL_DOPASOWANIA_TF = 15.0;
+    public static final double WSPOLCZYNNIK_PREDKOSCI = 0.8;
+    
     public static void ustawPolaczenia() {
 
 //        System.out.println("WSZYSTKIE: " + drogi.size());
@@ -124,20 +128,168 @@ public class DANE {
         System.out.print("Dodano wezly");
     }
 
-    public static final void ustawRuchUliczny() {
-        int ilosc_dodanego_ruchu = 0;
+//    public static final void ustawRuchUliczny() {
+//        int ilosc_dodanego_ruchu = 0;
+//
+//        for (TrafficSegment TF : ruchUliczny) {
+//            for (Long klucz : drogi.keySet()) {
+//                Droga dr = drogi.get(klucz);
+//                if (TF.street.equals(dr.nazwa)) {
+//                    dr.ruchUliczny = TF;
+//                    ilosc_dodanego_ruchu++;
+//                }
+//            }
+//        }
+//
+//        System.out.println("dodano info u ruchu ulicznym:" + ilosc_dodanego_ruchu);
+//    }
 
-        for (TrafficSegment TF : ruchUliczny) {
-            for (Long klucz : drogi.keySet()) {
-                Droga dr = drogi.get(klucz);
-                if (TF.street.equals(dr.nazwa)) {
-                    dr.ruchUliczny = TF;
-                    ilosc_dodanego_ruchu++;
-                }
-            }
+
+//    private static final double MAKSYMALNA_ODLEGLOSC = 15.0;
+//
+//    public static void ustawRuchUliczny() {
+//        for (Droga dr : drogi.values()) {
+//            dr.ruchUliczny = null;
+//
+//            TrafficSegment najlepiejDopasowany = null;
+//            double najlepszaSredniaOdleglosc = Double.MAX_VALUE;
+//
+//            for (TrafficSegment TF : ruchUliczny) {
+//                if (dr.punkty == null || dr.punkty.isEmpty()
+//                        || TF.points == null || TF.points.size() < 2) {
+//                    continue;
+//                }
+//
+//                double sumaOdleglosci = 0.0;
+//                int iloscDopasowanychPunktow = 0;
+//
+//                for (Punkt punktDrogi : dr.punkty) {
+//                    double najmniejszaOdleglosc = Double.MAX_VALUE;
+//
+//                    for (int i = 0; i < TF.points.size() - 1; i++) {
+//                        Punkt poczatek = TF.points.get(i);
+//                        Punkt koniec = TF.points.get(i + 1);
+//
+//                        double odleglosc = odlegloscPunktOdOdcinka(
+//                                punktDrogi,
+//                                poczatek,
+//                                koniec
+//                        );
+//
+//                        if (odleglosc < najmniejszaOdleglosc) {
+//                            najmniejszaOdleglosc = odleglosc;
+//                        }
+//                    }
+//
+//                    if (najmniejszaOdleglosc <= MAKSYMALNA_ODLEGLOSC) {
+//                        iloscDopasowanychPunktow++;
+//                        sumaOdleglosci += najmniejszaOdleglosc;
+//                    }
+//                }
+//
+//                double procentDopasowania
+//                        = (double) iloscDopasowanychPunktow / dr.punkty.size();
+//
+//                if (procentDopasowania >= 0.8) {
+//                    double sredniaOdleglosc
+//                            = sumaOdleglosci / iloscDopasowanychPunktow;
+//
+//                    if (sredniaOdleglosc < najlepszaSredniaOdleglosc) {
+//                        najlepszaSredniaOdleglosc = sredniaOdleglosc;
+//                        najlepiejDopasowany = TF;
+//                    }
+//                }
+//            }
+//
+//            if (najlepiejDopasowany != null) {
+//                dr.ruchUliczny = najlepiejDopasowany;
+//            }
+//        }
+//    }
+    
+public static void ustawRuchUliczny() {
+    for (Droga dr : drogi.values()) {
+        dr.ruchUliczny = null;
+
+        if (dr.punkty == null || dr.punkty.isEmpty()) {
+            continue;
         }
 
-        System.out.println("dodano info u ruchu ulicznym:" + ilosc_dodanego_ruchu);
+        for (TrafficSegment TF : ruchUliczny) {
+            if (TF.points == null || TF.points.size() < 2) {
+                continue;
+            }
+
+            int iloscDopasowanychPunktow = 0;
+
+            for (Punkt punktDrogi : dr.punkty) {
+                double najmniejszaOdleglosc = Double.MAX_VALUE;
+
+                for (int i = 0; i < TF.points.size() - 1; i++) {
+                    Punkt poczatek = TF.points.get(i);
+                    Punkt koniec = TF.points.get(i + 1);
+
+                    double odleglosc = odlegloscPunktOdOdcinka(
+                            punktDrogi,
+                            poczatek,
+                            koniec
+                    );
+
+                    if (odleglosc < najmniejszaOdleglosc) {
+                        najmniejszaOdleglosc = odleglosc;
+                    }
+                }
+
+                if (najmniejszaOdleglosc <= MAX_ODL_DOPASOWANIA_TF) {
+                    iloscDopasowanychPunktow++;
+                }
+            }
+
+            double procentDopasowania
+                    = (double) iloscDopasowanychPunktow / dr.punkty.size();
+
+            if (procentDopasowania >= 0.8) {
+                dr.ruchUliczny = TF;
+                break;
+            }
+        }
+    }
+}
+    
+
+    private static double odlegloscPunktOdOdcinka(
+            Punkt punkt,
+            Punkt poczatek,
+            Punkt koniec) {
+
+        final double PROMIEN_ZIEMI = 6371000.0;
+
+        double sredniaLat = Math.toRadians( (punkt.LAT + poczatek.LAT + koniec.LAT) / 3.0 );
+
+        double punktX = Math.toRadians(punkt.LON - poczatek.LON) * PROMIEN_ZIEMI * Math.cos(sredniaLat);
+        double punktY = Math.toRadians(punkt.LAT - poczatek.LAT) * PROMIEN_ZIEMI;
+
+        double koniecX = Math.toRadians(koniec.LON - poczatek.LON) * PROMIEN_ZIEMI * Math.cos(sredniaLat);
+
+        double koniecY = Math.toRadians(koniec.LAT - poczatek.LAT) * PROMIEN_ZIEMI;
+
+        double dlugoscOdcinka = koniecX * koniecX + koniecY * koniecY;
+
+        if (dlugoscOdcinka == 0.0) {
+            return Math.sqrt( punktX * punktX+ punktY * punktY );
+        }
+
+        double t = (punktX * koniecX + punktY * koniecY) / dlugoscOdcinka;
+
+        t = Math.max(0.0, Math.min(1.0, t));
+
+        double najblizszyX = t * koniecX;
+        double najblizszyY = t * koniecY;
+
+        double roznicaX = punktX - najblizszyX;
+        double roznicaY = punktY - najblizszyY;
+
+        return Math.sqrt( roznicaX * roznicaX + roznicaY * roznicaY );
     }
 
     public static void stopDebug() {
@@ -205,8 +357,8 @@ public class DANE {
 
     static public void ustawMaxSpeed() {
         int licznik_brak = 0;
-        int licznik_tag = 0;
-        int licznik_ruch_uliczny = 0;
+        int licznik_MaxSpeed = 0;
+        int licznik_HERE = 0;
         int licznik_klasa = 0;
         int licznik_unclassified = 0;
 
@@ -216,24 +368,25 @@ public class DANE {
                 case "brak":
                     licznik_brak++;
                     break;
-                case "tag":
-                    licznik_tag++;
+                case "MaxSpeed":
+                    licznik_MaxSpeed++;
                     break;
                 case "klasa":
                     licznik_klasa++;
                     break;
-                case "ruch_uliczny":
-                    licznik_ruch_uliczny++;
+                case "HERE":
+                    licznik_HERE++;
                     break;
                 case "unclassified":
                     licznik_unclassified++;
                     break;
             }
+            dr.temp_source=zrodlo;
         }
         System.out.println("========== DODANO MAXSPEED, ZLODLA: ==========");
         System.out.println("zrodlo_brak: " + licznik_brak);
-        System.out.println("zrodlo_tag: " + licznik_tag);
-        System.out.println("zrodlo_ruch_uliczny: " + licznik_ruch_uliczny);
+        System.out.println("zrodlo_tag_MAXSPEED: " + licznik_MaxSpeed);
+        System.out.println("zrodlo_ruch_uliczny: " + licznik_HERE);
         System.out.println("zrodlo_klasa: " + licznik_klasa);
         System.out.println("zrodlo_unclassified: " + licznik_unclassified);
         System.out.println("=========================================");
@@ -244,7 +397,7 @@ public class DANE {
             dr.obliczCzasPrzejazdu();
         }
     }
-    
+
     public static void print(Object tekst) {
         System.out.println(tekst);
     }

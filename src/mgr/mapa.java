@@ -16,11 +16,11 @@ import mgr.Wezel.Polaczenie;
 
 public class mapa extends javax.swing.JPanel {
 
-    private Boolean tryb_widoku = false;
     public Wezel ZaznaczonyWezel;
     public int clickX;
     public int clickY;
 
+    private String widok = "Zwykly";
     private int skalaProc = 100;
     private double widok_x = 30;
     private double widok_y = 30;
@@ -200,17 +200,22 @@ public class mapa extends javax.swing.JPanel {
         }
     }
 
-    private void rysujDroge(Droga droga, Color kolor, Graphics2D g2d) {
+    private void rysujDroge(Droga droga, Color kolor, Graphics2D g2d, int stroke) {
         g2d.setColor(kolor);
         String tag = droga.tags.getOrDefault("highway", "-");
         if (tag.equals("trunk") || tag.equals("motorway") || tag.equals("primary") || tag.equals("secondary") || tag.equals("tertiary")
-                || tag.equals("residential") || tag.equals("unclassified")) {
+                ) {
             g2d.setStroke(new BasicStroke(3));
         } else {
             g2d.setStroke(new BasicStroke(1));
         }
+        
+        if(stroke!=0){
+            g2d.setStroke(new BasicStroke(stroke));
+        }
+        
         if (DANE.ALG_SCIEZKA.contains(droga)) {
-            g2d.setStroke(new BasicStroke(4));
+            g2d.setStroke(new BasicStroke(5));
         }
 
         int il_pkt = droga.punkty.size();
@@ -278,7 +283,7 @@ public class mapa extends javax.swing.JPanel {
         roundedJPanel1 = new mgr.RoundedJPanel();
         skala_label = new javax.swing.JLabel();
         jButton4 = new javax.swing.JButton();
-        jToggleButton1 = new javax.swing.JToggleButton();
+        wybor_zrodla = new javax.swing.JComboBox<>();
 
         jButton1.setText("jButton1");
         jButton1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -397,10 +402,10 @@ public class mapa extends javax.swing.JPanel {
             }
         });
 
-        jToggleButton1.setText("zmien widok");
-        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
+        wybor_zrodla.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Zwykly", "All", "HERE", "MaxSpeed", "Klasa", "brak" }));
+        wybor_zrodla.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButton1ActionPerformed(evt);
+                wybor_zrodlaActionPerformed(evt);
             }
         });
 
@@ -424,7 +429,9 @@ public class mapa extends javax.swing.JPanel {
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jToggleButton1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(wybor_zrodla, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(103, 103, 103))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jButton4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -443,8 +450,8 @@ public class mapa extends javax.swing.JPanel {
                     .addComponent(jButton3)
                     .addComponent(jButton4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jToggleButton1)
-                .addGap(35, 35, 35)
+                .addComponent(wybor_zrodla, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(36, 36, 36)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(roundedJPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(reset_widoku_button, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -760,10 +767,13 @@ public class mapa extends javax.swing.JPanel {
 
     }//GEN-LAST:event_jButton4ActionPerformed
 
-    private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
+    private void wybor_zrodlaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wybor_zrodlaActionPerformed
         // TODO add your handling code here:
-        this.tryb_widoku = !tryb_widoku;
-    }//GEN-LAST:event_jToggleButton1ActionPerformed
+        this.widok = this.wybor_zrodla.getSelectedItem().toString();
+        this.repaint();
+
+
+    }//GEN-LAST:event_wybor_zrodlaActionPerformed
 
     static Color losowyKolor() {
         var r = ThreadLocalRandom.current();
@@ -783,10 +793,10 @@ public class mapa extends javax.swing.JPanel {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JButton reset_widoku_button;
     private mgr.RoundedJPanel roundedJPanel1;
     private javax.swing.JLabel skala_label;
+    private javax.swing.JComboBox<String> wybor_zrodla;
     // End of variables declaration//GEN-END:variables
 
     private void rysuj_wartosci(Graphics2D g2d) {
@@ -821,7 +831,7 @@ public class mapa extends javax.swing.JPanel {
         // rzeki
         for (Long rzeka_id : DANE.rzeki.keySet()) {
             Droga rzeka = DANE.rzeki.get(rzeka_id);
-            rysujDroge(rzeka, this.kolor_wody, g2d);
+            rysujDroge(rzeka, this.kolor_wody, g2d, 6);
         }
 
         // zbiorniki wodne
@@ -897,7 +907,7 @@ public class mapa extends javax.swing.JPanel {
         // tory
         for (Long kolej_id : DANE.kolej.keySet()) {
             Droga kolej = DANE.kolej.get(kolej_id);
-            rysujDroge(kolej, Color.DARK_GRAY, g2d);
+            rysujDroge(kolej, Color.LIGHT_GRAY, g2d, 1);
         }
     }
 
@@ -1001,95 +1011,95 @@ public class mapa extends javax.swing.JPanel {
     private void rysuj_sciezke(Graphics2D g2d_zawartosc) {
         if (!DANE.ALG_SCIEZKA.isEmpty()) {
             for (Droga dr : DANE.ALG_SCIEZKA) {
-                rysujDroge(dr, Color.magenta, g2d_zawartosc);
+                rysujDroge(dr, Color.magenta, g2d_zawartosc, 0);
             }
         }
     }
 
-private void rysuj_feromony_na_drogach(Graphics2D g2d) {
+    private void rysuj_feromony_na_drogach(Graphics2D g2d) {
 
-    Map<Long, Double> feromony = WYNIKI.wartosci_feromonow_na_drogach;
+        Map<Long, Double> feromony = WYNIKI.wartosci_feromonow_na_drogach;
 
-    if (feromony == null || feromony.isEmpty()) {
-        return;
+        if (feromony == null || feromony.isEmpty()) {
+            return;
+        }
+
+        double minFeromon = Double.MAX_VALUE;
+        double maxFeromon = -Double.MAX_VALUE;
+
+        for (Map.Entry<Long, Double> entry : feromony.entrySet()) {
+
+            Long drogaId = entry.getKey();
+            Double wartosc = entry.getValue();
+
+            if (wartosc == null || wartosc.isNaN() || wartosc.isInfinite()) {
+                continue;
+            }
+
+            if (!DANE.drogi.containsKey(drogaId)) {
+                continue;
+            }
+
+            if (wartosc < minFeromon) {
+                minFeromon = wartosc;
+            }
+
+            if (wartosc > maxFeromon) {
+                maxFeromon = wartosc;
+            }
+        }
+
+        if (minFeromon == Double.MAX_VALUE || maxFeromon == -Double.MAX_VALUE) {
+            return;
+        }
+
+        if (maxFeromon == minFeromon) {
+            return;
+        }
+
+        for (Map.Entry<Long, Double> entry : feromony.entrySet()) {
+
+            Long drogaId = entry.getKey();
+            Double wartosc = entry.getValue();
+
+            Droga droga = DANE.drogi.get(drogaId);
+
+            if (droga == null || wartosc == null || wartosc.isNaN() || wartosc.isInfinite()) {
+                continue;
+            }
+
+            double poziom = (wartosc - minFeromon) / (maxFeromon - minFeromon);
+
+            // TO JEST KLUCZ:
+            // ignoruj bardzo słabe feromony, bo inaczej wszystko będzie żółte
+            if (poziom < 0.10) {
+                continue;
+            }
+
+            if (poziom > 1.0) {
+                poziom = 1.0;
+            }
+
+            int red = 255;
+            int green = (int) (255 * (1.0 - poziom));
+            int blue = 0;
+
+            Color kolor = new Color(red, green, blue);
+
+            g2d.setColor(kolor);
+            g2d.setStroke(new BasicStroke(6));
+
+            int il_pkt = droga.punkty.size();
+            for (int i = 1; i < il_pkt; i++) {
+                g2d.drawLine(
+                        (int) droga.punkty.get(i - 1).X,
+                        (int) droga.punkty.get(i - 1).Y,
+                        (int) droga.punkty.get(i).X,
+                        (int) droga.punkty.get(i).Y
+                );
+            }
+        }
     }
-
-    double minFeromon = Double.MAX_VALUE;
-    double maxFeromon = -Double.MAX_VALUE;
-
-    for (Map.Entry<Long, Double> entry : feromony.entrySet()) {
-
-        Long drogaId = entry.getKey();
-        Double wartosc = entry.getValue();
-
-        if (wartosc == null || wartosc.isNaN() || wartosc.isInfinite()) {
-            continue;
-        }
-
-        if (!DANE.drogi.containsKey(drogaId)) {
-            continue;
-        }
-
-        if (wartosc < minFeromon) {
-            minFeromon = wartosc;
-        }
-
-        if (wartosc > maxFeromon) {
-            maxFeromon = wartosc;
-        }
-    }
-
-    if (minFeromon == Double.MAX_VALUE || maxFeromon == -Double.MAX_VALUE) {
-        return;
-    }
-
-    if (maxFeromon == minFeromon) {
-        return;
-    }
-
-    for (Map.Entry<Long, Double> entry : feromony.entrySet()) {
-
-        Long drogaId = entry.getKey();
-        Double wartosc = entry.getValue();
-
-        Droga droga = DANE.drogi.get(drogaId);
-
-        if (droga == null || wartosc == null || wartosc.isNaN() || wartosc.isInfinite()) {
-            continue;
-        }
-
-        double poziom = (wartosc - minFeromon) / (maxFeromon - minFeromon);
-
-        // TO JEST KLUCZ:
-        // ignoruj bardzo słabe feromony, bo inaczej wszystko będzie żółte
-        if (poziom < 0.10) {
-            continue;
-        }
-
-        if (poziom > 1.0) {
-            poziom = 1.0;
-        }
-
-        int red = 255;
-        int green = (int) (255 * (1.0 - poziom));
-        int blue = 0;
-
-        Color kolor = new Color(red, green, blue);
-
-        g2d.setColor(kolor);
-        g2d.setStroke(new BasicStroke(6));
-
-        int il_pkt = droga.punkty.size();
-        for (int i = 1; i < il_pkt; i++) {
-            g2d.drawLine(
-                    (int) droga.punkty.get(i - 1).X,
-                    (int) droga.punkty.get(i - 1).Y,
-                    (int) droga.punkty.get(i).X,
-                    (int) droga.punkty.get(i).Y
-            );
-        }
-    }
-}
 
     private void rysuj_zaznaczone_wezly(Graphics2D g2d_zawartosc) {
         if (ZaznaczonyWezel != null) {
@@ -1121,16 +1131,43 @@ private void rysuj_feromony_na_drogach(Graphics2D g2d) {
     }
 
     private void rysuj_strukture_drog(Graphics2D g2d_zawartosc) {
-        for (Droga dr : drogi.values()) {
-            if (tryb_widoku == false) {
-                rysujDroge(dr, Color.ORANGE, g2d_zawartosc);
-            } else if (tryb_widoku == true) {
-                if (dr.ruchUliczny != null) {
-                    rysujDroge(dr, Color.GREEN, g2d_zawartosc);
+        if (widok.equalsIgnoreCase("Zwykly")) {
+            for (Droga dr : drogi.values()) {
+                rysujDroge(dr, Color.ORANGE, g2d_zawartosc, 0);
+            }
+            return;
+        }
+
+        if (widok.equalsIgnoreCase("All")) {
+            for (Droga dr : drogi.values()) {
+                if (!dr.temp_source.equalsIgnoreCase("brak")) {
+                    rysujDroge(dr, Color.GREEN, g2d_zawartosc, 0);
                 } else {
-                    rysujDroge(dr, Color.darkGray, g2d_zawartosc);
+                    rysujDroge(dr, Color.orange, g2d_zawartosc, 0);
+                }
+            }
+        } else {
+            //widoki: HERE, MaxSpeed, Klasa, brak
+            for (Droga dr : drogi.values()) {
+                if (dr.temp_source.equalsIgnoreCase(widok)) {
+                    rysujDroge(dr, Color.GREEN, g2d_zawartosc, 8);
+                } else {
+                    rysujDroge(dr, Color.darkGray, g2d_zawartosc, 0);
                 }
             }
         }
+//        for (Droga dr : drogi.values()) {
+//            if (tryb_widoku == false) {
+//                rysujDroge(dr, Color.ORANGE, g2d_zawartosc);
+//            } else if (tryb_widoku == true) {
+//                if (dr.ruchUliczny != null) {
+//                    g2d_zawartosc.setStroke(new BasicStroke(3));
+//                    rysujDroge(dr, Color.GREEN, g2d_zawartosc);
+//                } else {
+//                    rysujDroge(dr, Color.darkGray, g2d_zawartosc);
+//                }
+//            }
+//        }
+//        g2d_zawartosc.setStroke(new BasicStroke(1));
     }
 }

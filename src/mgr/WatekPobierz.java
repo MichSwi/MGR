@@ -45,6 +45,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
 
     private static final String API_KEY = "opXIV-5dVqM7Ia_DQmr9L2giM4hKSk07FwlE7zi2_h0";
 
+    private static final int CZESTOTLIWOSC_AKTUALIZACJI = 100;
+
     private Map<Long, Punkt> punktyLista;
 
     private JProgressBar pasekPostepuTF;
@@ -171,7 +173,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         DANE.budujWezlyZDrog();
 
         DANE.ustawMaxSpeed();
-        
+
         DANE.ustawCzasPrzejazdu();
 
         System.out.println("DONE");
@@ -198,7 +200,7 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 "[out:xml][timeout:60];"
                 + "("
                 + "way[\"highway\"]"
-                + "[\"highway\"!~\"^(footway|path|cycleway|bridleway|steps|pedestrian|track|elevator|platform|construction|driveway)$\"]"
+                + "[\"highway\"!~\"^(footway|path|cycleway|proposed|bridleway|steps|pedestrian|track|elevator|corridor|platform|construction|driveway)$\"]"
                 + "(%.6f,%.6f,%.6f,%.6f);"
                 + "way[\"railway\"~\"^(rail|tram|light_rail|subway)$\"]"
                 + "(%.6f,%.6f,%.6f,%.6f);"
@@ -305,74 +307,99 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         pasekPostepuOSM.setString("Błąd pobierania");
     }
 
-    private void czytajOSM() {
-        allNodes.clear();
+private void czytajOSM() {
+    long start = System.currentTimeMillis();
 
-        DANE.drogi.clear();
-        DANE.wezly.clear();
-        DANE.ALG_SCIEZKA.clear();
-        DANE.relacje.clear();
+    try {
+        File file = new File("POBRANE_PLIKI/" + DANE.nazwaPliku + ".osm");
 
-        try {
-            System.out.println("Otwieram plik: " + DANE.nazwaPliku + ".osm");
+        long t = System.currentTimeMillis();
 
-            File file = new File("POBRANE_PLIKI/" + DANE.nazwaPliku + ".osm");
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.parse(file);
 
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
+        System.out.println("Parsowanie XML: "
+                + (System.currentTimeMillis() - t) + " ms");
 
-            Document doc = db.parse(file);
-            doc.getDocumentElement().normalize();
+        t = System.currentTimeMillis();
 
-            NodeList nList = doc.getElementsByTagName("node");
-            NodeList wList = doc.getElementsByTagName("way");
-            NodeList rList = doc.getElementsByTagName("relation");
+        NodeList nList = doc.getElementsByTagName("node");
+        NodeList wList = doc.getElementsByTagName("way");
+        NodeList rList = doc.getElementsByTagName("relation");
 
-            int iloscWszystkich = nList.getLength() + wList.getLength() + rList.getLength();
+        int[] ilosc = {0};
+        int wszystkie = nList.getLength() + wList.getLength() + rList.getLength();
 
-            int[] ilosc = {0};
+        wczytajPunktyOSM(nList, ilosc, wszystkie);
 
-            wczytajPunktyOSM(nList, ilosc, iloscWszystkich);
+        System.out.println("Wczytanie punktów: "
+                + (System.currentTimeMillis() - t) + " ms");
 
-            System.out.println("➡ Wszystkich node: " + allNodes.size());
+        t = System.currentTimeMillis();
 
-            Map<Long, Integer> nodeWayLicznik = policzUzyciePunktowPrzezWay(wList);
+        Map<Long, Integer> licznik = policzUzyciePunktowPrzezWay(wList);
 
-            wczytajDrogiOSM(wList, nodeWayLicznik, ilosc, iloscWszystkich);
+        System.out.println("Liczenie użycia punktów: "
+                + (System.currentTimeMillis() - t) + " ms");
 
-            wczytajRelacjeOSM(rList, wList, ilosc, iloscWszystkich);
+        t = System.currentTimeMillis();
 
-            System.out.println("➡ Wszystkich relation: " + DANE.relacje.size());
-            System.out.println("============");
+        wczytajDrogiOSM(wList, licznik, ilosc, wszystkie);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        System.out.println("Wczytanie dróg: "
+                + (System.currentTimeMillis() - t) + " ms");
+
+        t = System.currentTimeMillis();
+
+        wczytajRelacjeOSM(rList, wList, ilosc, wszystkie);
+
+        System.out.println("Wczytanie relacji: "
+                + (System.currentTimeMillis() - t) + " ms");
+
+        System.out.println("Łącznie czytajOSM: "
+                + (System.currentTimeMillis() - start) + " ms");
+
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
 
     private void wczytajPunktyOSM(NodeList nList, int[] ilosc, int iloscWszystkich) {
-        for (int i = 0; i < nList.getLength(); i++) {
-            Element e = (Element) nList.item(i);
 
-            long id = Long.parseLong(e.getAttribute("id"));
-            double lat = Double.parseDouble(e.getAttribute("lat"));
-            double lon = Double.parseDouble(e.getAttribute("lon"));
+    int liczbaPunktow = nList.getLength();
 
-            Punkt p = new Punkt(lat, lon, id);
+    for (int i = 0; i < liczbaPunktow; i++) {
+        Element e = (Element) nList.item(i);
 
-            NodeList tags = e.getElementsByTagName("tag");
+        long id = Long.parseLong(e.getAttribute("id"));
+        double lat = Double.parseDouble(e.getAttribute("lat"));
+        double lon = Double.parseDouble(e.getAttribute("lon"));
 
-            for (int t = 0; t < tags.getLength(); t++) {
-                Element tag = (Element) tags.item(t);
-                p.tags.put(tag.getAttribute("k"), tag.getAttribute("v"));
+        Punkt p = new Punkt(lat, lon, id);
+
+        org.w3c.dom.Node dziecko = e.getFirstChild();
+
+        while (dziecko != null) {
+            if (dziecko.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                Element tag = (Element) dziecko;
+
+                if ("tag".equals(tag.getTagName())) {
+                    p.tags.put(
+                            tag.getAttribute("k"),
+                            tag.getAttribute("v")
+                    );
+                }
             }
 
-            allNodes.put(id, p);
-
-            ilosc[0]++;
-            publish(new stanRealTime(ilosc[0], procent(ilosc[0], iloscWszystkich), 2));
+            dziecko = dziecko.getNextSibling();
         }
+
+        allNodes.put(id, p);
+        ilosc[0]++;
+        aktualizujPostep(ilosc[0], iloscWszystkich, 2);
     }
+}
 
     private Map<Long, Integer> policzUzyciePunktowPrzezWay(NodeList wList) {
         Map<Long, Integer> nodeWayLicznik = new HashMap<>();
@@ -461,7 +488,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                         DANE.drogi.put(biezaca.ID, biezaca);
 
                         ilosc[0]++;
-                        publish(new stanRealTime(ilosc[0], procent(ilosc[0], iloscWszystkich), 2));
+                        aktualizujPostep(ilosc[0], iloscWszystkich, 2);
+                        //publish(new stanRealTime(ilosc[0], procent(ilosc[0], iloscWszystkich), 2));
                     }
 
                     licznikSegmentow++;
@@ -487,7 +515,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
                 DANE.drogi.put(biezaca.ID, biezaca);
 
                 ilosc[0]++;
-                publish(new stanRealTime(ilosc[0], procent(ilosc[0], iloscWszystkich), 2));
+                aktualizujPostep(ilosc[0], iloscWszystkich, 2);
+                //publish(new stanRealTime(ilosc[0], procent(ilosc[0], iloscWszystkich), 2));
             }
         }
     }
@@ -552,7 +581,8 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
             }
 
             ilosc[0]++;
-            publish(new stanRealTime(ilosc[0], procent(ilosc[0], iloscWszystkich), 2));
+            aktualizujPostep(ilosc[0], iloscWszystkich, 2);
+            //publish(new stanRealTime(ilosc[0], procent(ilosc[0], iloscWszystkich), 2));
         }
     }
 
@@ -884,5 +914,15 @@ public class WatekPobierz extends SwingWorker<Void, stanRealTime> {
         }
 
         return (int) (100.0 * wartosc / calosc);
+    }
+
+    private void aktualizujPostep(int wartosc, int calosc, int numerPaska) {
+        if (wartosc % CZESTOTLIWOSC_AKTUALIZACJI == 0 || wartosc == calosc) {
+            publish(new stanRealTime(
+                    wartosc,
+                    procent(wartosc, calosc),
+                    numerPaska
+            ));
+        }
     }
 }
